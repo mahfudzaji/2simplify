@@ -27,7 +27,7 @@ require 'only-header.view.php';
                         <li><a href='/stock'>Stok</a></li>
                     </ul>
                 </li>
-                <li><a href='/upload'>Unggah data</a></li>
+                <!-- <li><a href='/upload'>Unggah data</a></li> -->
                 <!-- <li><a href='/engineering'>Engineer</a></li> -->
                 
                 <?php if(isset($_SESSION['sim-isLogin'])): ?>
