@@ -17,7 +17,6 @@ require base.'base/header.view.php';
             <?php if(array_key_exists('superadmin' , $roleOfUser)): ?>
                 <button class="btn btn-sm btn-header btn-modal" id="create-category"><span class="glyphicon glyphicon-pencil"></span> Tambahkan Kategori</button>
             <?php endif; ?>
-            <button class="btn btn-sm btn-header btn-modal" id="create-vendor"><span class="glyphicon glyphicon-pencil"></span> Tambahkan Vendor</button>
             <button class="btn btn-sm btn-header btn-modal" id="create-product"><span class="glyphicon glyphicon-pencil"></span> Tambahkan Produk</button>
         </header>
 
@@ -30,16 +29,6 @@ require base.'base/header.view.php';
                             <option value=''>KATEGORI</option>
                             <?php foreach($productCat as $cat): ?> 
                                 <option value= <?= $cat->id; ?> title='<?= $cat->name; ?>' ><?= makeItShort(ucfirst($cat->name), 50); ?></option>             
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-                <div class="search" id="vendor-based">
-                    <div class="form-group">
-                        <select name="vendor" class="form-control">
-                            <option value=''>VENDOR</option>
-                            <?php foreach($vendors as $vendor): ?> 
-                                <option value= <?= $vendor->id; ?> title='<?= ucfirst($vendor->name); ?>' ><?= makeItShort(ucfirst($vendor->name), 50); ?></option>             
                             <?php endforeach; ?>
                         </select>
                     </div>

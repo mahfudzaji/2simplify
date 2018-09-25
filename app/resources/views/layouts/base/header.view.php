@@ -21,12 +21,13 @@ require 'only-header.view.php';
                     </ul>
                 </li>
                 <li><a href="/partner">Partner</a></li>
-                <li><a href='#'>Produk & stok<span class="caret"></span></a>
+                <li><a href='#'>Product & stock<span class="caret"></span></a>
                     <ul class="dropdown">
                         <li><a href='/p-a'>Produk</a></li>
                         <li><a href='/stock'>Stok</a></li>
                     </ul>
                 </li>
+                <li><a href="/partner">Project</a></li>
                 <!-- <li><a href='/upload'>Unggah data</a></li> -->
                 <!-- <li><a href='/engineering'>Engineer</a></li> -->
                 
