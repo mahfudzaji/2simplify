@@ -1,0 +1,134 @@
+<?php
+
+$titlePage="Print Form";
+
+define("base", $_SERVER['DOCUMENT_ROOT']."/app/resources/views/layouts/");
+
+require base.'base/only-header.view.php';
+
+$priceTotal=0;
+//is already approved?
+$approved=true;
+
+foreach($quoData as $data):
+?>
+<style>
+.print-area .form{
+    width:790px;
+}
+
+tr{
+    height:25px;
+}
+</style>
+
+<body class="print-area">
+    <div class="form">
+        <table class="form-header" width='790' cellpadding='0' cellspacing='0' style="padding:20px;margin-bottom:10px;font-size:12px;" >
+            <tr>
+                <td rowspan='2'><img src="/public/image/vector-SNC-logo.fw_.png" alt="logo" width=100 height=100></td>
+                <td><strong>Workshop</strong></td>
+                <td class="text-right"><strong>Office</strong></td>
+            </tr>
+            <tr>
+                <td>Jl. Martimbang raya No. 30 <br>Kebayoran Baru - Jakarta Selatan,<br>Telp: 021 739 9554</td>
+                <td class="text-right">Gandaria 8 Office, 21 fl Gandaria City Complex,<br>Jl. Sultan Iskandar Muda,<br>Jakarta 12240 Indonesia<br>Telp: 021 29036562</td>
+            </tr>
+        </table>
+        <br>
+        <div class="form-body" id="quotation-form-body">
+            <table width='790' cellpadding='0' cellspacing='0' style="padding:20px;border:none" >
+                <tbody>
+                    <tr><td><?= $data->quo_date; ?></td></tr>
+                    <tr><td></td></tr>
+                    <tr><td><strong>Ref number: <?= (isset($_GET['revision']) && !empty($_GET['revision']))?$data->quo_number."/Rev".$_GET['revision']:$data->quo_number ?></strong></td></tr>
+                    <tr><td>Att : <?= $data->pic_buyer; ?><br><?= $data->buyer; ?><br><?= $data->baddress; ?></td></tr>
+                    <tr><td></td></tr>
+                    <tr><td><strong>Re :  Quotation for Renewal ProtectServer SafeNet</strong></td></tr>
+                </tbody>
+            </table>
+            <br>
+            <table width='790' cellpadding='0' cellspacing='0' style="padding:20px;border:none" >
+                <tbody>
+                    <tr><td>Dear <?= $data->pic_buyer; ?>,</td></tr>
+                    <tr><td>Following  your  company  requirement  for Renewal ProtactServer SafeNet, We are pleased to submit the quotation for the item below:</td></tr>
+                </tbody>
+            </table>
+            <br>
+            <table width='790' cellpadding='0' cellspacing='0' style="padding:20px; margin-bottom:10px;" >
+                <thead>
+                    <tr>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Part Number</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Product</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Quantity</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Price unit</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Discount(%)</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Price total</th>
+                    </tr>
+                </thead>
+                    
+                <?php foreach($quoDetailData as $data1): $item=(100-$data1->item_discount)*$data1->total*0.01; $priceTotal+=$item; if($data1->status!=1){$approved=false;}?>
+                    <tr class="quo-item" data-item=<?= $data1->id; ?>>
+                        <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="part_number" data-item-val=<?= $data1->part_number; ?>><?= $data1->part_number; ?></td>
+                        <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="product" data-item-val=<?= $data1->pid; ?>><?= $data1->product; ?></td>
+                        <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="quantity"><?= $data1->quantity; ?></td>
+                        <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="price_unit"><?= $data1->price_unit; ?></td>
+                        <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="item_discount"><?= $data1->item_discount; ?></td>
+                        <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="total" class="text-right"><?= $item; ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                    <tr><td style="border:none; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">Total</td><td style="border:1px solid; padding: 0 20px 0 10px;" class="text-right" ><?= $priceTotal; ?></td></tr>
+                    <tr><td style="border:none; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">PPN 10%</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><?= $ppn=$priceTotal*0.1; ?></td></tr>
+                    <tr><td style="border:none; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">Grand Total</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><strong><?= $priceTotal+$ppn; ?></strong></td></tr>
+            </table>
+            <br>
+            <table width='790' cellpadding='0' cellspacing='0' style="padding:20px;border:none" >
+                <tbody>
+                   <!--  <tr><td>Term & Condition :<br>1. This quotation is valid until November 24 2017<br>2. Price is subjected to 10% VAT (PPN)<br>3. Payment 30 Days after receive invoice </td></tr> -->
+                   <tr><?= ($data->remark==null || empty($data->remark))?"-":$data->remark; ?></td></tr> 
+                   <tr><td>Please feel free to contact us for further information. Thank you.</td></tr>
+                </tbody>
+            </table>
+            <br>
+            <table width='790' cellpadding='0' cellspacing='0' style="padding-bottom:20px;border:none">
+                <tbody>
+                    <tr>
+                        <td>
+                            <table width='790' cellpadding='0' cellspacing='0' style="padding-bottom:20px">
+                                <thead>
+                                    <tr>
+                                        <th style="padding-left:10px;">DISETUJUI OLEH</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="vertical-align:top;">
+                                        <td style="padding-left:10px;"><?= strtoupper($data->approved_by); ?> &nbsp; - &nbsp; <?= $data->approved_at; ?></td>
+                                    </tr>
+                                    <tr style="vertical-align:top;height:80px;">
+                                        <td style="padding-left:10px;">
+                                            <!-- TANDA TANGAN -->
+                                            <?php if($approved==true): ?>
+                                                <?php if($data->approverSign != null): ?>
+                                                    <img class="signature" src="/public/upload/<?= $data->approverSign; ?>" >
+                                                <?php else: ?>
+                                                    <label>TTD belum diupload</label>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <label>Belum semua item disetujui</label>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <hr>
+    <button type="button" onclick="window.print()">Print</button>
+
+</body>
+<?php endforeach; ?>
+</html>

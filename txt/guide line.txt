@@ -1,0 +1,2 @@
+create index page for admin
+	-user handling->create,view,update,delete,activate/non-activate,adding role

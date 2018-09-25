@@ -1,0 +1,204 @@
+<?php
+
+$titlePage="Purchase order";
+
+define("base", $_SERVER['DOCUMENT_ROOT']."/app/resources/views/layouts/");
+
+require base.'base/only-header.view.php';
+
+$priceTotal=0;
+$approveSign=false;
+
+foreach($poData as $data):
+
+?>
+<style>
+.print-area .form{
+    width:790px;
+}
+
+tr{
+    height:25px;
+}
+
+</style>
+
+<body class="print-area">
+    <div class="form">
+        <table class="form-header" width='790' cellpadding='0' cellspacing='0' style="padding:20px;margin-bottom:10px;" >
+            <tr>
+                <td rowspan='2'><img src="/public/image/vector-SNC-logo.fw_.png" alt="logo" width=100 height=100></td>
+                <td>Workshop</td>
+                <td>Office</td>
+            </tr>
+            <tr>
+                <td>Jl. Martimbang raya No. 30 <br>Kebayoran Baru - Jakarta Selatan,<br>Telp: 021 739 9554</td>
+                <td>Gandaria 8 Office, 21 fl Gandaria City Complex,<br>Jl. Sultan Iskandar Muda,<br>Jakarta 12240 Indonesia<br>Telp: 021 29036562</td>
+            </tr>
+        </table>
+        
+        <div class="form-body" id="reimburse-form-body">
+            <table width='790' cellpadding='0' cellspacing='0' style="padding-bottom:20px;">
+                <tbody>
+                    <tr>
+                        <td style="text-align:center;"><h3><strong>PURCHASE ORDER</strong></h3></td>
+                    </tr>
+                </tbody>
+            </table>
+            <table width='790' cellpadding='0' cellspacing='0' style="padding:20px;border:1px solid" >
+                <tbody>
+                    <tr>
+                        <td width=50% style="border-right:1px solid; border-bottom:1px solid; padding: 0 20px 0 10px;" >SUPPLIER</td>
+                        <td width=50% style="border-right:1px solid; border-bottom:1px solid; padding: 0 20px 0 10px;" >BUYER</td>
+                    </tr>
+                    <tr>
+                        <td width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" >
+                            <table cellpadding='0' cellspacing='0' >
+                                <tbody>
+                                    <tr><td><?= makeFirstLetterUpper($data->supplier); ?></td></tr>
+                                    <tr><td><?= makeFirstLetterUpper($data->saddress); ?></td></tr>
+                                    <tr><td>Telp/Fax: <?= $data->sphone; ?> / <?= $data->sfax; ?></td></tr>
+                                    <tr><td>PIC: <?= makeFirstLetterUpper($data->pic_supplier); ?></td></tr>                                  
+                                </tbody>
+                            </table>
+                        </td>
+                        <td width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" >
+                            <table cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr><td>PO: <?= $data->po_number; ?></td></tr>
+                                    <tr><td>Quo: <?= ($data->quo_number==null || empty($data->quo_number))?"-":$data->quo_number; ?></td></tr>
+                                    <tr><td>PO DATE: <?= $data->po_date; ?></td></tr>
+                                    <tr><td>PIC: <?= makeFirstLetterUpper($data->pic_buyer); ?></td></tr>
+                                    <tr><td>Telp/Fax: <?= $data->bphone; ?> / <?= $data->bfax; ?></td></tr>
+                                    <tr><td>Currency: <?= $data->currency; ?></td></tr>
+                                </tbody>
+                            </table>    
+                        </td>                        
+                    </tr>
+                </tbody>
+            </table>
+            <table width='790' cellpadding='0' cellspacing='0' style="padding-bottom:20px;">
+                <tbody>
+                    <tr>
+                        <td><h4><strong>PERINCIAN DAFTAR PO</strong></h4></td>
+                    </tr>
+                </tbody>
+            </table>
+            <table width='790' cellpadding='0' cellspacing='0' style="padding:20px; margin-bottom:10px;" >
+                <thead>
+                    <tr>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Part number</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Description</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >QTY</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Price unit</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Discount</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Total price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($poDetailData as $data2):  $item=(100-$data2->item_discount)*$data2->total*0.01; $priceTotal+=$item; ?>
+                        <?php
+                            if($data2->status==1){
+                                $approveSign=true;
+                            }
+                        ?>
+                        <tr>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->part_number; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->product; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->quantity; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->price_unit; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->item_discount; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;" class="text-right"><?= $item; ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                        <tr><td style="border:none; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">Total</td><td style="border:1px solid; padding: 0 20px 0 10px;" class="text-right" ><?= $priceTotal; ?></td></tr>
+                        <tr><td style="border:none; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">PPN 10%</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><?= $ppn=$priceTotal*0.1; ?></td></tr>
+                        <tr><td style="border:none; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">Grand Total</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><strong><?= $priceTotal+$ppn; ?></strong></td></tr>
+                </tbody>            
+            </table>
+            
+            <table width='790' cellpadding='0' cellspacing='0' style="padding:20px; margin-bottom:10px;border:1px solid" >
+                <thead>
+                    <tr>
+                        <th width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" >Delivery and billing address</th>
+                        <th width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" >Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" ><?= makeFirstLetterUpper($data->saddress); ?></td>
+                        <td width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" ><?= ($data->remark==null||empty($data->remark))?"-":makeFirstLetterUpper($data->remark); ?></td>    
+                    </tr>
+                </tbody>
+            </table>
+            
+            <table width='790' cellpadding='0' cellspacing='0' style="padding-bottom:20px">
+                <tbody>
+                    <tr>
+                        <td>
+                            <table width='790' cellpadding='0' cellspacing='0' style="padding-bottom:20px">
+                                <thead>
+                                    <tr>
+                                        <th style="padding-left:10px;border:1px solid">Prepared By</th>
+                                        <th style="padding-left:10px;border:1px solid">Acknowledged By</th>
+                                        <th style="padding-left:10px;border:1px solid">Approved By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="border:1px solid;vertical-align:top;">
+                                        <td style="padding-left:10px;border:1px solid"><?= strtoupper($data->created_by); ?> &nbsp; - &nbsp; <?= $data->created_at; ?></td>
+                                        <td style="padding-left:10px;border:1px solid"><?= strtoupper($data->acknowledged_by); ?> &nbsp; - &nbsp; <?= $data->acknowledged_at; ?></td>
+                                        <td style="padding-left:10px;border:1px solid"><?= strtoupper($data->approved_by); ?> &nbsp; - &nbsp; <?= $data->approved_at; ?></td>
+                                    </tr>
+                                    <tr style="border:1px solid;vertical-align:top;height:80px;">
+                                        <td style="padding-left:10px;border:1px solid">
+                                            <!-- TANDA TANGAN -->
+                                            <?php if($data->creatorSign != null): ?>
+                                                <?php if($data->created_at != null || !empty($data->created_at )): ?>
+                                                    <img class="signature" src="/public/upload/<?= $data->creatorSign; ?>" >
+                                                <?php else: ?>
+                                                    <label>Belum mendapatkan persetujuan</label>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <label>TTD belum diupload</label>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td style="padding-left:10px;border:1px solid">
+                                                <!-- TANDA TANGAN -->
+                                                <?php if($data->acknowledgeSign != null): ?>
+                                                    <?php if($data->acknowledged_at != null || !empty($data->acknowledged_at )): ?>
+                                                        <img class="signature" src="/public/upload/<?= $data->acknowledgeSign; ?>" >
+                                                    <?php else: ?>
+                                                        <label>Belum mendapatkan persetujuan</label>
+                                                    <?php endif; ?>
+                                                <?php else: ?>
+                                                    <label>TTD belum diupload</label>
+                                                <?php endif; ?>
+                                            </td>
+                                        <td style="padding-left:10px;border:1px solid">
+                                            <!-- TANDA TANGAN -->
+                                            <?php if($data->approverSign != null): ?>
+                                                <?php if($data->approved_at != null || !empty($data->approved_at )): ?>
+                                                    <img class="signature" src="/public/upload/<?= $data->approverSign; ?>" >
+                                                <?php else: ?>
+                                                    <label>Belum mendapatkan persetujuan</label>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <label>TTD belum diupload</label>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <hr>
+    <button type="button" onclick="window.print()">Print</button>
+
+</body>
+<?php endforeach; ?>
+</html>

@@ -1,0 +1,10 @@
+index
+
+halaman ini memiliki konten berupa pengenalan mengenai aplikasi simplify
+mungkin akan ditambah beberapa gambar beserta deskripsi singkat tentang indonesia seperti batik, taman budaya, objek wisata.
+beberapa artikel tentang sentra netcomindo
+profil karyawan/direksi
+birth day remainder-->karyawan yang sedang ultah akan tertampil
+
+pada halaman ini juga terdapat tombol untuk login dan link untuk forget password
+

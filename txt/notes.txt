@@ -1,0 +1,6 @@
+dashboard
+
+dashboard merupakan halaman yang digunakan oleh user yang mempunyai role administrator.
+administrator merupakan user yang mempunyai hak untuk melakukan beberapa operasi seperti create, update dan delete.
+di halaman ini berisi seluruh data dari semua menu, data tersebut bisa diolah atau diatur oleh administrator.
+dihalaman ini pula, admin bisa menambahkan user, menghapus, dan menonaktifkan user

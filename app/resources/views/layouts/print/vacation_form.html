@@ -1,0 +1,181 @@
+<?php
+
+$titlePage="Print Form";
+
+define("base", $_SERVER['DOCUMENT_ROOT']."/app/resources/views/layouts/");
+
+require base.'base/only-header.view.php';
+
+foreach($vacationData as $data):
+
+?>
+<style>
+.print-area .form{
+    width:790px;
+}
+
+tr{
+    height:25px;
+}
+
+
+</style>
+
+<body class="print-area">
+    <div class="form">
+        <table class="form-header" width='790' cellpadding='0' cellspacing='0' style="width:790px;padding:20px;margin-bottom:10px;" >
+            <tr>
+                <td rowspan='2'><img src="/public/image/vector-SNC-logo.fw_.png" alt="logo" width=100 height=100></td>
+                <td>Workshop</td>
+                <td>Office</td>
+            </tr>
+            <tr>
+                <td>Jl. Martimbang raya No. 30 <br>Kebayoran Baru - Jakarta Selatan,<br>Telp: 021 739 9554</td>
+                <td>Gandaria 8 Office, 21 fl Gandaria City Complex,<br>Jl. Sultan Iskandar Muda,<br>Jakarta 12240 Indonesia<br>Telp: 021 29036562</td>
+            </tr>
+        </table>
+        
+        <div class="form-body" id="vacation-form-body">
+            <table width='100%' cellpadding='0' cellspacing='0' style="width:100%;padding-bottom:20px;margin-bottom:10px;">
+                <tbody>
+                    <tr>
+                        <td style="text-align:center;"><h3><strong>FORM CUTI/IZIN</strong></h3></td>
+                    </tr>
+                </tbody>
+            </table>
+            <table width='790' cellpadding='0' cellspacing='0' style="width:790px;padding:20px;margin-bottom:10px;border:1px solid" >
+                <tbody>
+                    <tr>
+                        <td width='20%' style="border-right:1px solid; padding: 0 20px 0 10px;" >DATA KARYAWAN</td>
+                        <td width='80%'>
+                            <table width='100%' cellpadding='0' cellspacing='0' style="width:100%;padding-bottom:20px">
+                                <tbody>
+                                    <tr>
+                                        <td width='30%' style="padding: 0 20px 0 10px; ">Nama</td>
+                                        <td style="padding: 0 20px 0 10px; "><?= strtoupper($data->submitter); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td width='30%' style="padding: 0 20px 0 10px; ">PT/DEPT</td>
+                                        <td style="padding: 0 20px 0 10px; "><?= strtoupper($data->department); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td width='30%' style="padding: 0 20px 0 10px; ">Tanggal pengajuan</td>
+                                        <td style="padding: 0 20px 0 10px; "><?= strtoupper($data->created_at); ?></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table width='790' cellpadding='0' cellspacing='0' style="width:790px;padding:20px;margin-bottom:10px;border:1px solid" >
+                <tbody>
+                    <tr>
+                        <td width='20%' style="border-right:1px solid; padding: 0 20px 0 10px;" >PERINCIAN CUTI</td>
+                        <td width='80%'>
+                            <table width='100%' cellpadding='0' cellspacing='0' style="width:100%;padding-bottom:20px">
+                                <tbody>
+                                    <tr>
+                                        <td width='30%' style="padding: 0 20px 0 10px; ">Hak cuti</td>
+                                        <td style="padding: 0 20px 0 10px; "><?= $vacationPerYear[0]->yearly_v; ?> Hari</td>
+                                    </tr>
+                                    <tr>
+                                        <td width='30%' style="padding: 0 20px 0 10px; ">Cuti sudah diambil</td>
+                                        <td style="padding: 0 20px 0 10px; "><?= ($countVacationInThisYear[0]->total==null)?'0':$countVacationInThisYear[0]->total; ?> Hari</td>
+                                    </tr>
+                                    <tr>
+                                        <td width='30%' style="padding: 0 20px 0 10px; ">Sisa cuti</td>
+                                        <td style="padding: 0 20px 0 10px; "><?= $vacationPerYear[0]->yearly_v-$countVacationInThisYear[0]->total; ?> Hari</td>
+                                    </tr> 
+                                </tbody>
+                            </table>
+                            <table width='100%' cellpadding='0' cellspacing='0' style="width:100%;margin-top:10px;padding-bottom:20px">
+                                <tbody>
+                                    <tr>
+                                        <td width='30%' style="padding: 0 20px 0 10px; ">Permohonan cuti</td>
+                                        <td style="padding: 0 20px 0 10px; "><?= $data->day_used; ?> Hari</td>
+                                    </tr>
+                                    <tr>
+                                        <td width='30%' style="padding: 0 20px 0 10px;vertical-align:top;">Tanggal cuti</td>
+                                        <td style="padding: 0 20px 0 10px; ">
+                                            <table>
+                                                <tbody>
+                                                    <?php foreach($vacationDate as $date): ?>
+                                                    <tr>
+                                                        <td style="padding: 0 20px 0 0; "><?= $date->vacation_date; ?></td>
+                                                    </tr>
+                                                    <?php endforeach; ?>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width='30%' style="padding: 0 20px 0 10px; ">Jenis cuti</td>
+                                        <td style="padding: 0 20px 0 10px; "><?= ucfirst($data->requisite); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td width='30%' style="padding: 0 20px 0 10px; ">Status cuti</td>
+                                        <td style="padding: 0 20px 0 10px; "><strong><?= ucfirst($data->approved); ?></strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table width='790' cellpadding='0' cellspacing='0' style="width:100%;padding-bottom:20px">
+                <tbody>
+                    <tr>
+                        <td colspan="2">
+                            <table width='100%' cellpadding='0' cellspacing='0' style="width:100%;padding-bottom:20px">
+                                <thead>
+                                    <tr>
+                                        <th style="padding-left:10px;border:1px solid">DIAJUKAN OLEH</th>
+                                        <th style="padding-left:10px;border:1px solid">DISETUJUI OLEH</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="border:1px solid;vertical-align:top;">
+                                        <td style="padding-left:10px;border:1px solid"><?= strtoupper($data->submitter); ?> &nbsp; - &nbsp; <?= $data->verified_at; ?></td>
+                                        <td style="padding-left:10px;border:1px solid"><?= strtoupper($data->approved_by); ?> &nbsp; - &nbsp; <?= $data->approved_at; ?></td>
+                                    </tr>
+                                    <tr style="border:1px solid;vertical-align:top;height:80px;">
+                                        <td style="padding-left:10px;border:1px solid">
+                                            <!-- TANDA TANGAN -->
+                                            <?php if($data->submitterSign != null): ?>
+                                                <img class="signature" src="/public/upload/<?= $data->submitterSign; ?>" >
+                                            <?php else: ?>
+                                                <label>TTD belum diupload</label>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td style="padding-left:10px;border:1px solid">
+                                            <!-- TANDA TANGAN -->
+                                            <?php if($data->abid ==1): ?>
+                                                <?php if($data->approveSign != null): ?>
+                                                    <img class="signature" src="/public/upload/<?= $data->approveSign; ?>" >
+                                                <?php else: ?>
+                                                    <label>TTD belum diupload</label>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <label>Belum disetujui</label>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width='20%'>KETERANGAN</td>
+                        <td width='80%'><?= ucfirst($data->remark); ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <hr>
+    <button type="button" onclick="window.print()">Print</button>
+
+</body>
+<?php endforeach; ?>
+</html>

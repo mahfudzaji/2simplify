@@ -1,0 +1,162 @@
+<?php
+
+$titlePage="Delivery order";
+
+define("base", $_SERVER['DOCUMENT_ROOT']."/app/resources/views/layouts/");
+
+require base.'base/only-header.view.php';
+
+$priceTotal=0;
+$approveSign=false;
+
+foreach($doData as $data):
+
+?>
+<style>
+.print-area .form{
+    width:790px;
+}
+
+tr{
+    height:25px;
+}
+
+</style>
+
+<body class="print-area">
+    <div class="form">
+        <table class="form-header" width='790' cellpadding='0' cellspacing='0' style="padding:20px;margin-bottom:10px;" >
+            <tr>
+                <td rowspan='2'><img src="/public/image/vector-SNC-logo.fw_.png" alt="logo" width=100 height=100></td>
+                <td>Workshop</td>
+                <td>Office</td>
+            </tr>
+            <tr>
+                <td>Jl. Martimbang raya No. 30 <br>Kebayoran Baru - Jakarta Selatan,<br>Telp: 021 739 9554</td>
+                <td>Gandaria 8 Office, 21 fl Gandaria City Complex,<br>Jl. Sultan Iskandar Muda,<br>Jakarta 12240 Indonesia<br>Telp: 021 29036562</td>
+            </tr>
+        </table>
+        
+        <div class="form-body" id="reimburse-form-body">
+            <table width='790' cellpadding='0' cellspacing='0' style="padding-bottom:20px;">
+                <tbody>
+                    <tr>
+                        <td style="text-align:center;"><h3><strong><?= strtoupper($titlePage); ?></strong></h3></td>
+                    </tr>
+                </tbody>
+            </table>
+            <table width='790' cellpadding='0' cellspacing='0' style="padding:20px;border:1px solid" >
+                <tbody>
+                    <tr>
+                        <td width=50% style="border-right:1px solid; border-bottom:1px solid; padding: 0 20px 0 10px;" >SUPPLIER</td>
+                        <td width=50% style="border-right:1px solid; border-bottom:1px solid; padding: 0 20px 0 10px;" >BUYER</td>
+                    </tr>
+                    <tr>
+                        <td width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" >
+                            <table cellpadding='0' cellspacing='0' >
+                                <tbody>
+                                    <tr><td>DO: <?= $data->do_number; ?></td></tr>
+                                    <tr><td>DO DATE: <?= $data->do_date; ?></td></tr>
+                                    <tr><td><?= makeFirstLetterUpper($data->supplier); ?></td></tr>
+                                    <tr><td><?= makeFirstLetterUpper($data->saddress); ?></td></tr>
+                                    <tr><td>Telp/Fax: <?= $data->sphone; ?> / <?= $data->sfax; ?></td></tr>
+                                    <tr><td>PIC: <?= makeFirstLetterUpper($data->pic_supplier); ?></td></tr>                                  
+                                </tbody>
+                            </table>
+                        </td>
+                        <td width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" >
+                            <table cellpadding='0' cellspacing='0'>
+                                <tbody>
+                                    <tr><td>PO: <?= $data->po_number; ?></td></tr>
+                                    <tr><td>PO DATE: <?= $data->po_date; ?></td></tr>
+                                    <tr><td><?= makeFirstLetterUpper($data->buyer); ?></td></tr>
+                                    <tr><td><?= makeFirstLetterUpper($data->baddress); ?></td></tr>
+                                    <tr><td>Telp/Fax: <?= $data->bphone; ?> / <?= $data->bfax; ?></td></tr>
+                                    <tr><td>PIC: <?= makeFirstLetterUpper($data->pic_buyer); ?></td></tr>
+                                </tbody>
+                            </table>    
+                        </td>                        
+                    </tr>
+                </tbody>
+            </table>
+            <table width='790' cellpadding='0' cellspacing='0' style="padding-bottom:20px;">
+                <tbody>
+                    <tr>
+                        <td><h4><strong>PERINCIAN DAFTAR ITEM</strong></h4></td>
+                    </tr>
+                </tbody>
+            </table>
+            <table width='790' cellpadding='0' cellspacing='0' style="padding:20px; margin-bottom:10px;" >
+                <thead>
+                    <tr>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Part number</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Description</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >QTY</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Remark</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($receivedItems as $data2):?>
+                        <tr>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= ($data2->part_number==null||empty($data2->part_number))?"-":$data2->part_number; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->product; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->quantity; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= ($data2->serial_number==null||empty($data2->serial_number))?"-":$data2->serial_number; ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>            
+            </table>
+            
+            <table width='790' cellpadding='0' cellspacing='0' style="padding:20px; margin-bottom:10px;border:1px solid" >
+                <thead>
+                    <tr>
+                        <th width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" >Delivery and billing address</th>
+                        <th width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" >Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" ><?= makeFirstLetterUpper($data->saddress); ?></td>
+                        <td width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" ><?= ($data->remark==null||empty($data->remark))?"-":makeFirstLetterUpper($data->remark); ?></td>    
+                    </tr>
+                </tbody>
+            </table>
+            
+            <table width='790' cellpadding='0' cellspacing='0' style="padding-bottom:20px">
+                <tbody>
+                    <tr>
+                        <td>
+                            <table width='790' cellpadding='0' cellspacing='0' style="padding-bottom:20px">
+                                <thead>
+                                    <tr>
+                                        <th style="padding-left:10px;border:1px solid">Delivered By</th>
+                                        <th style="padding-left:10px;border:1px solid">Received By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="border:1px solid;vertical-align:top;">
+                                        <td width=50% style="padding-left:10px;border:1px solid"><?= strtoupper($data->delivered_by); ?></td>
+                                        <td width=50% style="padding-left:10px;border:1px solid"><?= strtoupper($data->received_by); ?></td>
+                                    </tr>
+                                    <tr style="border:1px solid;vertical-align:top;height:80px;">
+                                        <td width=50% style="padding-left:10px;border:1px solid">
+                                            <!-- TANDA TANGAN -->
+                                        </td>
+                                        <td width=50% style="padding-left:10px;border:1px solid">
+                                            <!-- TANDA TANGAN -->
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <hr>
+    <button type="button" onclick="window.print()">Print</button>
+
+</body>
+<?php endforeach; ?>
+</html>
