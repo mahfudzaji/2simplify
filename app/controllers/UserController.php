@@ -151,14 +151,14 @@ class UserController{
         $insertAdminRole=$builder->insert('role_user', ['user_id'=>$firstUserId, 'role_id'=>1]);
         
         if(!$insertAdminRole){
-            redirectWithMessage(["Pendaftaran sebagai admin gagal. Coba lagi", 0],'/')
+            redirectWithMessage(["Pendaftaran sebagai admin gagal. Coba lagi", 0], '/');
         }
 
         $builder->save();
 
         recordLog('Register owner', "Register user pertama berhasil");
 
-        redirectWithMessage(['Anda telah didaftarkan sebagai admin',1],'/')
+        redirectWithMessage(['Anda telah didaftarkan sebagai admin',1],'/');
     }
 
     /*
