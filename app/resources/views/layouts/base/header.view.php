@@ -23,7 +23,7 @@ require 'only-header.view.php';
                 <li><a href="/partner">Partner</a></li>
                 <li><a href='#'>Product & stock<span class="caret"></span></a>
                     <ul class="dropdown">
-                        <li><a href='/p-a'>Produk</a></li>
+                        <li><a href='/product'>Produk</a></li>
                         <li><a href='/stock'>Stok</a></li>
                     </ul>
                 </li>

@@ -131,16 +131,16 @@ $router->post('form/do/approve', 'FormController@doFormApproval');
 $router->post('form/do/update', 'FormController@doFormUpdate');
 
 //PRODUCTS AND STOCKS
-$router->get('p-a', 'PAController@index');
-$router->get('p-a/category', 'PAController@category');
-$router->get('p-a/vendor', 'PAController@vendor');
-$router->get('p-a/asset/detail', 'PAController@detailAsset');
-$router->post('p-a/product/create', 'PAController@createProduct');
-$router->post('p-a/category/create', 'PAController@createCategory');
-$router->post('p-a/vendor/create', 'PAController@createVendor');
-$router->post('p-a/asset/create', 'PAController@createAsset');
-$router->post('p-a/asset/remove', 'PAController@removeAsset');
-$router->post('p-a/asset/update', 'PAController@updateAsset');
+$router->get('product', 'PAController@index');
+$router->get('product/category', 'PAController@category');
+/* $router->get('product/vendor', 'PAController@vendor'); */
+/* $router->get('product/asset/detail', 'PAController@detailAsset'); */
+$router->post('product/create-product', 'PAController@createProduct');
+$router->post('product/create-category', 'PAController@createCategory');
+/* $router->post('product/vendor/create', 'PAController@createVendor');
+$router->post('product/asset/create', 'PAController@createAsset');
+$router->post('product/asset/remove', 'PAController@removeAsset');
+$router->post('product/asset/update', 'PAController@updateAsset'); */
 
 ////STOCKS
 $router->get('stock', 'StockController@index');
