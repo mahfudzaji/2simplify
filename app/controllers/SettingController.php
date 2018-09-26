@@ -32,7 +32,8 @@ class SettingController{
                 $this->userSetting();
                 break;
             case 'profile':
-                continue;
+                $this->profileSetting();
+                break;
             case 'form':
                 $this->formSetting();
                 break;
@@ -44,6 +45,9 @@ class SettingController{
                 break;
         }
 
+    }
+
+    public function profileSetting(){
         $builder = App::get('builder');
 
         $id = $this->userId;
