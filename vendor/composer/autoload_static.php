@@ -100,6 +100,7 @@ class ComposerStaticInit16cc2351b9b9c213b14e4980105150bc
         'ReCaptcha\\ResponseTest' => __DIR__ . '/..' . '/google/recaptcha/tests/ReCaptcha/ResponseTest.php',
         'Role' => __DIR__ . '/../..' . '/app/Role.php',
         'SMTP' => __DIR__ . '/..' . '/phpmailer/phpmailer/class.smtp.php',
+        'Setting' => __DIR__ . '/../..' . '/app/Setting.php',
         'TypeError' => __DIR__ . '/..' . '/paragonie/random_compat/lib/error_polyfill.php',
         'User' => __DIR__ . '/../..' . '/app/User.php',
         'ntlm_sasl_client_class' => __DIR__ . '/..' . '/phpmailer/phpmailer/extras/ntlm_sasl_client.php',

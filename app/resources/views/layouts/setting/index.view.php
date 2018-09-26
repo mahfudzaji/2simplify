@@ -52,7 +52,7 @@ require base.'base/header.view.php';
                 <div class="description">
                     <p>Form ini digunakan untuk memperbaharui profile.</p>
                 </div>
-                <form action="/setting/profile/update" method="post">
+                <form action="/settings/profile/update" method="post">
                     <div class="form-group">
                         <label>Name</label>
                         <input type="text" name="name" class="form-control" required>
