@@ -25,7 +25,13 @@ class PageController{
         $recaptcha = App::get('config')['recaptcha']['development'];
 
         if(!$checkIfAnyAccountRegistered){
-            view('register',['firstUser'=>true, 'message'=>'Anda adalah calon user pertama. Anda akan didaftarkan sebagai admin']);
+
+            $builder = App::get('builder');
+
+            $departments = $builder->getAllData('departments', 'User');
+
+            view('register',['firstUser'=>true, 'message'=>'Anda adalah calon user pertama. Anda akan didaftarkan sebagai admin', 'departments' => $departments]);
+            
         }else{
             if(!isset($_SESSION['sim-isLogin'])||$_SESSION['sim-isLogin']==false||empty($_SESSION)){
                 view('index', compact('recaptcha')); 
@@ -64,13 +70,17 @@ class PageController{
 
         $role->getRole($userId);
 
+        $builder = App::get('builder');
+
+        $departments = $builder->getAllData('departments', 'User');
+
         if(!$role->hasRole('superadmin')){
 
-            redirectWithMessage(['anda tidak memiliki hak akses ke halaman tersebut', 0], "home");
+            redirectWithMessage(['Anda tidak memiliki hak akses ke halaman tersebut', 0], "home");
             //redirectWithMessage(['Maaf, anda tidak memiliki hak akses', 0], getLastVisitedPage());
         }
         
-        view('register');
+        view('register', ['firstUser'=>false, 'message'=>'', 'departments' => $departments]);
         
     }
 

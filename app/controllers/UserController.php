@@ -138,7 +138,8 @@ class UserController{
         $checkAnyUser=$builder->getAllData('users', 'User');
         
         if($checkAnyUser){
-            redirectWithMessage('Maaf, anda bukan merupakan pengguna pertama', '/');
+            redirectWithMessage(['Maaf, anda bukan merupakan pengguna pertama',0], '/');
+            
         }
 
         $this->processingRegister($builder);
@@ -149,16 +150,15 @@ class UserController{
 
         $insertAdminRole=$builder->insert('role_user', ['user_id'=>$firstUserId, 'role_id'=>1]);
         
-        if($insertAdminRole){
-            array_push($_SESSION['sim-messages'],['Anda telah didaftarkan sebagai admin',1]);
+        if(!$insertAdminRole){
+            redirectWithMessage(["Pendaftaran sebagai admin gagal. Coba lagi", 0],'/')
         }
 
         $builder->save();
 
         recordLog('Register owner', "Register user pertama berhasil");
 
-        redirect('/');
-        exit();
+        redirectWithMessage(['Anda telah didaftarkan sebagai admin',1],'/')
     }
 
     /*
@@ -303,9 +303,9 @@ class UserController{
 
             $mail->isHTML(true);                                  
 
-            $mail->Subject = 'Here is the subject';
-            $mail->Body    = "This is the HTML message body <b>in bold!</b>. To activate your account please go to this <a href=localhost:8000/confirmation?c=$link&u=$email>link</a>.";
-            $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+            $mail->Subject = 'Confirmation link to activate account';
+            $mail->Body    = "To activate your account please go to this <a href=localhost:8000/confirmation?c=$link&u=$email>link</a>.";
+            $mail->AltBody = '';
 
             if(!$mail->send()) {
                 $_SESSION['sim-messages']=[['Message could not be sent.','Mailer Error: ' . $mail->ErrorInfo, 0]];
