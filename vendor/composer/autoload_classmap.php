@@ -73,6 +73,7 @@ return array(
     'ReCaptcha\\ResponseTest' => $vendorDir . '/google/recaptcha/tests/ReCaptcha/ResponseTest.php',
     'Role' => $baseDir . '/app/Role.php',
     'SMTP' => $vendorDir . '/phpmailer/phpmailer/class.smtp.php',
+    'Setting' => $baseDir . '/app/Setting.php',
     'TypeError' => $vendorDir . '/paragonie/random_compat/lib/error_polyfill.php',
     'User' => $baseDir . '/app/User.php',
     'ntlm_sasl_client_class' => $vendorDir . '/phpmailer/phpmailer/extras/ntlm_sasl_client.php',
