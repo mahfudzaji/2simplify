@@ -44,7 +44,7 @@ $router->get('home','HomeController@index');
 //page
 $router->get('', 'PageController@index');
 $router->get('login','PageController@login');
-$router->get('register','PageController@register');
+//$router->get('register','PageController@register');
 
 //confirmation email and make new password
 $router->get('confirmation', 'PageController@userConfirmation');

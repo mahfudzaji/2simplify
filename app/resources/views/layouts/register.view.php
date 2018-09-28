@@ -3,7 +3,9 @@
     require 'base/header.view.php';
 ?>
 
-<div class="container-fluid">
+<div class="container-fluid text-center">
+
+    <?php require "app/resources/views/errors/errors.view.php"; ?>
 
     <?php
         
@@ -15,14 +17,30 @@
         }
         
     ?>
-
-    <h3>Register user</h3>
-    <form action=<?= $actionTo; ?> method='POST'>
-        <input type='text' name='username' placeholder='Username'><br>
-        <input type='email' name='email' placeholder='Alamat email'><br>
-        <input type='text' name='department' placeholder='Departemen/divisi'>
-        <button type='submit'>Register</button>
-    </form>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4">
+            <h3>Register</h3>
+            <form action=<?= $actionTo; ?> method='POST'>
+                <div class="form-group">
+                    <input type='text' class="form-control" name='username' placeholder='Username'>
+                </div>
+                <div class="form-group">
+                    <input type='email' class="form-control" name='email' placeholder='Alamat email'>
+                </div>
+                <div class="form-group">
+                    <select name="department" class="form-control">
+                        <option value="">Department</option>
+                        <?php foreach($contents['departments'] as $department): ?>
+                            <option value=<?= $department->id; ?> ><?= ucfirst($department->name); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <button class="btn btn-primary" type='submit'>Register</button>
+            </form>
+        </div>
+        <div class="col-sm-4"></div>
+    </div>
 </div>
 
 <?php
