@@ -90,7 +90,7 @@ require base.'base/header.view.php';
 
 <script>
     $(document).ready(function(){
-        /* UPDATE PO ITEM */
+
         $("#update-profile").on("click", function(){
  
             var department = $(this).parent().find("[data-item~='department']").attr("data-item-val");

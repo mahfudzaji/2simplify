@@ -1,6 +1,6 @@
 <?php
 
-$dashboardMenu = array("company", "profile", "user", "form", "permission");
+$dashboardMenu = array("profile", "company", "user", "form", "permission");
 
 $toReturn = "<aside><ul style='list-style:none'>";
 
