@@ -30,7 +30,7 @@ require 'only-header.view.php';
                 </li> -->
                 <li><a href="/product">Product</a></li>
                 <li><a href="/stock">Stock</a></li>
-                <li><a href="/partner">Project</a></li>
+                <li><a href="/project">Project</a></li>
                 <!-- <li><a href='/upload'>Unggah data</a></li> -->
                 <!-- <li><a href='/engineering'>Engineer</a></li> -->
                 

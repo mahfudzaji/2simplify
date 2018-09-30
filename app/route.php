@@ -160,6 +160,9 @@ $router->get('settings', 'SettingController@index');
 $router->post('settings/profile/update', 'SettingController@profileUpdate');
 $router->post('settings/user/update', 'SettingController@userUpdate');
 
+//PROJECT
+$router->get('project', 'ProjectController@index');
+
 ////ENGINEERING
 $router->get('engineering', '');
 /*

@@ -144,6 +144,25 @@ return [
             'deleteFail' => 'Maaf, menghapus data item stock gagal. Mohon ulangi atau hubungi admin.'
         ],
 
+        'project' => [
+            'title' => 'Project',
+            'accessRight' => [
+                'create' => 'Anda tidak memiliki hak untuk membuat Project',
+                'view' => 'Anda tidak memiliki hak untuk melihat Project',
+                'update' => 'Anda tidak memiliki hak untuk memperbaharui Project',
+                'delete' => 'Anda tidak memiliki hak untuk menghapus Project',
+                'print' => 'Anda tidak memiliki hak untuk mencetak Project',
+                'approval' => 'Anda tidak memiliki hak untuk menyetujui atau tidak menyetujui data Project'
+            ],
+            'createSuccess' => 'Data Project  berhasil disimpan',
+            'createFail' => 'Data Project  gagal disimpan. Mohon cek dan ulangi kembali', 
+            'createDataNotValid' => 'Pendaftaran data Project  gagal.',
+            'updateSuccess' => 'Memperbaharui data Project  berhasil.',
+            'updateFail' => 'Maaf, memperbaharui data  Project gagal.',
+            'deleteSuccess' => 'Menghapus data item Project berhasil.',
+            'deleteFail' => 'Maaf, menghapus data item Project gagal. Mohon ulangi atau hubungi admin.'
+        ],
+
         'formNotPassingRequirements' => 'Mohon isi form dengan benar dan sesuai ketentuan',
         
         'databaseOperationFailed' => 'Maaf, terjadi kesalahan pada operasi database, mohon ulangi lagi atau hubungi administrator.',
