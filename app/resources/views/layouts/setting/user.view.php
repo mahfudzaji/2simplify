@@ -50,7 +50,7 @@ require base.'base/header.view.php';
                             <div class="user-group" >
                                 <?php
                                     //name of the user. wrap this as a link to user's profile page
-                                    echo ucwords($user->name)." (".$user->email.")";
+                                    echo "<span data-item='name'>".ucwords($user->name)."</span> (<span data-item='email'>".$user->email."</span>)";
 
                                     //activate or deactivate user account
                                     $link="<button type='button' class='btn btn-link'><a href='#' data-email=$user->email onclick='toggleStatusOfUser(this)' style='display:inline;'>";
@@ -62,7 +62,7 @@ require base.'base/header.view.php';
                                     $link.="</button></a>";
 
                                     echo $link."<button type='button' class='btn btn-link btn-modal' data-id='update-user'>Update</button><br>";
-                                    echo ucfirst($user->department)." - ".ucfirst($user->user_role)
+                                    echo "<span data-item='department' data-item-val='$user->idd'>".ucfirst($user->department)."</span> - <span data-item='role' data-item-val=$user->idr >".ucfirst($user->user_role)."</span>";
 
                                 ?>
                             </div>
@@ -134,7 +134,7 @@ require base.'base/header.view.php';
                 <div class="description">
                     <p>Form ini digunakan untuk memperbaharui profile.</p>
                 </div>
-                <form action="/settings/profile/update" method="post">
+                <form action="/settings/user/update" method="post">
                     <div class="form-group">
                         <label>Name</label>
                         <input type="text" name="name" class="form-control" placeholder='Name' required>
@@ -195,16 +195,19 @@ require base.'base/header.view.php';
     }
 
     $(document).ready(function(){
-        $("#update-user").on("click", function(){
+        $(".btn-modal").on("click", function(){
  
             var department = $(this).parent().find("[data-item~='department']").attr("data-item-val");
+            var role = $(this).parent().find("[data-item~='role']").attr("data-item-val");
             var name = $(this).parent().find("[data-item~='name']").html();
             var email = $(this).parent().find("[data-item~='email']").html();
 
-            $("#modal-update-profile").find("select[name~='department']").find("option").attr("selected", false);
-            $("#modal-update-profile").find("select[name~='department']").find("option[value~='"+department+"']").attr("selected", true);
-            $("#modal-update-profile").find("input[name~='name']").val(name); 
-            $("#modal-update-profile").find("input[name~='email']").val(email);
+            $("#modal-update-user").find("select[name~='role']").find("option").attr("selected", false);
+            $("#modal-update-user").find("select[name~='role']").find("option[value~='"+role+"']").attr("selected", true);
+            $("#modal-update-user").find("select[name~='department']").find("option").attr("selected", false);
+            $("#modal-update-user").find("select[name~='department']").find("option[value~='"+department+"']").attr("selected", true);
+            $("#modal-update-user").find("input[name~='name']").val(name); 
+            $("#modal-update-user").find("input[name~='email']").val(email);
             
         });
     });

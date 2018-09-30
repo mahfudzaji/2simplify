@@ -141,12 +141,15 @@ class SettingController{
         
         $builder = App::get('builder');
 
+        $departments = $builder->getAllData('departments', 'User');
+
         //Get list of user account registered
         $users=$builder->custom("SELECT a.id, a.name, a.email, a.code, a.department as idd,
         b.name as department, c.upload_file as photo, 
         case active when 1 then 'Active' else 'Deactive' end  as active, 
         a.active as ida,
         e.name as user_role,
+        d.role_id as idr,
         date_format(a.created_at, '%d %M %Y') as created_at, date_format(a.updated_at, '%d %M %Y') as updated_at 
         FROM users as a 
         INNER JOIN departments as b on a.department=b.id 
@@ -154,7 +157,54 @@ class SettingController{
         INNER JOIN roles as e on d.role_id=e.id
         LEFT JOIN upload_files as c on a.photo=c.id", 'User');
 
-        view('/setting/user', compact('users'));
+        view('/setting/user', compact('users', 'departments'));
+
+    }
+
+    public function userUpdate(){
+        $builder = App::get('builder');
+
+        $id = $this->userId;
+
+        //checking form requirement
+        $data=[];
+
+        //check the requirement
+        //if passing the requirement, put the data into $data array
+        //otherwise redirect back to the page
+
+        $passingRequirement=true;
+        $_SESSION['sim-messages']=[];
+
+        foreach(['name' => 'required', 'email' => 'required', 'department' => 'required'] as $k => $v){
+            if(checkRequirement($v, $k, $_POST[$k])){
+                $data[$k]=filterUserInput($_POST[$k]);
+            }else{
+                $passingRequirement=false;
+            }  
+        }
+
+        $data['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
+
+        //if not the passing requirements
+        if(!$passingRequirement){
+            redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
+        }
+
+
+        $updateProfile = $builder->update("users", $data, ['id' => $id], '', 'Setting');
+
+        if(!$updateProfile ){
+            recordLog("profile", "Pembaharuan profile gagal");
+            redirectWithMessage([["Pembaharuan profile gagal",0]],getLastVisitedPage());
+        }
+
+        recordLog("profile", "Pembaharuan profile  berhasil");
+
+        $builder->save();
+
+        //redirect to form page with message
+        redirectWithMessage([["Pembaharuan profile berhasil",1]],getLastVisitedPage());
 
     }
 

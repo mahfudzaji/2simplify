@@ -158,6 +158,7 @@ $router->post('stock/out', 'StockController@stockOut');
 //SETTINGS
 $router->get('settings', 'SettingController@index');
 $router->post('settings/profile/update', 'SettingController@profileUpdate');
+$router->post('settings/user/update', 'SettingController@userUpdate');
 
 ////ENGINEERING
 $router->get('engineering', '');

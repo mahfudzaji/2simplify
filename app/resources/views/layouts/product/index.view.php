@@ -1,6 +1,6 @@
 <?php
 
-$titlePage="Product dan Stok";
+$titlePage="Product";
 define('base', 'app/resources/views/layouts/');
 require base.'base/header.view.php';
 
@@ -17,7 +17,7 @@ require base.'base/header.view.php';
             <?php if(array_key_exists('superadmin' , $roleOfUser)): ?>
                 <button class="btn btn-sm btn-header btn-modal" id="create-category"><span class="glyphicon glyphicon-pencil"></span> Tambahkan Kategori</button>
             <?php endif; ?>
-            <button class="btn btn-sm btn-header btn-modal" id="create-product"><span class="glyphicon glyphicon-pencil"></span> Tambahkan Produk</button>
+            <button class="btn btn-sm btn-header btn-modal" id="create-product"><span class="glyphicon glyphicon-pencil"></span> Tambahkan Item</button>
         </header>
 
         <div class="sub-header"> 
@@ -74,16 +74,7 @@ require base.'base/header.view.php';
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Vendor</label>
-                            <select name="vendor" class="form-control">
-                                <option value=''>VENDOR</option>
-                                <?php foreach($vendors as $vendor): ?> 
-                                    <option value= <?= $vendor->id; ?> ><?= ucfirst($vendor->name); ?></option>             
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Part number</label>
+                            <label>Kode/Part number</label>
                             <input type="text" name="part_number" class="form-control" placeholder="Part number" autofocus required>
                         </div>
                         <div class="form-group">
@@ -106,6 +97,9 @@ require base.'base/header.view.php';
                         <button class="btn btn-danger btn-close">Tutup</button>
                         <button type="submit" name="submit" class="btn btn-primary" style="float:right;">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </form>
+
+                    <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+
                 </div>
             </div>  
         </div>
@@ -159,6 +153,9 @@ require base.'base/header.view.php';
                         </div>                                                                             
                         <button class="btn btn-danger btn-close">Tutup</button>
                         <button type="submit" name="submit" class="btn btn-primary" style="float:right;"><span class="glyphicon glyphicon-send"></span> Kirim</button>
+                    
+                        <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+
                     </form>
                 </div>  
             </div>

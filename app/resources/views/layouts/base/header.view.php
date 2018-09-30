@@ -17,16 +17,19 @@ require 'only-header.view.php';
                         <li><a href='/form/cuti'>Form cuti</a></li> -->
                         <li><a href='/form/quo'>QUO</a></li>
                         <li><a href='/form/po'>PO</a></li>
+                        <li><a href='/form/inv'>Invoice</a></li>
                         <li><a href='/form/do'>DO</a></li>
                     </ul>
                 </li>
                 <li><a href="/partner">Partner</a></li>
-                <li><a href='#'>Product & stock<span class="caret"></span></a>
+                <!-- <li><a href='#'>Product<span class="caret"></span></a>
                     <ul class="dropdown">
-                        <li><a href='/product'>Produk</a></li>
-                        <li><a href='/stock'>Stok</a></li>
+                        <li><a href='/product'>Goods</a></li>
+                        <li><a href='/stock'>Service</a></li>
                     </ul>
-                </li>
+                </li> -->
+                <li><a href="/product">Product</a></li>
+                <li><a href="/stock">Stock</a></li>
                 <li><a href="/partner">Project</a></li>
                 <!-- <li><a href='/upload'>Unggah data</a></li> -->
                 <!-- <li><a href='/engineering'>Engineer</a></li> -->
