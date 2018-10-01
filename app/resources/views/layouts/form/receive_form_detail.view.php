@@ -44,6 +44,7 @@ require base.'base/header.view.php';
                 </div>
                 <br> 
                 <button class="btn btn-danger btn-close" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -114,6 +115,7 @@ require base.'base/header.view.php';
                         <button type="button" class="btn btn-danger btn-close" >Tutup</button>                          
                         <button type="button" name="submit" class="btn btn-primary btn-next pull-right">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </form>
+                    <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
                 </div>
             </div>
         </div>
@@ -151,6 +153,7 @@ require base.'base/header.view.php';
                         <button type="button" class="btn btn-danger btn-close" >Tutup</button>
                         <button type="submit" class="btn btn-primary pull-right">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </form>
+                    <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
                 </div>              
             </div>
         </div>
@@ -187,6 +190,7 @@ require base.'base/header.view.php';
                 </div>
                 <br> 
                 <button class="btn btn-danger btn-close" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 

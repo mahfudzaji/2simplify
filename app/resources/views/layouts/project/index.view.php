@@ -25,9 +25,19 @@ require base.'base/header.view.php';
                 <div class="search" id="product-based">
                     <div class="form-group">
                         <select name="product" class="form-control">
+                            <option value=''>Customer</option>
+                            <?php foreach($companies as $company): ?>
+                                <option title="<?= $company->name; ?>" value=<?= $company->id ?>><?= makeItShort($company->name, 50); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="search" id="product-based">
+                    <div class="form-group">
+                        <select name="product" class="form-control">
                             <option value=''>PIC</option>
                             <?php foreach($users as $user): ?>
-                                <option title="<?= $user->name; ?>" value=<?= $user->id ?>><?= (strlen($user->name)>50)?substr(ucfirst($user->name),0, 50)."...":ucfirst($user->name); ?></option>
+                                <option title="<?= $user->name; ?>" value=<?= $user->id ?>><?= makeItShort($user->name, 50); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -74,6 +84,7 @@ require base.'base/header.view.php';
                             <thead>
                                 <tr>
                                     <th>Name</th>
+                                    <th>Customer</th>
                                     <th>Start</th>
                                     <th>End</th>
                                     <th>PIC</th>
@@ -86,6 +97,7 @@ require base.'base/header.view.php';
                             <?php foreach($projectData as $data): ?>
                                     <tr>
                                         <td><a href="/project/detail?pr=<?= $data->id ?>"><strong><?= ucwords($data->name); ?></strong></a></td>
+                                        <td><?= $data->customer; ?></td>
                                         <td><?= $data->start_date; ?></td>
                                         <td><?= $data->end_date ?></td>
                                         <td><?= $data->pic; ?></td>
@@ -119,13 +131,29 @@ require base.'base/header.view.php';
                 </div>
                 <form action="/project/create" method="POST">
                     <div class="form-group">
+                        <label>Customer</label>
+                        <select name="company" class="form-control">
+                            <option value=''>Customer</option>
+                            <?php foreach($companies as $company): ?>
+                                <option title="<?= $company->name; ?>" value=<?= $company->id ?>><?= makeItShort($company->name, 50); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>  
+                    <div class="form-group">
+                        <label>PO</label>
+                        <select name="po_quo" class="form-control" required>
+                            <option value=''>PO</option>
+                        </select>
+                    </div>  
+                    <div class="data-respond"></div>
+                    <div class="form-group">
                         <label>Project</label>
                         <input type="text" name="name" class="form-control" placeholder="Nama project" required>
                     </div>
                     <div class="form-group">
                         <label>Description</label>
                         <textarea name="description" class="form-control" placeholder="Deskripsi"></textarea>
-                    </div>    
+                    </div>  
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -164,90 +192,117 @@ require base.'base/header.view.php';
     
     $(document).ready(function(){
         
-        $("#btn-add-sn").on("click", function(){
-            var clone = $(this).parent().find("input[name~='serial_number[]']:first").clone().val("");
-            $(this).before(clone);
-        });
-
-        $("#modal-create-stock").on("change", "select[name~='vendor']", function(){
-            var vendor = $(this).val();
+        //Show the list of po from the buyer (PO IN)
+        $("#modal-create-project").on("change", "select[name~='company']", function(){
+            $("#modal-create-project").find(".modal-content").find(".data-respond").empty()
+            var company = $(this).val();
             
-            $.get('/stock/getProduct', {vendor:vendor}, function(data, status){
-                var products = JSON.parse(data);
-                var productOption = "<option value=''>PRODUCT</option>";
-                
-                for(var i=0; i<products.length; i++){
-                    productOption+="<option value="+products[i].id+">"+products[i].name+"</option>";
-                }
-                //console.log(productOption);
-                $("select[name~='vendor']").closest("form").find("select[name~='product']").empty().append(productOption);
-            });
-            
+            if(company!=0 && company!=null && company.length>0){
+                $.get("/form/po/get-number", {company:company, do_type:0}, function(data, status){
+                    var poNumber="<option value='0'>PO number</option>";
+                    var responds=JSON.parse(data);
+
+                    if(responds.length>0){
+                        for(var i=0; i<responds.length; i++){
+                            poNumber+="<option value="+responds[i].po_quo+" data-po="+responds[i].id+">"+responds[i].po_number+"</option>";
+                        }   
+                    }    
+                    $("select[name~='po_quo']").empty().append(poNumber);           
+                });
+            }  
         });
+        
+        //Show information about the selected PO
+        $("#modal-create-project").on("change", "select[name~='po_quo']", function(){
+            var poNumber = $(this).find("option:selected").attr("data-po");
 
-        //show the detail of the product
-        $("#modal-create-stock").on("change", "select[name~='product']", function(){
-            var product = $(this).val();
+            if(poNumber!=0 && poNumber!=null && poNumber.length>0){
+                $.get("/form/po/detail", {po:poNumber}, function(data, status){
 
-            $.get('/stock/getProductDetail', {product:product}, function(data, status){
+                    var quotationData="Belum terdapat data";
+                    var responds=JSON.parse(data);
 
-                var productDetail = JSON.parse(data)[0];
+                    //console.log(responds);
 
-                var detail ="<ul>";
-                detail+="<li>Nama : "+productDetail.name+"</li>";
-                detail+="<li>Vendor : "+productDetail.vendor+"</li>";
-                detail+="<li>Part number : "+productDetail.part_number+"</li>";
-                detail+="<li>Deskripsi : "+productDetail.description+"</li>";
-                detail+="<li>Link : "+productDetail.link+"</li>";
-                detail+="</ul>";
+                    var poData = responds.poData[0];
+                    var poNum = poData.po_number;
+                    var poDate = poData.po_date;
+                    var supplier = poData.supplier;
+                    var buyer = poData.buyer;
+                    var picB = poData.pic_buyer;
+                    var picS = poData.pic_supplier;
+                    var addressS = poData.saddress;
+                    var addressB = poData.baddress;
 
-                $("select[name~='product']").closest("form").find(".detail-respond").find(".col-md-4").empty().append("<img src='/public/upload/"+productDetail.upload_file+"' class='img-responsive'>");
-                $("select[name~='product']").closest("form").find(".detail-respond").find(".col-md-8").empty().append(detail);
+                    var poProduct = "<h3>Supplier: "+supplier+"</h3><h3>Buyer: "+buyer+"</h3><h4>"+addressB+"</h4>";
+                    poProduct+="<h4><span style='background-color:#95DEE3;'><a href='/form/po/detail?po="+poData.po+"' target='blank'>"+poNum+"</a></span></h4><h4>Quo date:"+poDate+"</h4>";
 
-            });
+                    poProduct += "<table class='table table-striped'><thead><tr><th>Part Number</th><th>Product</th><th>Qty</th></tr></thead><tbody>";
+                    
+                    var poDetail = responds.poDetailData;
+
+                    //console.log(poDetail);
+
+                    //clone class .modal-add-stock-detail as many as poDetail.length
+                    var firstStockDetail = $("#modal-create-do-form").find(".modal-add-stock-detail:first");
+                    var firstStockItem = firstStockDetail.find(".stock-item:first");
+
+                    for(var i=0; i<poDetail.length; i++){
+
+                        poProduct += "<tr data-item="+poDetail[i].pid+"><td>"+poDetail[i].part_number+"</td>";
+                        poProduct += "<td>"+poDetail[i].product+"</td>";
+                        poProduct += "<td>"+poDetail[i].quantity+"</td></tr>";
+                        //poProduct += "<td><button type='button' class='btn btn-link add-stock-detail btn-modal' id='stock-product-"+poDetail[i].pid+"'>Detail</button></td></tr>";
+
+                        var clone = firstStockDetail.clone();
+                        var product = poDetail[i].pid;
+
+                        //if this is first data, no need to clone class .modal-add-stock-detail
+                        if(i==0){
+                            firstStockDetail.attr("id", "modal-stock-product-"+poDetail[i].pid);
+                            firstStockDetail.find(".stock-item").find("input[name~='product[]']").val(poDetail[i].pid);
+                            firstStockDetail.find(".modal-header").find("h3").text(poDetail[i].product);
+
+                            for(var j=1; j<poDetail[i].quantity; j++){
+                                //locate the cloned data after the last element class .stock-item
+                                firstStockDetail.find(".stock-item:last").after(firstStockItem.clone());
+                            }
+                        }else{
+                            var lastStockDetail = $("#modal-create-project").find(".modal-add-stock-detail:last");
+                            
+                            var currentStockDetail = clone.attr("id", "modal-stock-product-"+poDetail[i].pid); 
+
+                            //remove all stock-item except the first
+                            clone.find(".stock-item:not(:first)").remove();
+
+                            //locate it at the last
+                            lastStockDetail.after(currentStockDetail);
+
+                            var currentStockItem = lastStockDetail.find(".stock-item:first");
+
+                            currentStockDetail.find(".modal-header").find("h3").text(poDetail[i].product);
+
+                            for(var j=1; j<poDetail[i].quantity; j++){
+                                
+                                currentStockDetail.find(".stock-item:last").after(currentStockItem.clone());
+                                currentStockDetail.find(".stock-item:last").find("input, select").attr("required", true);
+                            }
+
+                            currentStockDetail.find(".stock-item").find("input[name~='product[]']").val(poDetail[i].pid);
+                            
+                        } 
+                        
+                    }
+
+                    poProduct += "</tbody></table>";
+                        
+                    $("#modal-create-project").find(".modal-content").find(".data-respond").empty().append(poProduct);
+
+                });
+            }else{
+                $("#modal-create-project").find(".modal-content").find(".data-respond").empty().append("Belum terdapat data");
+            }
         });
-
-        $(".content-preview").on("click", function(){
-            let product = $(this).attr("id");
-            
-            $('.content').removeClass('active');
-            $('.content').children('.detail').hide();
-            $(this).closest('.content').addClass('active');
-
-            $.get("/stock/get-stock-list", {product:product}, function(data, status){
-                let responds = JSON.parse(data);
-                
-                let unitList = "<table class='table table-hover'><thead>";
-				unitList += "<tr><th>Serial number</th><th>Stock condition</th><th>Location</th><th>Receive date</th><th>Send date</th><th>Status</th><th>Update</th></tr>";
-                unitList += "</thead><tbody>";
-                
-
-                for(let i=0; i<responds.length; i++){
-                    unitList += "<tr id="+responds[i].id+">";
-                    unitList += "<td data-item='serial-number'>"+responds[i].serial_number+"</td>";
-                    unitList += "<td>"+makeFirstLetterUpper(responds[i].stock_condition)+"</td>";
-                    unitList += "<td data-item='service-point' data-item-val="+responds[i].idsp+">"+makeFirstLetterUpper(responds[i].service_point)+"</td>";
-                    unitList += "<td data-item='receive-date' data-item-val="+responds[i].ra+">"+responds[i].received_at+"</td>";
-                    unitList += "<td data-item='send-date' data-item-val="+responds[i].sa+">"+responds[i].send_at+"</td>";
-                    unitList += "<td>"+makeFirstLetterUpper(responds[i].status)+"</td>";
-                    unitList += "<td><button type='button' class='btn btn-sm btn-primary btn-modal' data-id='update-stock'>Update</button></td>";
-                    unitList += "</tr>";
-                }
-
-                unitList += "</tbody></table>";
-
-                /* $('.active>.detail').empty();
-                $('.active>.detail').append(unitList); */
-                $('.content.active').find('.detail').empty();
-                $('.content.active').find('.detail').append(unitList);
-
-                console.log(unitList);
-
-            });
-
-            $(this).closest('.content').children('.detail').show();
-
-        })
 
     });
 

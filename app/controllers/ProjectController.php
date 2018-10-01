@@ -30,6 +30,7 @@ class ProjectController{
         $builder = App::get('builder');
 
         $users = $builder->getAllData('users', 'User');
+        $companies = $builder->getAllData('companies', 'Partner');
 
         //Searching for specific category
 
@@ -74,15 +75,18 @@ class ProjectController{
 
 
         $projectData = $builder->custom("SELECT a.id, a.name, a.description, 
-        DATE_FORMAT(a.start_date, '%d %m %Y') as start_date, DATE_FORMAT(a.end_date, '%d %M %Y') as end_date,
+        DATE_FORMAT(a.start_date, '%d %M %Y') as start_date, DATE_FORMAT(a.end_date, '%d %M %Y') as end_date,
         b.name as pic, 
         case project_status when 1 then 'Belum dimulai' when 2 then 'Sedang dikerjakan' when 3 then 'Selesai' end as project_status,
         c.name as created_by,
-        d.name as updated_by
+        d.name as updated_by,
+        f.name as customer
         FROM projects as a
         INNER JOIN users as b on a.pic=b.id
         INNER JOIN users as c on a.created_by=c.id
         INNER JOIN users as d on a.updated_by=d.id
+        INNER JOIN form_po as e on a.po=e.id
+        INNER JOIN companies as f on e.buyer=f.id
         WHERE $whereClause", "Project");
 
         //download all the data
@@ -119,7 +123,9 @@ class ProjectController{
         
         $projectData=array_slice($projectData,$limitStart,maxDataInAPage());
 
-        view('/project/index', compact('projectData', 'sumOfAllData', 'pages', 'users'));
+        setSearchPage();
+
+        view('/project/index', compact('projectData', 'sumOfAllData', 'pages', 'users', 'companies'));
     }
 
     public function projectCreate(){
@@ -181,7 +187,44 @@ class ProjectController{
 
         $id = filterUserInput($_GET['pr']);
 
-        $projectDetailData = $builder->custom("", 'Project');
+        /* $projectDetailData = $builder->custom("SELECT a.id, a.name, a.description, 
+        DATE_FORMAT(a.start_date, '%d %M %Y') as start_date, DATE_FORMAT(a.end_date, '%d %M %Y') as end_date,
+        b.name as pic, 
+        case project_status when 1 then 'Belum dimulai' when 2 then 'Sedang dikerjakan' when 3 then 'Selesai' end as project_status,
+        a.project_status as psid,
+        c.name as created_by,
+        d.name as updated_by,
+        g.name as buyer
+        FROM projects as a
+        INNER JOIN users as b on a.pic=b.id
+        INNER JOIN users as c on a.created_by=c.id
+        INNER JOIN users as d on a.updated_by=d.id
+        LEFT JOIN po_project as e on a.id=e.project
+        LEFT JOIN form_po as f on e.po=f.id
+        LEFT JOIN companies as g on f.buyer=g.id
+        WHERE a.id=$id", 'Project'); */
+
+        $projectDetailData = $builder->custom("SELECT a.id, a.name, a.description, 
+        DATE_FORMAT(a.start_date, '%d %M %Y') as start_date, DATE_FORMAT(a.end_date, '%d %M %Y') as end_date,
+        a.start_date as sd, a.end_date as ed,
+        b.name as pic, 
+        a.pic as picid,
+        case project_status when 1 then 'Belum dimulai' when 2 then 'Sedang dikerjakan' when 3 then 'Selesai' end as project_status,
+        a.project_status as psid,
+        c.name as created_by,
+        d.name as updated_by,
+        f.name as customer,
+        g.po_number as po_number,
+        DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, 
+        DATE_FORMAT(a.updated_at, '%d %M %Y') as updated_at
+        FROM projects as a
+        INNER JOIN users as b on a.pic=b.id
+        INNER JOIN users as c on a.created_by=c.id
+        INNER JOIN users as d on a.updated_by=d.id
+        INNER JOIN form_po as e on a.po=e.id
+        INNER JOIN companies as f on e.buyer=f.id
+        INNER JOIN po_quo as g on e.id=g.po
+        WHERE a.id=$id", "Project");
 
         if(count($projectDetailData)<1){
             redirectWithMessage([['Data tidak tersedia atau telah dihapus',0]], getLastVisitedPage());
