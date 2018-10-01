@@ -8,6 +8,14 @@ use App\Core\Auth;
 class ProjectController{
 
     private $role,$userId,$roleOfUser;
+
+    private $placeholderProjectForm = array(
+        "name" => "required",
+        "description" => "",
+        "start_date" => "required",
+        "end_date" => "required",
+        "pic" => "required"
+    );
     
     public function __CONSTRUCT(){
         $user=Auth::user();
@@ -20,6 +28,8 @@ class ProjectController{
     public function index(){
 
         $builder = App::get('builder');
+
+        $users = $builder->getAllData('users', 'User');
 
         //Searching for specific category
 
@@ -105,7 +115,57 @@ class ProjectController{
         
         $projectData=array_slice($projectData,$limitStart,maxDataInAPage());
 
-        view('/project/index', compact('projectData', 'sumOfAllData', 'pages'));
+        view('/project/index', compact('projectData', 'sumOfAllData', 'pages', 'users'));
+    }
+
+    public function projectCreate(){
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+        }
+
+        $builder = App::get('builder');
+
+        //checking form requirement
+        $data=[];
+
+        //check the requirement
+        //if passing the requirement, put the data into $data array
+        //otherwise redirect back to the page
+
+        $passingRequirement=true;
+        $_SESSION['sim-messages']=[];
+
+        foreach($this->placeholderProjectForm as $k => $v){
+            if(checkRequirement($v, $k, $_POST[$k])){
+                $data[$k]=filterUserInput($_POST[$k]);
+            }else{
+                $passingRequirement=false;
+            }  
+        }
+
+        $data['created_by'] = substr($_SESSION['sim-id'], 3, -3);
+        $data['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
+
+        //if not the passing requirements
+        if(!$passingRequirement){
+            redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
+        }
+
+        $insertToProjects = $builder->insert("projects", $data);
+
+        if(!$insertToProjects){
+            recordLog('Project', returnMessage()['project']['createFail'] );
+            redirectWithMessage([['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.', 0]],getLastVisitedPage());
+            exit();
+        }else{
+            recordLog('Project', returnMessage()['project']['createSuccess'] );
+        }
+
+        $builder->save();
+
+        //redirect to form page with message
+        redirectWithMessage([[ returnMessage()['project']['createSuccess'] ,1]],getLastVisitedPage());
+
     }
 }
 

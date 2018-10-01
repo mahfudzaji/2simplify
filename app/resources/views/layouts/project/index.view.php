@@ -25,15 +25,15 @@ require base.'base/header.view.php';
                 <div class="search" id="product-based">
                     <div class="form-group">
                         <select name="product" class="form-control">
-                            <option value=''>Produk</option>
-                            <?php foreach($products as $product): ?>
-                                <option title="<?= $product->name; ?>" value=<?= $product->id ?>><?= (strlen($product->name)>50)?substr(ucfirst($product->name),0, 50)."...":ucfirst($product->name); ?></option>
+                            <option value=''>PIC</option>
+                            <?php foreach($users as $user): ?>
+                                <option title="<?= $user->name; ?>" value=<?= $user->id ?>><?= (strlen($user->name)>50)?substr(ucfirst($user->name),0, 50)."...":ucfirst($user->name); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
                 </div>
                 <div class="search" id="date-based" style="position:relative">
-                    <button type="button" class="btn btn-default" id="btn-date-based">TANGGAL DITERIMA</button>
+                    <button type="button" class="btn btn-default" id="btn-date-based">TANGGAL PROJECT</button>
                     <div class="form-group" style="position: absolute;left: 50%;margin-top: 5px;transform: translateX(-50%);z-index: 5;display: none;width: 400px;">
                         <div class="row">
                             <div class="col-md-6">
