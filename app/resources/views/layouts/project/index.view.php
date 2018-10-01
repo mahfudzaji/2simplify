@@ -78,16 +78,20 @@ require base.'base/header.view.php';
                                     <th>End</th>
                                     <th>PIC</th>
                                     <th>Status</th>
+                                    <th>Created by</th>
+                                    <th>Updated by</th>
                                 </tr>
                             </thead>
                             <tbody>
                             <?php foreach($projectData as $data): ?>
                                     <tr>
-                                        <td><a href="/project/detail?p=<?= $data->id ?>"><strong><?= ucwords($data->name); ?></strong></a></td>
+                                        <td><a href="/project/detail?pr=<?= $data->id ?>"><strong><?= ucwords($data->name); ?></strong></a></td>
                                         <td><?= $data->start_date; ?></td>
                                         <td><?= $data->end_date ?></td>
                                         <td><?= $data->pic; ?></td>
-                                        <td><?= $data->status; ?></td>
+                                        <td><?= $data->project_status; ?></td>
+                                        <td><?= $data->created_by; ?></td>
+                                        <td><?= $data->created_by; ?></td>
                                     <tr>
                                 <?php endforeach; ?>
                             </tbody>

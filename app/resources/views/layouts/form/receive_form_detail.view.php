@@ -148,10 +148,6 @@ require base.'base/header.view.php';
                                 <option value='0'>Rusak</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label>Catatan</label>
-                            <textarea name="notes" class="form-control" placeholder="Tambahkan catatan"></textarea>
-                        </div>
                         <button type="button" class="btn btn-danger btn-close" >Tutup</button>
                         <button type="submit" class="btn btn-primary pull-right">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </form>
@@ -286,7 +282,6 @@ require base.'base/header.view.php';
                                             <th>Lokasi</th>
                                             <th>Kondisi</th>
                                             <th>Status</th>
-                                            <th>Catatan</th>
                                             <th colspan=2 class="text-center">Action</th>
                                         </tr>
                                     </thead>
@@ -319,13 +314,13 @@ $(document).ready(function(){
         if(countData){
             bigListChild.slideToggle();
         }else{    
-            $.get("/p-a/asset/detail", {product:product, document_number:documentNumber}, function(data, status){
+            $.get("/product/asset/detail", {product:product, document_number:documentNumber}, function(data, status){
                 
                 var assets=JSON.parse(data);
                 bigListChild.find("tbody").empty();
                 
                 for(var i=0; i<assets.length; i++){
-                    var toAppend="<tr data-item="+assets[i].id+"><td data-item='serial_number'>"+assets[i].serial_number+"</td><td data-item='service_point' data-item-val="+assets[i].id_sp+">"+assets[i].service_point+"</td><td data-item='asset_condition' data-item-val="+assets[i].id_ac+">"+assets[i].asset_condition+"</td><td data-item='status'>"+assets[i].status+"</td><td data-item='notes'>"+assets[i].notes+"</td><td class='text-center'><span class='span-action span-action-update glyphicon glyphicon-pencil' style='color:#034f84;'></span></td><td class='text-center'><form action='/p-a/asset/remove' method='post'><input type='hidden' name='asset' value="+assets[i].id+"><button type='submit' class='btn btn-link btn-remove confirm' id='deletion' style='padding:0;color:#ff0000'><span class='span-action span-action-remove glyphicon glyphicon-remove'></span></button></form></td></tr>";
+                    var toAppend="<tr data-item="+assets[i].id+"><td data-item='serial_number'>"+assets[i].serial_number+"</td><td data-item='service_point' data-item-val="+assets[i].id_sp+">"+assets[i].service_point+"</td><td data-item='asset_condition' data-item-val="+assets[i].id_ac+">"+assets[i].asset_condition+"</td><td data-item='status'>"+assets[i].status+"</td><td class='text-center'><span class='span-action span-action-update glyphicon glyphicon-pencil' style='color:#034f84;'></span></td><td class='text-center'><form action='/p-a/asset/remove' method='post'><input type='hidden' name='asset' value="+assets[i].id+"><button type='submit' class='btn btn-link btn-remove confirm' id='deletion' style='padding:0;color:#ff0000'><span class='span-action span-action-remove glyphicon glyphicon-remove'></span></button></form></td></tr>";
                     bigListChild.find("tbody").append(toAppend);
                 }
 

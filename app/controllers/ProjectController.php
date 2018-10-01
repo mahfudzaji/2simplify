@@ -74,11 +74,15 @@ class ProjectController{
 
 
         $projectData = $builder->custom("SELECT a.id, a.name, a.description, 
-        DATE_FORMAT(a.start_date, '%d %m %Y') as start_date, DATE_FORMAT(a.end_date, '%d %m %Y') as end_date,
+        DATE_FORMAT(a.start_date, '%d %m %Y') as start_date, DATE_FORMAT(a.end_date, '%d %M %Y') as end_date,
         b.name as pic, 
-        case project_status when 1 then 'Belum dimulai' when 2 then 'Sedang dikerjakan' when 3 then 'Selesai' end as project_status
+        case project_status when 1 then 'Belum dimulai' when 2 then 'Sedang dikerjakan' when 3 then 'Selesai' end as project_status,
+        c.name as created_by,
+        d.name as updated_by
         FROM projects as a
         INNER JOIN users as b on a.pic=b.id
+        INNER JOIN users as c on a.created_by=c.id
+        INNER JOIN users as d on a.updated_by=d.id
         WHERE $whereClause", "Project");
 
         //download all the data
@@ -166,6 +170,29 @@ class ProjectController{
         //redirect to form page with message
         redirectWithMessage([[ returnMessage()['project']['createSuccess'] ,1]],getLastVisitedPage());
 
+    }
+
+    public function projectDetail(){
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+        }
+
+        $builder = App::get('builder');
+
+        $id = filterUserInput($_GET['pr']);
+
+        $projectDetailData = $builder->custom("", 'Project');
+
+        if(count($projectDetailData)<1){
+            redirectWithMessage([['Data tidak tersedia atau telah dihapus',0]], getLastVisitedPage());
+        }
+
+        if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+            echo json_encode(["projectDetailData"=>$projectDetailData]);
+            exit();
+        }else{
+            view('/project/detail', compact('projectDetailData'));
+        }
     }
 }
 

@@ -405,7 +405,7 @@ class PAController{
             inner join service_points as c on b.service_point=c.id 
             where a.document_number=$assets", "Asset");*/
 
-            $asset=$builder->custom("SELECT b.id, b.serial_number,b.stock_condition as id_ac, case b.notes when '' then '-' else b.notes end as notes, case b.stock_condition when 0 then 'rusak' else 'baik' end as asset_condition, case b.ownership when 0 then 'pihak luar' else 'milik sendiri' end as own_status, case b.status when 0 then 'out' else 'in' end as status,b.service_point as id_sp, c.name as service_point 
+            $asset=$builder->custom("SELECT b.id, b.serial_number,b.stock_condition as id_ac, case b.stock_condition when 0 then 'rusak' else 'baik' end as asset_condition,  case b.status when 0 then 'out' else 'in' end as status,b.service_point as id_sp, c.name as service_point 
             FROM `document_data` as a 
             inner join stocks as b on a.asset=b.id 
             inner join service_points as c on b.service_point=c.id 

@@ -134,13 +134,13 @@ $router->post('form/do/update', 'FormController@doFormUpdate');
 $router->get('product', 'PAController@index');
 $router->get('product/category', 'PAController@category');
 /* $router->get('product/vendor', 'PAController@vendor'); */
-/* $router->get('product/asset/detail', 'PAController@detailAsset'); */
+$router->get('product/asset/detail', 'PAController@detailAsset');
 $router->post('product/create-product', 'PAController@createProduct');
 $router->post('product/create-category', 'PAController@createCategory');
-/* $router->post('product/vendor/create', 'PAController@createVendor');
+/*$router->post('product/vendor/create', 'PAController@createVendor');
 $router->post('product/asset/create', 'PAController@createAsset');
-$router->post('product/asset/remove', 'PAController@removeAsset');
-$router->post('product/asset/update', 'PAController@updateAsset'); */
+$router->post('product/asset/remove', 'PAController@removeAsset');*/
+$router->post('product/asset/update', 'PAController@updateAsset'); 
 
 ////STOCKS
 $router->get('stock', 'StockController@index');
@@ -163,6 +163,7 @@ $router->post('settings/user/update', 'SettingController@userUpdate');
 //PROJECT
 $router->get('project', 'ProjectController@index');
 $router->post('project/create', 'ProjectController@projectCreate');
+$router->get('project/detail', 'ProjectController@projectDetail');
 
 ////ENGINEERING
 $router->get('engineering', '');
