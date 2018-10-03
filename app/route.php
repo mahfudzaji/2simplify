@@ -208,6 +208,7 @@ $router->get('print/reimburse', 'PrintController@reimburseForm');
 $router->get('print/quotation', 'PrintController@quotationForm');
 $router->get('print/po', 'PrintController@poForm');
 $router->get('print/do', 'PrintController@doForm');
+$router->get('print/receipt', 'PrintController@receiptForm');
 
 //SERBA-SERBI
 $router->get('parameter', 'PageController@parameterShow');

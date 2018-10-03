@@ -584,7 +584,7 @@ class PrintController{
             }
         }
 
-        $id = filterUserInput($_GET['do']);
+        $id = filterUserInput($_GET['r']);
         
         $builder = App::get('builder');
 
@@ -602,21 +602,25 @@ class PrintController{
         GROUP_CONCAT(b.quantity ORDER by c.id asc SEPARATOR '<br>') as quantity,
         GROUP_CONCAT(b.price_unit ORDER by c.id asc SEPARATOR '<br>') as price,
         a.remark,
-        f.id as ddata
+        f.id as ddata,
+        g.name as currency
         FROM `form_receipt` as a 
         INNER JOIN receipt_product as b on a.id=b.receipt
         INNER JOIN products as c on b.product=c.id
         INNER JOIN companies as d on a.supplier=d.id
         INNER JOIN companies as e on a.buyer=e.id
         INNER JOIN document_data as f on f.document_number=a.id
+        INNER JOIN currency as g on a.currency=g.id
         WHERE a.id=$id and f.document=11
         GROUP BY a.id
         ORDER BY a.id DESC","Document");
 
-        $receivedItems = $builder->custom("SELECT b.name as product, a.quantity 
+        $receivedItems = $builder->custom("SELECT b.name as product, a.quantity , b.part_number, d.item_discount, d.price_unit,
+        a.quantity*d.price_unit as total
         FROM receipt_stock as a 
         INNER JOIN products as b on a.product=b.id 
         INNER JOIN stock_relation as c on a.stock_relation=c.id
+        INNER JOIN receipt_product as d on d.receipt=$id
         WHERE c.do_or_receipt_in=0 and c.doc_in=$id or c.do_or_receipt_out=0 and c.doc_out=$id
         GROUP BY a.product","Document");
 

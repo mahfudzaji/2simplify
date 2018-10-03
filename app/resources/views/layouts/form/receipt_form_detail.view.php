@@ -206,7 +206,7 @@ $printBtn = false;
                     <?php endforeach; ?>
                     
                     <?php if($printBtn): ?>
-                        <a target="_blank" href="/print/do?do=<?= $_GET['do']; ?>"><button type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-print"></span> Cetak</button></a>
+                        <a target="_blank" href="/print/receipt?r=<?= $_GET['r']; ?>"><button type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-print"></span> Cetak</button></a>
                     <?php endif; ?>
 
                 </div>
