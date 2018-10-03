@@ -573,6 +573,66 @@ class PrintController{
             printData('do_form',compact('doData', 'receivedItems'));
         }  
     }
+
+    public function receiptForm(){
+        if(!$this->role->can("print-do")){
+            if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+                echo '{"access":false}';
+                exit();
+            }else{
+                redirectWithMessage([[ returnMessage()['receiptForm']['accessRight']['print'] , 0]],getLastVisitedPage());
+            }
+        }
+
+        $id = filterUserInput($_GET['do']);
+        
+        $builder = App::get('builder');
+
+        $receiptData = $builder->custom("SELECT a.id, a.receipt_number,
+        date_format(a.receipt_date, '%d %M %Y') as receipt_date, 
+        a.supplier as sid,
+        a.buyer as bid,
+        d.name as supplier,
+        d.address as saddress,
+        d.phone as sphone,
+        e.name as buyer,
+        e.address as baddress,
+        e.phone as bphone,
+        GROUP_CONCAT(c.name ORDER by c.id asc SEPARATOR '<br>') as product,
+        GROUP_CONCAT(b.quantity ORDER by c.id asc SEPARATOR '<br>') as quantity,
+        GROUP_CONCAT(b.price_unit ORDER by c.id asc SEPARATOR '<br>') as price,
+        a.remark,
+        f.id as ddata
+        FROM `form_receipt` as a 
+        INNER JOIN receipt_product as b on a.id=b.receipt
+        INNER JOIN products as c on b.product=c.id
+        INNER JOIN companies as d on a.supplier=d.id
+        INNER JOIN companies as e on a.buyer=e.id
+        INNER JOIN document_data as f on f.document_number=a.id
+        WHERE a.id=$id and f.document=11
+        GROUP BY a.id
+        ORDER BY a.id DESC","Document");
+
+        $receivedItems = $builder->custom("SELECT b.name as product, a.quantity 
+        FROM receipt_stock as a 
+        INNER JOIN products as b on a.product=b.id 
+        INNER JOIN stock_relation as c on a.stock_relation=c.id
+        WHERE c.do_or_receipt_in=0 and c.doc_in=$id or c.do_or_receipt_out=0 and c.doc_out=$id
+        GROUP BY a.product","Document");
+
+
+        if(count($receiptData)<1){
+            redirectWithMessage([['Data tidak tersedia atau telah dihapus',0]], getLastVisitedPage());
+        }
+
+        //dd($doData);
+        if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+            echo json_encode(["receiptData"=>$receiptData, "receivedItems"=>$receivedItems]);
+            exit();
+        }else{
+            printData('receipt_form',compact('receiptData', 'receivedItems'));
+        }  
+    }
 }
 
 ?>

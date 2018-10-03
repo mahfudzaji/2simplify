@@ -29,6 +29,7 @@ ini_set("display_errors",1);
 
     <link rel="stylesheet" href="/public/vendor/trumbowyg/dist/ui/trumbowyg.min.css">
 
+
     <!-- Custom css -->
     <link type="text/css" rel="stylesheet" href="/public/custom/css/site.css">
 

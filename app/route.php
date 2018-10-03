@@ -100,6 +100,18 @@ $router->post('form/reimburse/create', 'FormController@reimburseFormCreate');
 $router->post('form/reimburse/update', 'FormController@reimburseFormUpdate');
 $router->post('form/reimburse/remove', 'FormController@reimburseFormItemRemove');
 
+////receipt
+$router->get('form/receipt', 'FormController@receiptFormIndex');
+$router->get('form/receipt/detail', 'FormController@receiptFormDetail');
+$router->post('form/receipt/create', 'FormController@receiptFormCreate');
+$router->post('form/receipt/update', 'FormController@receiptFormUpdate');
+$router->post('form/receipt/remove', 'FormController@receiptFormItemRemove');
+$router->post('form/receipt/new-item', 'FormController@receiptFormCreateNewItem');
+$router->post('form/receipt/approve', 'FormController@receiptFormApproval');
+$router->post('form/receipt/create-from-quo', 'FormController@receiptFormCreateFromQuo');
+$router->get('form/receipt/get-number', 'FormController@receiptFormNumber');
+
+
 ////quo
 $router->get('form/quo', 'FormController@quoFormIndex');
 $router->get('form/quo/detail', 'FormController@quoFormDetail');

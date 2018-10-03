@@ -68,6 +68,25 @@ return [
             'deleteSuccess' => 'Hapus data item reimburse berhasil.'
         ],
 
+        'receiptForm' => [
+            'title' => 'Receipt',
+            'accessRight' => [
+                'create' => 'Anda tidak memiliki hak untuk membuat Receipt',
+                'view' => 'Anda tidak memiliki hak untuk melihat Receipt',
+                'update' => 'Anda tidak memiliki hak untuk memperbaharui Receipt',
+                'delete' => 'Anda tidak memiliki hak untuk menghapus Receipt',
+                'print' => 'Anda tidak memiliki hak untuk mencetak Receipt',
+                'approval' => 'Anda tidak memiliki hak untuk menyetujui ataupun menolak rancangan Receipt'
+            ],
+            'createSuccess' => 'Data Receipt berhasil disimpan',
+            'createFail' => 'Data Receipt gagal disimpan. Mohon cek dan ulangi kembali', 
+            'createDataNotValid' => 'Pendaftaran data Receipt gagal.',
+            'updateSuccess' => 'Memperbaharui data Receipt berhasil.',
+            'updateFail' => 'Maaf, memperbaharui data Receiptgagal.',
+            'deleteSuccess' => 'Menghapus data item Receipt berhasil.',
+            'deleteFail' => 'Maaf, menghapus data item Receipt gagal. Mohon ulangi atau hubungi admin.'
+        ],
+
         'poForm' => [
             'title' => 'Purchase order',
             'accessRight' => [

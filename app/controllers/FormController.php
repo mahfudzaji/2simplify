@@ -6,7 +6,7 @@ use App\Core\App;
 
 class FormController{
 
-    private $role;
+    private $role, $roleOfUser;
 
     private $placeholderReceiveForm=array(
         //receive form
@@ -103,6 +103,25 @@ class FormController{
         "approved_by" => 'required'
     );
     
+    private $placeholderReceiptForm=array(
+        //insert to db: form_receipt
+        [
+            "supplier" => 'required',
+            "buyer" => 'required',
+            "receipt_date" => 'required',
+            "currency" => 'required',
+            "ppn" => 'required',
+            "remark" => ''
+        ],
+        //insert to db: receipt_product
+        [
+            "product" => 'required',
+            "quantity" => 'required',
+            "price_unit" => 'required',
+            "item_discount" => ''
+        ]
+    );
+
     public function __construct(){
         $user=Auth::user();
 
@@ -110,7 +129,7 @@ class FormController{
 
         $this->role = App::get('role');
         
-        $this->role -> getRole($userId);
+        $this->roleOfUser = $this->role -> getRole($userId);
         
     }
 
@@ -1625,6 +1644,394 @@ class FormController{
         //redirect to form page with message
         redirectWithMessage([[ returnMessage()['reimburseForm']['deleteSuccess'], 1]], getLastVisitedPage());
 
+    }
+
+//=====================================================================================================//  
+
+    /* RECEIPT */
+
+    public function receiptFormIndex(){
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+        }
+
+        $builder = App::get('builder');
+
+        $products = $builder->getAllData('products', 'Product');
+
+        $partners = $builder->getAllData('companies', 'Partner');
+
+        //Searching for specific category
+        //category: buyer, supplier, po_date, product, is there any quo
+        
+        $whereClause='';
+    
+        if(isset($_GET['search']) && $_GET['search']==true){
+
+            $search=array();
+
+            $search['buyer']=filterUserInput($_GET['buyer']);
+            $search['supplier']=filterUserInput($_GET['supplier']);
+            $search['product']=filterUserInput($_GET['product']);
+
+            $searchByDateStart=filterUserInput($_GET['receipt_date_start']);
+            $searchByDateEnd=filterUserInput($_GET['receipt_date_end']);
+    
+            $operator='&&';
+
+            foreach($search as $k => $v){
+                if(!empty($search[$k])){
+                    $whereClause.=$k."=".$v.$operator;
+                }
+            }
+
+            if(!empty($searchByDateStart) && !empty($searchByDateEnd)){
+                $whereClause.=" a.receipt_date between '$searchByDateStart' and '$searchByDateEnd'";
+            }elseif(!empty($searchByDateStart)){
+                $whereClause.=" a.receipt_date like '%$searchByDateStart%'";
+            }elseif(!empty($searchByDateEnd)){
+                $whereClause.=" a.receipt_date like '%$searchByDateEnd%'";
+            }
+            //dd($whereClause);
+            $whereClause=trim($whereClause, '&&');
+    
+        }
+
+        if($whereClause==''){
+            $whereClause=1;
+        }
+
+        //End of searching
+
+        $receiptData = $builder->custom("SELECT a.id, a.receipt_number,
+        date_format(a.receipt_date, '%d %M %Y') as receipt_date, 
+        a.supplier as sid,
+        a.buyer as bid,
+        d.name as supplier,
+        e.name as buyer,
+        GROUP_CONCAT(c.name ORDER by c.id asc SEPARATOR '<br>') as product,
+        GROUP_CONCAT(b.quantity ORDER by c.id asc SEPARATOR '<br>') as quantity,
+        GROUP_CONCAT(b.price_unit ORDER by c.id asc SEPARATOR '<br>') as price
+        FROM `form_receipt` as a 
+        INNER JOIN receipt_product as b on a.id=b.receipt
+        INNER JOIN products as c on b.product=c.id
+        INNER JOIN companies as d on a.supplier=d.id
+        INNER JOIN companies as e on a.buyer=e.id
+        WHERE $whereClause
+        GROUP BY a.id
+        ORDER BY a.id DESC","Document");
+
+        /* if(isset($_GET['quo'])&&!empty($_GET['quo'])){
+
+            $withQuo = filterUserInput($_GET['quo']);
+            
+            if($withQuo == 1){
+                
+                $poData = $builder->custom("SELECT d.id, b.quo_number, 
+                a.po_number,
+                date_format(d.doc_date, '%d %M %Y') as doc_date, 
+                e.name as supplier,
+                f.name as buyer, 
+                GROUP_CONCAT(DISTINCT(g.name) ORDER by g.id asc SEPARATOR '<br>') as product 
+                FROM po_quo as a 
+                INNER JOIN form_quo as b on a.quo=b.id 
+                INNER JOIN form_po as d on a.po=d.id 
+                INNER JOIN quo_product as c on a.quo=c.quo
+                INNER JOIN companies as e on d.supplier=e.id 
+                INNER JOIN companies as f on d.buyer=f.id 
+                INNER JOIN products as g on c.product=g.id
+                WHERE $whereClause && po_or_quo=1
+                GROUP BY d.id
+                ORDER BY d.id DESC", "Document");
+            }
+        } */
+
+        //download all the data
+        if(isset($_GET['download']) && $_GET['download']==true){
+            
+            $dataColumn = ['receipt_date', 'supplier', 'buyer', 'product', 'quantity', 'price'];
+
+            $this->download(toDownload($receiptData, $dataColumn));
+
+        }
+
+        //Pagination
+        //only show data for specified page
+        if(isset($_GET['p'])){
+            $p=$_GET['p'];
+
+            if(!is_numeric($p)){
+                redirectWithMessage([["Halaman yang anda tuju tidak diketahui",0]],getLastVisitedPage());
+            }
+            
+        }else{
+            $p=1;
+        }
+        
+        $limitStart=$p*maxDataInAPage()-maxDataInAPage();
+
+        $pages=ceil(count($receiptData)/maxDataInAPage());
+    
+        //End of pagination
+
+        //======================//
+
+        $sumOfAllData=count($receiptData);
+        
+        $receiptData=array_slice($receiptData,$limitStart,maxDataInAPage());
+
+        setSearchPage();
+        
+        view('form/receipt_form', compact('receiptData', 'products', 'pages', 'sumOfAllData', 'partners'));
+        
+    }
+
+    public function receiptFormCreate(){
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+        }
+
+        //checking form requirement
+        $data=[];
+        
+        //check the requirement
+        //if passing the requirement, put the data into $data array
+        //otherwise redirect back to the page
+
+        $passingRequirement=true;
+        $_SESSION['sim-messages']=[];
+
+        for($i=0; $i<count($this->placeholderReceiptForm); $i++){
+            foreach($this->placeholderReceiptForm[$i] as $k => $v){
+                if(checkRequirement($v, $k, $_POST[$k])){
+                    $data[$i][$k]=filterUserInput($_POST[$k]);
+                }else{
+                    $passingRequirement=false;
+                }  
+            }
+        }
+
+        //if not the passing requirements
+        if(!$passingRequirement){
+            //redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
+            redirect(getLastVisitedPage());
+        }
+
+        $data[0]['created_by'] = substr($_SESSION['sim-id'], 3, -3);
+        $data[0]['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
+
+        //Check whether data inserted is appropriate with the default parameters
+        $receiptType = filterUserInput($_POST['receipt_type']);
+
+        $builder = App::get('builder');
+    
+        $parameterData=[];
+        $parameters = $builder->getAllData('default_parameter', 'Internal');
+        for($i=0; $i<count($parameters); $i++){
+            $parameterData[$parameters[$i]->parameter]=$parameters[$i]->value;
+        }
+
+        $companyData = $builder->getSpecificData("companies", ['*'], ["id"=>$data[0]['buyer']], '', 'Partner');
+        $userData = $builder->getSpecificData("users", ["*"], ["id"=>$data[0]['created_by']], '', 'User');
+
+        //if 'company' value in default parameter is checked in mode 'RECEIPT IN' 
+        
+        if($receiptType==1){
+            $data[0]['receipt_number'] = filterUserInput($_POST['receipt_number']);
+            //supplier must be the value of 'company' parameter
+            if($data[0]['buyer']!=$parameterData['company']){
+                redirectWithMessage([['Mohon isi data supplier dengan benar', 0 ]], getLastVisitedPage());
+            }
+        }else{
+            //if 'company' value in default parameter is checked in mode 'RECEIPT OUT' 
+            //buyer must be the value of 'company' parameter
+            if($data[0]['supplier']!=$parameterData['company']){
+                redirectWithMessage([['Mohon isi data buyer dengan benar', 0 ]], getLastVisitedPage());
+            }
+
+            // For numbering format purpose
+            $thisYear = date('Y');
+            $thisMonth = convertToRoman(date('m'));
+            $countDataInThisYear = $builder->custom("select count(*) as total_data from form_receipt where date_format(receipt_date, '%Y') in ($thisYear) and supplier=$parameterData[company]", "Document");
+            
+            $numbering=$countDataInThisYear[0]->total_data;
+            $numbering=  str_pad($numbering+1, 3, '0', STR_PAD_LEFT);
+            $userCode = strtoupper($userData[0]->code);
+            $companyCode = strtoupper($companyData[0]->code);
+            $data[0]['receipt_number'] = $numbering."/RCP/".$companyCode."/SNC-".$userCode."/".$thisMonth."/".date('Y');
+            // End of numbering format
+        }
+
+        //End of check
+
+        //check whether the value between keys is equal
+        $dataKeys= array_keys($data[1]);
+
+        $value=0;
+        $isSame=true;
+        for($i=0;$i<count($dataKeys);$i++){
+            $countValue = count($data[1][$dataKeys[$i]]);
+            if($i==0){
+                $value = $countValue;
+            }
+            if($countValue!=$value){
+                $isSame=false;
+            }
+        }
+
+        if(!$isSame){
+            redirectWithMessage([["Mohon isi data product dengan lengkap", 0]], getLastVisitedPage());
+        }
+        
+        //dd($data);
+
+        //insert to db:form_receipt
+        $insertToFormReceipt = $builder->insert('form_receipt', $data[0]);
+
+        //dd($insertToFormReceipt);
+
+        if(!$insertToFormReceipt){
+            recordLog('Receipt form', returnMessage()['receiptForm']['createFail'] );
+            redirectWithMessage([['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.1', 0]],getLastVisitedPage());
+            exit();
+        }
+
+        $idReceiptForm = $builder->getPdo()->lastInsertId();
+
+        $newDataRecap=[];
+        for($i=0; $i<$value; $i++){
+            $newData=[];
+            foreach($dataKeys as $key){
+                $newData[$key]=$data[1][$key][$i];
+            }
+            $newData['receipt'] = $idReceiptForm;
+            array_push($newDataRecap, $newData);
+        }
+
+        //$newDataRecap is the data that will be inserted into table po_product
+        //$data[0] is the data that will be inserted into table form_po
+        
+        //dd($newDataRecap);
+        //dd($data);
+
+        //insert into stock_relation
+        $insertToStockRelation = $builder->insert("stock_relation", ['do_or_receipt_in' => 0, 'doc_in' => $idReceiptForm ]);
+        
+        $idStockRelation = $builder->getPdo()->lastInsertId();
+
+        if(!$insertToStockRelation){
+            recordLog('Stock', returnMessage()['stock']['createFail'] );
+            redirectWithMessage([[ returnMessage()['databaseOperationFailed'], 0]],getLastVisitedPage());
+            exit();
+        }else{
+            recordLog('Stock', returnMessage()['stock']['createSuccess'] );
+        }
+
+        $isSuccessInsertToReceiptProduct=true;
+        for($i=0; $i<count($newDataRecap); $i++){
+            $insertToReceiptProduct = $builder->insert('receipt_product', $newDataRecap[$i]);
+
+            //insert into receipt_stock
+            $insertToStock = $builder->insert("receipt_stock", ["product" => $newDataRecap[$i]['product'], "quantity" => $newDataRecap[$i]['quantity'], "stock_relation" => $idStockRelation, "created_by" => $data[0]['created_by'], "updated_by" => $data[0]['updated_by'], "status" => $receiptType]);
+            
+            if(!$insertToReceiptProduct || !$insertToStock){
+                $isSuccessInsertToReceiptProduct=false;
+            }
+        }
+
+        //insert into document_data
+        $insertToDocumentData = $builder->insert("document_data", ['document'=>'11', 'document_number'=>$idReceiptForm]);
+        if(!$insertToDocumentData){
+            recordLog('Receipt form', returnMessage()['receiptForm']['createFail'] );
+            redirectWithMessage(['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.2', 0],getLastVisitedPage());
+            exit();
+        }
+
+
+        if(!$isSuccessInsertToReceiptProduct){
+            recordLog('Receipt form', returnMessage()['receiptForm']['createFail'] );
+            redirectWithMessage([['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.', 0]],getLastVisitedPage());
+            exit();
+        }else{
+            recordLog('Receipt form', returnMessage()['receiptForm']['createSuccess'] );
+        }
+
+        $builder->save();
+
+        //redirect to form page with message
+        redirectWithMessage([[ returnMessage()['receiptForm']['createSuccess'] ,1]],getLastVisitedPage());
+    }
+
+    public function receiptFormDetail(){
+
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+        }
+
+        $id = filterUserInput($_GET['r']);
+
+        $builder = App::get('builder');
+
+        $vendors = $builder->getAllData("vendors", "Product");
+
+        $parameterData=[];
+        $parameters = $builder->getAllData('default_parameter', 'Internal');
+        for($i=0; $i<count($parameters); $i++){
+            $parameterData[$parameters[$i]->parameter]=$parameters[$i]->value;
+        }
+
+        $uploadFiles=$builder->getAllData('upload_files', 'Document');
+
+        $attachments=$builder->custom("SELECT b.id, 
+        c.upload_file,
+        c.title, 
+        date_format(b.created_at, '%d %M %Y') as created_at, 
+        b.description
+        FROM document_data as a RIGHT JOIN document_attachments as b on a.id=b.document_data 
+        INNER JOIN upload_files as c on b.attachment=c.id
+        WHERE a.document=11 and a.document_number=$id","Document");
+
+
+        $receiptData = $builder->custom("SELECT a.id, a.receipt_number,
+        date_format(a.receipt_date, '%d %M %Y') as receipt_date, 
+        a.supplier as sid,
+        a.buyer as bid,
+        d.name as supplier,
+        d.address as saddress,
+        d.phone as sphone,
+        e.name as buyer,
+        e.address as baddress,
+        e.phone as bphone,
+        GROUP_CONCAT(c.name ORDER by c.id asc SEPARATOR '<br>') as product,
+        GROUP_CONCAT(b.quantity ORDER by c.id asc SEPARATOR '<br>') as quantity,
+        GROUP_CONCAT(b.price_unit ORDER by c.id asc SEPARATOR '<br>') as price,
+        a.remark,
+        f.id as ddata
+        FROM `form_receipt` as a 
+        INNER JOIN receipt_product as b on a.id=b.receipt
+        INNER JOIN products as c on b.product=c.id
+        INNER JOIN companies as d on a.supplier=d.id
+        INNER JOIN companies as e on a.buyer=e.id
+        INNER JOIN document_data as f on f.document_number=a.id
+        WHERE a.id=$id and f.document=11
+        GROUP BY a.id
+        ORDER BY a.id DESC","Document");
+
+        /* $receiptItems = $builder->custom("SELECT b.product, c.name, b.quantity
+        FROM form_receipt as a 
+        INNER JOIN receipt_product as b on b.receipt=a.id
+        INNER JOIN products as c on b.product=c.id 
+        WHERE a.id=$id
+        GROUP BY c.id", "Document"); */
+
+        $receivedItems = $builder->custom("SELECT b.name as product, a.quantity 
+        FROM receipt_stock as a 
+        INNER JOIN products as b on a.product=b.id 
+        INNER JOIN stock_relation as c on a.stock_relation=c.id
+        WHERE c.do_or_receipt_in=0 and c.doc_in=$id or c.do_or_receipt_out=0 and c.doc_out=$id
+        GROUP BY a.product","Document");
+
+        view('form/receipt_form_detail', compact('receiptData', 'receiptItems', 'receivedItems', 'attachments', 'uploadFiles'));
     }
 
 //=====================================================================================================//   

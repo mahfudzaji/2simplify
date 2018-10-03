@@ -12,7 +12,7 @@ require 'only-header.view.php';
                 <li><a href="#">Form<span class="caret"></span></a>
                     <ul class="dropdown">
                         <li><a href='/form/receipt'>Nota</a></li>
-                        <li><a href='/form/tanda-terima'>Tanda terima</a></li>
+                        <!-- <li><a href='/form/tanda-terima'>Tanda terima</a></li> -->
                         <!-- <li><a href='/form/activity-report'>Activity report</a></li>
                         <li><a href='/form/reimburse'>Form reimburse</a></li>
                         <li><a href='/form/cuti'>Form cuti</a></li> -->
