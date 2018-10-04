@@ -18,7 +18,7 @@ $priceTotal=0;
             <h1>Detail <?= $titlePage; ?></h1>
             <p>Halaman ini menangani data detail terkait <?= $titlePage; ?></p>
             <?php if($projectDetailData[0]->psid!=3): ?>
-                <button class="btn btn-sm btn-header btn-modal" id="create-new-item"><span class="glyphicon glyphicon-plus"></span> Request item</button>
+                <button class="btn btn-sm btn-header btn-modal" id="create-new-request"><span class="glyphicon glyphicon-plus"></span> Request item</button>
             <?php endif; ?>
             <button class="btn btn-sm btn-header btn-modal btn-modal-ajax" id="show-notes"><span class="glyphicon glyphicon-star"></span> Catatan</button>
             <button class="btn btn-sm btn-header btn-modal" id="create-attachment"><span class="glyphicon glyphicon-paperclip"></span> Lampiran</button>
@@ -32,8 +32,8 @@ $priceTotal=0;
                 </div>
                 <div class="modal-main-content">
                     <form action="/form/notes/create" method="POST">
-                        <input type="hidden" name="document_number" value=<?= $_GET['po']; ?>>
-                        <input type="hidden" name="document_type" value=5>
+                        <input type="hidden" name="document_number" value=<?= $_GET['pr']; ?>>
+                        <input type="hidden" name="document_type" value=10>
                         <div class="form-group">
                             <label>Catatan</label>
                             <textarea class="form-control" name="notes" placeholder="Tuliskan catatan anda..." required></textarea>
@@ -61,7 +61,7 @@ $priceTotal=0;
                 </div>
                 <div class="modal-main-content">
                     <form action="/attachment" method="post">
-                        <input type="hidden" name="document_data" value=<?= $poData[0]->ddata; ?>>
+                        <input type="hidden" name="document_data" value=<?= $projectDetailData[0]->ddata; ?>>
                         <div class="form-group">
                             <label>Lampiran</label>
                             <textarea class="form-control" name="description" placeholder="Tuliskan deskripsi lampiran..." required></textarea>
@@ -180,8 +180,8 @@ $priceTotal=0;
             </div>
         </div>
 
-        <!-- CREATE NEW ITEM -->
-        <div class="app-form modal" id="modal-create-new-item">
+        <!-- REQUEST NEW ITEM -->
+        <div class="app-form modal" id="modal-create-new-request">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Menambah item <?= $titlePage; ?></h3>
@@ -191,8 +191,8 @@ $priceTotal=0;
                     <p>Form ini digunakan untuk menambahkan item <?= $titlePage; ?>.</p>
                     <p><span style="color:red;">*</span>Catatan: <br> Setelah mengirim form, kemudian upload bukti dan beri notes jika diperlukan</p>
                 </div>
-                <form action="/form/po/new-item" method="post">
-                    <input type="hidden" name="po" value=<?= $_GET['po']; ?>>
+                <form action="/project/new-request" method="post">
+                    <input type="hidden" name="po" value=<?= $_GET['pr']; ?>>
                     <div class="form-group">
                         <label>Product</label>
                         <select name="product" class="form-control" required>
@@ -237,7 +237,7 @@ $priceTotal=0;
         </div>
 
         <!-- MAIN -->
-        <div class="main-data">
+        <div class="main-data" data-document=10 data-number=<?= $_GET['pr']; ?>>
             <a href=<?= getSearchPage(); ?>><button type="button" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-menu-left"></span> Kembali</button></a>
             <div class="row">
                 <div class="col-md-4 table-responsive">

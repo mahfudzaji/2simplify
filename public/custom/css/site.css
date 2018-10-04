@@ -662,4 +662,5 @@ aside .active{
     top:50%;
     left:50%;
     padding:2px;
+    z-index: 100;
 }
