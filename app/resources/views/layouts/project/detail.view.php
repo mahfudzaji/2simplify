@@ -182,40 +182,53 @@ $priceTotal=0;
 
         <!-- REQUEST NEW ITEM -->
         <div class="app-form modal" id="modal-create-new-request">
-            <div class="modal-content">
+            <div class="modal-content modal-wizard show">
                 <div class="modal-header">
-                    <h3>Menambah item <?= $titlePage; ?></h3>
+                    <h3>Request item</h3>
                 </div>
 
                 <div class="description">
-                    <p>Form ini digunakan untuk menambahkan item <?= $titlePage; ?>.</p>
+                    <p>Form ini digunakan oleh user untuk request item yang diperlukan pada project ini.</p>
                     <p><span style="color:red;">*</span>Catatan: <br> Setelah mengirim form, kemudian upload bukti dan beri notes jika diperlukan</p>
                 </div>
                 <form action="/project/new-request" method="post">
-                    <input type="hidden" name="po" value=<?= $_GET['pr']; ?>>
+                    <input type="hidden" name="project" value=<?= $_GET['pr']; ?>>
                     <div class="form-group">
-                        <label>Product</label>
-                        <select name="product" class="form-control" required>
-                            <option value=''>PRODUK</option>
-                            <?php foreach($products as $product): ?>
-                                <option value=<?= $product->id ?> title=<?= $product->description ?> ><?= ucfirst($product->name).'|'.strtoupper($product->part_number); ?></option>
+                        <label>Request date</label>
+                        <input type="date" name="request_date" min=0 class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Requested by</label>
+                        <select name="requested_by" class="form-control" required>
+                            <option value=''>Requested by</option>
+                            <?php foreach($users as $user): ?>
+                                <option value=<?= $user->id ?>><?= ucfirst($user->name); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    
-                    <div class="form-group">
-                        <label>Quantity</label>
-                        <input type="number" name="quantity" min=0 class="form-control" required>
+                    <div class="row inline-input">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Produk</label>
+                                <select name="product[]" class="form-control" required>
+                                    <option value=''>PRODUK</option>
+                                    <?php foreach($products as $product): ?>
+                                        <option title="<?= $product->name; ?>" value=<?= $product->id ?>><?= (strlen($product->name)>50)?substr(ucfirst($product->name),0, 50)."...":ucfirst($product->name); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Jumlah</label>
+                                <input type="number" min=0 name="quantity[]" class="form-control" required>
+                            </div>
+                        </div>
                     </div>
-                    
+                    <button type="button" class="btn btn-default btn-add-input-form">Tambah</button>
                     <div class="form-group">
-                        <label>Price unit</label>
-                        <input type="number" name="price_unit" min=0 class="form-control" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Diskon (%)</label>
-                        <input type="number" min=0 name="item_discount" class="form-control" required>
+                        <label>Remark</label>
+                        <textarea name="remark" class="form-control"></textarea>
                     </div>
                             
                     <button type="button" class="btn btn-danger btn-close" >Tutup</button>
@@ -224,6 +237,8 @@ $priceTotal=0;
                         <button type="submit" name="submit" class="btn btn-primary btn-next">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </div>
                 </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+
             </div>
         </div>
 
@@ -240,7 +255,7 @@ $priceTotal=0;
         <div class="main-data" data-document=10 data-number=<?= $_GET['pr']; ?>>
             <a href=<?= getSearchPage(); ?>><button type="button" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-menu-left"></span> Kembali</button></a>
             <div class="row">
-                <div class="col-md-4 table-responsive">
+                <div class="col-md-3 table-responsive">
                     <table class="table table-hover">
                         <?php foreach($projectDetailData as $data): ?>
                             <tr>
@@ -297,37 +312,49 @@ $priceTotal=0;
                     <a target="_blank" href="/print/project-form?pr=<?= $_GET['pr']; ?>"><button type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-print"></span> Cetak</button></a>
                     
                 </div>
-                <div class="col-md-8">
-                    <?php foreach($detailNumber as $detail): ?>
-                        <div class="big-list" id=<?= $detail->id; ?>>
-                            <div class="row big-list-main">
-                                <div class="col-md-3">
-                                    <img src=/public/upload/<?= $detail->upload_file; ?> alt=<?= $detail->title; ?> >
-                                </div>
-                                <div class="col-md-6">
-                                    <p><strong><?= $detail->name; ?></strong></p>
-                                    <p>Deskripsi: <?= $detail->description; ?> </p>
-                                </div>
-                                <div class="col-md-3">
-                                    <p class="text-right">Jumlah: <?= $detail->jumlah; ?></p>
-                                </div>
-                            </div>
-                            <div class="table-responsive big-list-child">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Serial number</th>
-                                            <th>Lokasi</th>
-                                            <th>Kondisi</th>
-                                            <th>Status</th>
-                                            <th colspan=2 class="text-center">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
+                <div class="col-md-9">
+                    <?php if(count($projectItemRequested)==0): ?>
+                        <p style="color:red">Belum terdapat request.</p>
+                    <?php else: $printBtn=true; ?>
+                        <table class="table table-striped">
+                            <thead>
+                                <th>Tanggal</th>
+                                <th>Nomor</th>
+                                <th>Oleh</th>
+                                <th>Part number</th>
+                                <th>Produk</th>
+                                <th>Quantity</th>
+                                <th>Returned</th>
+                                <th>Keterangan</th>
+                                <th>Action</th>
+                            </thead>
+                            <tbody>
+                                <?php foreach($projectItemRequested as $item): ?>
+                                    <tr>
+                                        <td><?= $item->request_date; ?></td>
+                                        <td><?= $item->request_number; ?></td>
+                                        <td><?= $item->requested_by; ?></td>
+                                        <td><?= $item->part_number; ?></td>
+                                        <td><?= $item->product; ?></td>
+                                        <td><?= $item->quantity_out; ?></td>
+                                        <td><?= $item->quantity_in; ?></td>
+                                        <td><?= $item->remark; ?></td>
+                                        <td class="text-center">
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Action <span class="caret"></span>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a href="#" class="btn-modal btn-action" data-id="update-do-form"><span class="glyphicon glyphicon-pencil"></span> Update</a></li>
+                                                    <li><a href="#" class="btn-modal btn-action" data-id="update-do-form"><span class="glyphicon glyphicon-remove"></span> Remove</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

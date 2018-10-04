@@ -56,7 +56,7 @@ class QueryBuilder{
             implode(',',$keys),
             ':'.implode(',:',$keys)
         );
-
+       
         try{
             $statement=$this->pdo->prepare($sql);
             
