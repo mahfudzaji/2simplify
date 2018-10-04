@@ -164,6 +164,7 @@ $router->post('settings/user/update', 'SettingController@userUpdate');
 $router->get('project', 'ProjectController@index');
 $router->post('project/create', 'ProjectController@projectCreate');
 $router->get('project/detail', 'ProjectController@projectDetail');
+$router->post('project/new-request', 'ProjectController@projectNewRequest');
 
 ////ENGINEERING
 $router->get('engineering', '');

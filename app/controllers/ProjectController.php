@@ -32,6 +32,7 @@ class ProjectController{
         $users = $builder->getAllData('users', 'User');
         $companies = $builder->getAllData('companies', 'Partner');
 
+
         //Searching for specific category
 
         $whereClause='';
@@ -80,14 +81,16 @@ class ProjectController{
         case project_status when 1 then 'Belum dimulai' when 2 then 'Sedang dikerjakan' when 3 then 'Selesai' end as project_status,
         c.name as created_by,
         d.name as updated_by,
-        f.name as customer
+        f.name as customer,
+        g.id as ddata
         FROM projects as a
         INNER JOIN users as b on a.pic=b.id
         INNER JOIN users as c on a.created_by=c.id
         INNER JOIN users as d on a.updated_by=d.id
         INNER JOIN form_po as e on a.po=e.id
         INNER JOIN companies as f on e.buyer=f.id
-        WHERE $whereClause", "Project");
+        INNER JOIN document_data as g on a.id=g.document_number
+        WHERE $whereClause and g.document=10", "Project");
 
         //download all the data
         if(isset($_GET['download']) && $_GET['download']==true){
@@ -187,6 +190,9 @@ class ProjectController{
 
         $id = filterUserInput($_GET['pr']);
 
+        $uploadFiles=$builder->getSpecificData('upload_files', ['*'], ['public'=>1], '', 'Document');
+        $products=$builder->getAllData('products', 'Product');
+
         /* $projectDetailData = $builder->custom("SELECT a.id, a.name, a.description, 
         DATE_FORMAT(a.start_date, '%d %M %Y') as start_date, DATE_FORMAT(a.end_date, '%d %M %Y') as end_date,
         b.name as pic, 
@@ -215,6 +221,7 @@ class ProjectController{
         d.name as updated_by,
         f.name as customer,
         g.po_number as po_number,
+        h.id as ddata,
         DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, 
         DATE_FORMAT(a.updated_at, '%d %M %Y') as updated_at
         FROM projects as a
@@ -224,7 +231,8 @@ class ProjectController{
         INNER JOIN form_po as e on a.po=e.id
         INNER JOIN companies as f on e.buyer=f.id
         INNER JOIN po_quo as g on e.id=g.po
-        WHERE a.id=$id", "Project");
+        INNER JOIN document_data as h on a.id=h.document_number
+        WHERE a.id=$id and h.document=10", "Project");
 
         if(count($projectDetailData)<1){
             redirectWithMessage([['Data tidak tersedia atau telah dihapus',0]], getLastVisitedPage());
@@ -234,8 +242,12 @@ class ProjectController{
             echo json_encode(["projectDetailData"=>$projectDetailData]);
             exit();
         }else{
-            view('/project/detail', compact('projectDetailData'));
+            view('/project/detail', compact('projectDetailData', 'uploadFiles', 'products'));
         }
+    }
+
+    public function projectNewRequest(){
+
     }
 }
 
