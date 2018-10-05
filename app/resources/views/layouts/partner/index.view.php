@@ -112,49 +112,51 @@ require base.'base/header.view.php';
         </div>
 
         <div class="main-data">
-            <?php echo count($partnerData)<1?'<div class="text-center">Belum terdapat data tersimpan</div>':''; ?>
-            <div class="container-fluid">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Product</th>
-                                <th>Address</th>
-                                <th>Province</th>
-                                <th>Phone</th>
-                                <th>Email</th>
-                                <th>Relation</th>
-                                <th>Active</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach($partnerData as $data): ?>
-                                <?php 
-                                    $product = explode('<br>', $data->product);
-                                    $thisProduct = "";
-                                    if(count($product)>3){
-                                        $thisProduct.=$product[0].", ".$product[1].", etc";
-                                    }else{
-                                        $thisProduct = $data->product;
-                                    }
-                                ?>
+            <?php if(count($partnerData)<1): ?>
+                <div class="text-center">Belum terdapat data tersimpan</div>
+            <?php else: ?>
+                <div class="container-fluid">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
                                 <tr>
-                                    <td><a href="/partner/detail?p=<?= $data->id ?>"><strong><?= ucwords($data->name).", ".$data->bussiness_entity; ?></strong></a></td>
-                                    <td><?= $thisProduct; ?></td>
-                                    <td><?= makeFirstLetterUpper($data->address); ?></td>
-                                    <td><?= $data->province; ?></td>
-                                    <td><?= $data->phone; ?></td>
-                                    <td><?= $data->email; ?></td>
-                                    <td><?= makeFirstLetterUpper($data->relationship); ?></td>
-                                    <td><button type="button" name="toggle-class" class="btn btn-sm btn-default"><?= $data->active; ?></button></td>
-                                <tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                                    <th>Name</th>
+                                    <th>Product</th>
+                                    <th>Address</th>
+                                    <th>Province</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>Relation</th>
+                                    <!-- <th>Active</th> -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach($partnerData as $data): ?>
+                                    <?php 
+                                        $product = explode('<br>', $data->product);
+                                        $thisProduct = "";
+                                        if(count($product)>3){
+                                            $thisProduct.=$product[0].", ".$product[1].", etc";
+                                        }else{
+                                            $thisProduct = $data->product;
+                                        }
+                                    ?>
+                                    <tr>
+                                        <td><a href="/partner/detail?p=<?= $data->id ?>"><strong><?= ucwords($data->name).", ".$data->bussiness_entity; ?></strong></a></td>
+                                        <td><?= $thisProduct; ?></td>
+                                        <td><?= makeFirstLetterUpper($data->address); ?></td>
+                                        <td><?= $data->province; ?></td>
+                                        <td><?= $data->phone; ?></td>
+                                        <td><?= $data->email; ?></td>
+                                        <td><?= makeFirstLetterUpper($data->relationship); ?></td>
+                                        <!-- <td><button type="button" name="toggle-class" class="btn btn-sm btn-default"><?= $data->active; ?></button></td> -->
+                                    <tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-
+            <?php endif;?>
             <!-- START PAGINATION -->
             <?php 
                 if($pages>1){

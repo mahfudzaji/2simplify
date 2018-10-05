@@ -158,6 +158,24 @@ class PartnerController{
         $data['created_by'] = substr($_SESSION['sim-id'], 3, -3);
         $data['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
 
+        //here is processing upload file then get the result
+        if(isset($_FILES["logo"]) && !empty($_FILES["logo"]) && $_FILES["logo"]!=''){
+            
+            $processingUpload = new UploadController();
+
+            $uploadResult = $processingUpload->processingUpload($_FILES["logo"]);
+
+            if($uploadResult){
+                $lastUploadedId=$processingUpload->getLastUploadedId();
+
+                $parameters['logo']=$lastUploadedId;
+            }else{
+                $_SESSION['sim-messages']=[['Maaf, gagal upload logo', 0]];
+            }
+            unset($processingUpload);
+  
+        }
+
         $insertPartner= $builder->insert('companies', $data);
 
        // dd(insertPartner);

@@ -131,7 +131,7 @@ class UserController{
         //check whether users table has row or not
         //if not, script continue otherwise redirect back to index page
 
-        $this->checkSession();
+        //$this->checkSession();
 
         $builder=App::get('builder');
         
@@ -142,7 +142,9 @@ class UserController{
             
         }
 
-        $this->processingRegister($builder);
+        if(!$this->processingRegister($builder)){
+            redirectWithMessage([["Pendaftaran sebagai admin gagal. Coba lagi", 0]], '/');
+        }
 
         //give him admin role
         
@@ -151,14 +153,14 @@ class UserController{
         $insertAdminRole=$builder->insert('role_user', ['user_id'=>$firstUserId, 'role_id'=>1]);
         
         if(!$insertAdminRole){
-            redirectWithMessage(["Pendaftaran sebagai admin gagal. Coba lagi", 0], '/');
+            redirectWithMessage([["Pendaftaran sebagai admin gagal. Coba lagi", 0]], '/');
         }
 
         $builder->save();
 
         recordLog('Register owner', "Register user pertama berhasil");
 
-        redirectWithMessage(['Anda telah didaftarkan sebagai admin',1],'/');
+        redirectWithMessage([['Anda telah didaftarkan sebagai admin',1]],'/');
     }
 
     /*
@@ -266,7 +268,8 @@ class UserController{
 
                 $parameters['photo']=$lastUploadedId;
             }else{
-                $_SESSION['sim-messages']=[['Maaf, gagal upload photo', 0]];
+                //$_SESSION['sim-messages']=[['Maaf, gagal upload photo', 0]];
+                redirectWithMessage([["Maaf, gagal upload photo", 0]],'/home');
             }
             unset($processingUpload);
   
@@ -283,7 +286,8 @@ class UserController{
 
                 $parameters['signature']=$lastUploadedId;
             }else{
-                $_SESSION['sim-messages']=[['Maaf, gagal upload signature', 0]];
+                //$_SESSION['sim-messages']=[['Maaf, gagal upload signature', 0]];
+                redirectWithMessage([["Maaf, gagal upload signature", 0]],'/home');
             }
             unset($processingUpload);
 
@@ -297,9 +301,9 @@ class UserController{
             //send verification mail
             $mail = App::get('mail');
 
-            $mail->setFrom('aji@sentranetcomindo.com', 'Mailer');
+            $mail->setFrom('mahfudz.aji16@gmail.com', 'Mailer');
             $mail->addAddress($parameters['email'], $name);     
-            $mail->addReplyTo('aji@sentranetcomindo.com', 'Information');
+            $mail->addReplyTo('mahfudz.aji16@gmail.com', 'Information');
 
             $mail->isHTML(true);                                  
 
