@@ -49,6 +49,8 @@ class StockController{
 
         $servicePoints=$builder->getAllData('service_points', 'Internal');
 
+        $category = $builder->getAllData('product_categories', 'Product');
+
         $products=$builder->getAllData('products', 'Product');
 
         $vendors = $builder->getAllData("vendors", "Product");
@@ -62,11 +64,7 @@ class StockController{
 
             $search=array();
 
-            $search['status']=filterUserInput($_GET['status']);
-            $search['product']=filterUserInput($_GET['product']);
-
-            $searchByDateStart=filterUserInput($_GET['date_start']);
-            $searchByDateEnd=filterUserInput($_GET['date_end']);
+            $search['d.id']=filterUserInput($_GET['category']);
     
             $operator='&&';
 
@@ -76,14 +74,6 @@ class StockController{
                 }
             }
 
-            if(!empty($searchByDateStart) && !empty($searchByDateEnd)){
-                $whereClause.=" a.received_at between '$searchByDateStart' and '$searchByDateEnd'";
-            }elseif(!empty($searchByDateStart)){
-                $whereClause.=" a.received_at like '%$searchByDateStart%'";
-            }elseif(!empty($searchByDateEnd)){
-                $whereClause.=" a.received_at like '%$searchByDateEnd%'";
-            }
-            //dd($whereClause);
             $whereClause=trim($whereClause, '&&');
     
         }
@@ -92,24 +82,6 @@ class StockController{
             $whereClause=1;
         }
 
-        //Based on product
-        /* 
-        $stocksData = $builder->custom("SELECT a.product as pid, 
-        b.name as product, 
-        b.description, 
-        c.upload_file as pic,
-        IFNULL((select count(*) from stocks where product=a.product and status=1),0) as stock_in, 
-        IFNULL((select sum(quantity) as quantity from project_item where status=1 and product=a.id),0) as qty_pro_in,
-        IFNULL((select sum(quantity) as quantity from receipt_stock where status=1 and product=a.id),0) as qty_receipt_in,
-        IFNULL((select count(*) from stocks where product=a.product and status=2),0) as stock_out,
-        IFNULL((select sum(quantity) as quantity from project_item where status=2 and product=a.id),0) as qty_pro_out,
-        IFNULL((select sum(quantity) as quantity from receipt_stock where status=2 and product=a.id),0) as qty_receipt_out
-        FROM `stocks` as a 
-        INNER JOIN products as b on a.product=b.id 
-        INNER JOIN upload_files as c on b.picture=c.id
-        WHERE $whereClause
-        GROUP BY a.product
-        ORDER BY product asc", "Document"); */
 
         //Based on product category
         $stocksData = $builder->custom("SELECT d.id as cid, d.name as category, d.description,
@@ -151,7 +123,7 @@ class StockController{
         
         $stocksData=array_slice($stocksData,$limitStart,maxDataInAPage());
 
-        view('stock/index', compact('stocksData', 'partners', 'approvalPerson', 'products', 'vendors', 'pages', 'servicePoints', 'sumOfAllData'));
+        view('stock/index', compact('stocksData', 'partners', 'approvalPerson', 'products', 'vendors', 'pages', 'servicePoints', 'sumOfAllData', 'category'));
     
     }
 

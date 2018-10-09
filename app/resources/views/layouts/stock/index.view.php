@@ -22,45 +22,14 @@ require base.'base/header.view.php';
         <div class="sub-header"> 
             <form action="/stock" method="GET" style="display:inherit">    
                 <input type="hidden" name="search" value="true">
-                <div class="search" id="buyer-based">
-                    <div class="form-group">
-                        <select name="status" class="form-control">
-                            <option value=''>Status</option>
-                            <option value=1>In</option>
-                            <option value=0>Out</option>
-                        </select>
-                    </div>
-                </div>
-                <!-- <div class="search" id="supplier-based">
-                    <div class="form-group">
-                        <select name="ownership" class="form-control">
-                            <option value=''>Kepemilikan</option>
-                            <option value=1>Milik sendiri</option>
-                            <option value=0>Pinjaman</option>
-                        </select>
-                    </div>
-                </div> -->
                 <div class="search" id="product-based">
                     <div class="form-group">
-                        <select name="product" class="form-control">
-                            <option value=''>Produk</option>
-                            <?php foreach($products as $product): ?>
-                                <option title="<?= $product->name; ?>" value=<?= $product->id ?>><?= (strlen($product->name)>50)?substr(ucfirst($product->name),0, 50)."...":ucfirst($product->name); ?></option>
+                        <select name="category" class="form-control">
+                            <option value=''>Category</option>
+                            <?php foreach($category as $cat): ?>cat
+                                <option title="<?= $cat->name; ?>" value=<?= $cat->id ?>><?= makeItShort($cat->name, 50); ?></option>
                             <?php endforeach; ?>
                         </select>
-                    </div>
-                </div>
-                <div class="search" id="date-based" style="position:relative">
-                    <button type="button" class="btn btn-default" id="btn-date-based">TANGGAL DITERIMA</button>
-                    <div class="form-group" style="position: absolute;left: 50%;margin-top: 5px;transform: translateX(-50%);z-index: 5;display: none;width: 400px;">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <input type="date" name="date_start" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <input type="date" name="date_end" class="form-control">
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="search">
@@ -79,23 +48,6 @@ require base.'base/header.view.php';
             <?php else: ?>
                 <div class="container-fluid">
                     <?php foreach($stocksData as $data): ?>
-                        <!-- <div class='content' style="width:55%; margin:5px auto;">
-                            <div style="border-bottom:2px solid;cursor:pointer;background-color:#ffffe6;">
-                                <div class="content-preview row" id="<?= $data->pid; ?>">
-                                    <div class="col-md-4">
-                                        <img src='/public/upload/<?= $data->pic; ?>' class="img-responsive">
-                                    </div>
-                                    <div class="col-md-8">
-                                        <h2><?= $data->product; ?></h2>
-                                        <p><?= $data->description; ?></p>
-                                        <p>IN: <?= $data->stock_in+$data->qty_pro_in+$data->qty_receipt_in; ?></p>
-                                        <p>OUT: <?= $data->stock_out; ?></p>
-                                    </div>
-                                </div>
-                                <div class='table-responsive detail' style="background-color:#fff;">
-                                </div>
-                            </div> 
-                        </div> -->
                         <div class='content' style="width:55%; margin:5px auto;">
                             <div style="border-bottom:2px solid;cursor:pointer;background-color:#ffffe6;">
                                 <div class="content-preview row" id="<?= $data->cid; ?>">
