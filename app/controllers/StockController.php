@@ -92,37 +92,39 @@ class StockController{
             $whereClause=1;
         }
 
-        /* $stocksData = $builder->custom("SELECT a.id, a.serial_number, b.name as product, 
-        e.name as service_point, 
-        case a.stock_condition when 0 then 'Rusak' when 1 then 'Baik' end as stock_condition,
-        date_format(a.received_at, '%d %M %Y') as received_at,
-        date_format(a.send_at, '%d %M %Y') as send_at,
-        case a.status when 0 then 'out' when 1 then 'in' end as status,
-        a.status as ids,
-        c.name as created_by, d.name as updated_by,
-        f.do_or_receipt_in,
-        f.doc_in 
-        FROM `stocks` as a 
-        INNER JOIN products as b on a.product=b.id 
-        INNER JOIN stock_relation as f on a.stock_relation=f.id
-        INNER JOIN users as c on a.created_by=c.id 
-        INNER JOIN users as d on a.updated_by=d.id
-        INNER JOIN service_points as e on a.service_point=e.id
-        WHERE $whereClause
-        ORDER BY a.id desc", "Document"); */
-
+        //Based on product
+        /* 
         $stocksData = $builder->custom("SELECT a.product as pid, 
         b.name as product, 
         b.description, 
         c.upload_file as pic,
-        (select count(*) from stocks where product=a.product and status=1) as stock_in, 
-        (select count(*) from stocks where product=a.product and status=0) as stock_out
+        IFNULL((select count(*) from stocks where product=a.product and status=1),0) as stock_in, 
+        IFNULL((select sum(quantity) as quantity from project_item where status=1 and product=a.id),0) as qty_pro_in,
+        IFNULL((select sum(quantity) as quantity from receipt_stock where status=1 and product=a.id),0) as qty_receipt_in,
+        IFNULL((select count(*) from stocks where product=a.product and status=2),0) as stock_out,
+        IFNULL((select sum(quantity) as quantity from project_item where status=2 and product=a.id),0) as qty_pro_out,
+        IFNULL((select sum(quantity) as quantity from receipt_stock where status=2 and product=a.id),0) as qty_receipt_out
         FROM `stocks` as a 
         INNER JOIN products as b on a.product=b.id 
         INNER JOIN upload_files as c on b.picture=c.id
         WHERE $whereClause
         GROUP BY a.product
-        ORDER BY product asc", "Document");
+        ORDER BY product asc", "Document"); */
+
+        //Based on product category
+        $stocksData = $builder->custom("SELECT d.id as cid, d.name as category, d.description,
+        IFNULL((select count(*) from stocks inner join products on stocks.product=products.id where products.category=d.id and status=1),0) as stock_in, 
+        IFNULL((select sum(quantity) as quantity from project_item inner join products on project_item.product=products.id where products.category=d.id and status=1),0) as qty_pro_in,
+        IFNULL((select sum(quantity) as quantity from receipt_stock inner join products on receipt_stock.product=products.id where products.category=d.id and status=1),0) as qty_receipt_in,
+        IFNULL((select count(*) from stocks inner join products on stocks.product=products.id where products.category=d.id and status=2),0) as stock_out, 
+        IFNULL((select sum(quantity) as quantity from project_item inner join products on project_item.product=products.id where products.category=d.id and status=2),0) as qty_pro_out,
+        IFNULL((select sum(quantity) as quantity from receipt_stock inner join products on receipt_stock.product=products.id where products.category=d.id and status=2),0) as qty_receipt_out
+        FROM `stocks` as a 
+        INNER JOIN products as b on a.product=b.id 
+        INNER JOIN product_categories as d on b.category=d.id
+        WHERE $whereClause
+        GROUP BY b.category
+        ORDER BY d.name asc", 'Stock');
 
         //Pagination
         //only show data for specified page
@@ -190,9 +192,8 @@ class StockController{
 
         $builder = App::get('builder');
 
-        $getProductDetail = $builder->custom("SELECT ifnull(a.part_number, '-') as part_number, b.name as vendor, c.upload_file, a.name, a.description, a.link 
+        $getProductDetail = $builder->custom("SELECT ifnull(a.part_number, '-') as part_number, c.upload_file, a.name, a.description, a.link 
         FROM products as a 
-        INNER JOIN vendors as b on a.product_vendor=b.id 
         INNER JOIN upload_files as c on a.picture=c.id
         WHERE a.id = $product", "Product");
 
@@ -220,7 +221,7 @@ class StockController{
         case a.stock_condition when 0 then 'Rusak' when 1 then 'Baik' end as stock_condition,
         date_format(a.received_at, '%d %M %Y') as received_at,
         date_format(a.send_at, '%d %M %Y') as send_at,
-        case a.status when 0 then 'out' when 1 then 'in' end as status,
+        case a.status when 2 then 'out' when 1 then 'in' end as status,
         a.status as ids,
         c.name as created_by, d.name as updated_by,
         f.do_or_receipt_in,
@@ -307,6 +308,28 @@ class StockController{
 
     public function stockProcessAction(){
 
+    }
+
+    public function checkStock(){
+        $builder = App::get('builder');
+
+        $product = filterUserInput($_GET['product']);
+        $status = filterUserInput($_GET['status']);
+
+        $stockAvailable = $builder->custom("SELECT a.product as pid, 
+        (select count(*) from stocks where product=a.product and status=1) as stock_in, 
+        (select sum(quantity) as quantity from project_item where status=1 and product=a.id) as qty_pro_in,
+        (select sum(quantity) as quantity from receipt_stock where status=1 and product=a.id) as qty_receipt_in
+        FROM `stocks` as a 
+        INNER JOIN products as b on a.product=b.id 
+        WHERE a.product=$product and a.status=$status
+        GROUP BY a.product", 'Stock');
+
+        if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+            echo json_encode($stockAvailable);
+        }else{
+            return $stockAvailable;
+        }
     }
 
     public function stockUpdate(){
@@ -465,19 +488,6 @@ class StockController{
         $serialNumber = $data[0]['serial_number'];
 
         $builder = App::get('builder');
-        
-        //insert to stock relation
-        $insertToStockRelation = $builder->insert("stock_relation", ['do_or_receipt_in' => $data[1]['do_or_receipt'], 'doc_in' => $data[1]['doc']]);
-        
-        $data[0]['stock_relation'] = $builder->getPdo()->lastInsertId();
-
-        if(!$insertToStockRelation){
-            recordLog('Stock', returnMessage()['stock']['createFail'] );
-            redirectWithMessage([[ returnMessage()['databaseOperationFailed'], 0]],getLastVisitedPage());
-            exit();
-        }else{
-            recordLog('Stock', returnMessage()['stock']['createSuccess'] );
-        }
 
         $flag = true;
         
@@ -490,6 +500,11 @@ class StockController{
                 redirectWithMessage([[ "Serial number telah terdapat pada daftar stock", 0]],getLastVisitedPage());
                 exit();
             }
+
+            //insert to stock relation
+            $insertToStockRelation = $builder->insert("stock_relation", ['do_or_receipt_in' => $data[1]['do_or_receipt'], 'doc_in' => $data[1]['doc']]);
+            
+            $data[0]['stock_relation'] = $builder->getPdo()->lastInsertId();
 
             $insertToStock = $builder->insert("stocks", $data[0]);
             
@@ -540,7 +555,8 @@ class StockController{
         }
 
         $data[0]['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
-        $data[0]['status'] = 0;
+        //Status=> 1:in, 2:out
+        $data[0]['status'] = 2;
 
         $serialNumber = $data[0]['serial_number'];
 

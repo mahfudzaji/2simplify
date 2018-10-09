@@ -333,16 +333,16 @@ class PrintController{
             a.remark,
             l.upload_file as approverSign
             FROM `form_po` as a 
-            inner join form_quo as k on a.id=k.quo
-            inner join users as b on a.created_by=b.id 
-            inner join users as c on a.updated_by=c.id 
-            inner join users as d on a.acknowledged_by=d.id
-            inner join users as e on a.approved_by=e.id 
-            inner join companies as f on a.buyer=f.id
-            inner join companies as g on a.supplier=g.id
-            inner join document_data as h on h.document_number=k.id
-            inner join currency as i on a.currency=i.id
-            inner join upload_files as l on e.signature=l.id
+            INNER JOIN form_quo as k on a.id=k.quo
+            INNER JOIN users as b on a.created_by=b.id 
+            INNER JOIN users as c on a.updated_by=c.id 
+            INNER JOIN users as d on a.acknowledged_by=d.id
+            INNER JOIN users as e on a.approved_by=e.id 
+            INNER JOIN companies as f on a.buyer=f.id
+            INNER JOIN companies as g on a.supplier=g.id
+            INNER JOIN document_data as h on h.document_number=k.id
+            INNER JOIN currency as i on a.currency=i.id
+            LEFT JOIN upload_files as l on e.signature=l.id
             WHERE h.document=9 and k.id=$id", 'Document');
 
 
@@ -362,7 +362,7 @@ class PrintController{
         }
 
         /* End of Quo revision */
-
+        
         if(count($quoDetailData)<1){
             redirectWithMessage([['Data tidak tersedia atau telah dihapus',0]], '/form/quo');
         }

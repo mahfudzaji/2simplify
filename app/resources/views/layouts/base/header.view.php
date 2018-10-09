@@ -29,7 +29,12 @@ require 'only-header.view.php';
                     </ul>
                 </li> -->
                 <li><a href="/product">Product</a></li>
-                <li><a href="/stock">Stock</a></li>
+                <li><a href="#">Stock<span class="caret"></span></a>
+                    <ul class="dropdown">
+                        <li><a href='/stock'>Recap</a></li>
+                        <li><a href='/stock/history'>History</a></li>
+                    </ul>
+                </li>
                 <li><a href="/project">Project</a></li>
                 <!-- <li><a href='/upload'>Unggah data</a></li> -->
                 <!-- <li><a href='/engineering'>Engineer</a></li> -->

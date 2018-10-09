@@ -215,13 +215,13 @@ require base.'base/header.view.php';
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label>Harga satuan</label>
-                                <input type="number" min=0 name="price_unit[]" class="form-control" required>
+                                <input type="number" min=0 name="price[]" class="form-control" required>
                             </div>
                         </div>
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label>Disc (%)</label>
-                                <input type="number" min=0 name="item_discount[]" class="form-control">
+                                <input type="number" min=0 name="discount[]" class="form-control">
                             </div>
                         </div>
                     </div>

@@ -50,6 +50,8 @@ $priceTotal=0;
                 </div>
                 <br> 
                 <button class="btn btn-danger btn-close" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+
             </div>
         </div>
 
@@ -77,6 +79,8 @@ $priceTotal=0;
                         <div class="image-appear"></div>
                         <button type="submit" class="btn btn-primary pull-right">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </form>
+                    <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+
                 </div>
                 <button class="btn btn-danger btn-close clear" >Tutup</button>
             </div>
@@ -126,6 +130,7 @@ $priceTotal=0;
                         <button type="submit" name="submit" class="btn btn-primary btn-next">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </div>
                 </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -143,6 +148,7 @@ $priceTotal=0;
                     </form>
                 </div>
                 <br><button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -160,6 +166,7 @@ $priceTotal=0;
                     </form>
                 </div>
                 <br><button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -177,6 +184,7 @@ $priceTotal=0;
                     </form>
                 </div>
                 <br><button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -224,6 +232,7 @@ $priceTotal=0;
                         <button type="submit" name="submit" class="btn btn-primary btn-next">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </div>
                 </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 

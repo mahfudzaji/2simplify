@@ -21,7 +21,7 @@ require base.'base/header.view.php';
         </header>
 
         <div class="sub-header"> 
-            <form action="/p-a" method="GET" style="display:inherit">    
+            <form action="/product" method="GET" style="display:inherit">    
                 <input type="hidden" name="search" value="true">
                 <div class="search" id="category-based">
                     <div class="form-group">
@@ -63,7 +63,7 @@ require base.'base/header.view.php';
                     <div class="description">
                         <p>Form ini digunakan untuk menambahkan data produk.</p>
                     </div>
-                    <form action="p-a/product/create" method="POST" enctype="multipart/form-data">
+                    <form action="product/create-product" method="POST" enctype="multipart/form-data">
                         <div class="form-group">
                             <label>Kategori</label>
                             <select name="category" class="form-control" required>
@@ -142,7 +142,7 @@ require base.'base/header.view.php';
                         <h3>Tambahkan Kategori</h3>
                     </div>
 
-                    <form action="p-a/category/create" method="POST">
+                    <form action="/product/create-category" method="POST">
                         <div class="form-group">
                             <label>Nama kategori</label>
                             <input type="text" name="name" class="form-control" placeholder="Nama" autofocus required>
@@ -169,28 +169,23 @@ require base.'base/header.view.php';
                     <div class="cover-grid category fade-toggle-trigger">
                         <ul>
                             <li><strong><?= strtoupper($data->category); ?></strong></li>
-                            <li><?= $data->description; ?></li>  
+                            <li><?= $data->description; ?></li> 
+                            <li><?= count($data->products); ?> Product</li> 
                         </ul>
                         <span class="glyphicon glyphicon-chevron-down arrow-down"></span>
                     </div>
                     
-                    <?php $vendors=$data->vendors;?>
+                    <?php $prods=$data->products;?>
 
                     <div class="fade-toggle" style="max-width:200px; margin:auto">
-                        <?php foreach($vendors as $vendor => $val): ?>
-                            <div class="vendor">
-                                <header><?= strtoupper($vendor); ?></header>
-                                <div class="product">
-                                    <ul>
-                                    <?php for($j=0; $j<count($vendors[$vendor]); $j++): ?>  
-                                        <li><?= $vendors[$vendor][$j][0]; ?><a href=<?= $vendors[$vendor][$j][1]; ?> class="text-right" target="_blank" style="float:right; display:inline-block"><span class="glyphicon glyphicon-new-window"></span></a></li> 
-                                        <!-- <li><a href="//www.pertamina.com" target="_blank"><?= $vendors[$vendor][$j][0]; ?></a></li>  -->   
-                                    <?php endfor; ?>
-                                    </ul>
-                                </div>
+                        <?php for($j=0; $j<count($prods); $j++): ?> 
+                            <div class="product">
+                                <ul>
+                                    <li><?= $prods[$j]['prod']; ?><a href=<?= $prods[$j]['link']; ?> class="text-right" target="_blank" style="float:right; display:inline-block"><span class="glyphicon glyphicon-new-window"></span></a></li> 
+                                    <!-- <li><a href="//www.pertamina.com" target="_blank"><?= $vendors[$vendor][$j][0]; ?></a></li>  -->   
+                                </ul>
                             </div>
-                            <hr>
-                        <?php endforeach; ?>
+                        <?php endfor; ?>
                     </div>
                 </div>
                 <?php endforeach; ?>

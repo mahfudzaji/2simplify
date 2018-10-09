@@ -3,15 +3,16 @@
     require 'base/header.view.php';
 ?>
 
-<div class="container-fluid text-center">
+<div class="container-fluid">
 
     <?php require "app/resources/views/errors/errors.view.php"; ?>
 
     <div class="row">
         <div class="col-sm-4"></div>
         <div class="col-sm-4">
-            <h3>Register Your Company</h3>
-            <form action="partner/create" method="POST">
+            <h3 class="text-center">Register Your Company</h3>
+            <form action="partner/create" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="relationship" value=1>
                 <div class="form-group">
                     <label>Nama</label>
                     <input type="text" name="name" class="form-control" placeholder="Nama" autofocus required>
@@ -22,7 +23,7 @@
                 </div>
                 <div class="form-group">
                     <label>Badan usaha</label>
-                    <select name="entity" class="form-control">
+                    <select name="bussiness_entity" class="form-control">
                         <option value=''>BADAN USAHA</option>
                         <option value='1'>PT</option>
                         <option value='2'>CV</option>
@@ -51,21 +52,14 @@
                     <input type="email" name="email" class="form-control" placeholder="Email" required>
                 </div>  
                 <div class="form-group">
-                    <label>Hubungan</label><br>
-                    <input type="radio" name="relationship" value=2>Partner <br>
-                    <input type="radio" name="relationship" value=3>Customer
-                </div>
-                <div class="form-group">
                     <label>Keterangan tambahan</label>
                     <textarea name="remark" class="form-control" placeholder="Keterangan tambahan"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Logo</label>
-                    <input type="file" name="logo" >
+                    <input type="file" name="logo">
                 </div>
                 <button type="submit" name="submit" class="btn btn-primary" style="float:right;"><span class="glyphicon glyphicon-send"></span> Kirim</button>
-                                                                                    
-                <button class="btn btn-danger btn-close">Tutup</button>
             </form>
         </div>
         <div class="col-sm-4"></div>

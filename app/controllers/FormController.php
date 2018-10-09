@@ -45,8 +45,7 @@ class FormController{
 
     private $placeholderAttachmentForm=array(
         "document_data" => 'required',
-        "description" => '',
-        "attachment" => 'required'
+        "description" => ''
     );
 
     private $placeholderVacationForm=array(
@@ -113,12 +112,12 @@ class FormController{
             "ppn" => 'required',
             "remark" => ''
         ],
-        //insert to db: receipt_product
+        //insert to db: receipt_stock
         [
             "product" => 'required',
             "quantity" => 'required',
-            "price_unit" => 'required',
-            "item_discount" => ''
+            "price" => 'required',
+            "discount" => ''
         ]
     );
 
@@ -1711,9 +1710,11 @@ class FormController{
         e.name as buyer,
         GROUP_CONCAT(c.name ORDER by c.id asc SEPARATOR '<br>') as product,
         GROUP_CONCAT(b.quantity ORDER by c.id asc SEPARATOR '<br>') as quantity,
-        GROUP_CONCAT(b.price_unit ORDER by c.id asc SEPARATOR '<br>') as price
+        GROUP_CONCAT(b.price ORDER by c.id asc SEPARATOR '<br>') as price,
+        GROUP_CONCAT(b.discount ORDER by c.id asc SEPARATOR '<br>') as discount,
+        a.remark
         FROM `form_receipt` as a 
-        INNER JOIN receipt_product as b on a.id=b.receipt
+        INNER JOIN receipt_stock as b on a.id=b.receipt
         INNER JOIN products as c on b.product=c.id
         INNER JOIN companies as d on a.supplier=d.id
         INNER JOIN companies as e on a.buyer=e.id
@@ -1749,7 +1750,7 @@ class FormController{
         //download all the data
         if(isset($_GET['download']) && $_GET['download']==true){
             
-            $dataColumn = ['receipt_date', 'supplier', 'buyer', 'product', 'quantity', 'price'];
+            $dataColumn = ['receipt_date', 'receipt_number', 'supplier', 'buyer', 'product', 'quantity', 'price', 'remark'];
 
             $this->download(toDownload($receiptData, $dataColumn));
 
@@ -1887,6 +1888,7 @@ class FormController{
 
         //insert to db:form_receipt
         $insertToFormReceipt = $builder->insert('form_receipt', $data[0]);
+        $idReceiptForm = $builder->getPdo()->lastInsertId();
 
         //dd($insertToFormReceipt);
 
@@ -1896,8 +1898,6 @@ class FormController{
             exit();
         }
 
-        $idReceiptForm = $builder->getPdo()->lastInsertId();
-
         $newDataRecap=[];
         for($i=0; $i<$value; $i++){
             $newData=[];
@@ -1905,6 +1905,8 @@ class FormController{
                 $newData[$key]=$data[1][$key][$i];
             }
             $newData['receipt'] = $idReceiptForm;
+            $newData['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
+            $newData['status'] = $receiptType;
             array_push($newDataRecap, $newData);
         }
 
@@ -1915,27 +1917,27 @@ class FormController{
         //dd($data);
 
         //insert into stock_relation
-        $insertToStockRelation = $builder->insert("stock_relation", ['do_or_receipt_in' => 0, 'doc_in' => $idReceiptForm ]);
+        //$insertToStockRelation = $builder->insert("stock_relation", ['do_or_receipt_in' => 0, 'doc_in' => $idReceiptForm ]);
         
-        $idStockRelation = $builder->getPdo()->lastInsertId();
+        //$idStockRelation = $builder->getPdo()->lastInsertId();
 
-        if(!$insertToStockRelation){
+        /* if(!$insertToStockRelation){
             recordLog('Stock', returnMessage()['stock']['createFail'] );
             redirectWithMessage([[ returnMessage()['databaseOperationFailed'], 0]],getLastVisitedPage());
             exit();
         }else{
             recordLog('Stock', returnMessage()['stock']['createSuccess'] );
-        }
+        } */
 
-        $isSuccessInsertToReceiptProduct=true;
+        $isSuccessInsertToReceiptStock=true;
         for($i=0; $i<count($newDataRecap); $i++){
-            $insertToReceiptProduct = $builder->insert('receipt_product', $newDataRecap[$i]);
+            //$insertToReceiptProduct = $builder->insert('receipt_product', $newDataRecap[$i]);
 
             //insert into receipt_stock
-            $insertToStock = $builder->insert("receipt_stock", ["product" => $newDataRecap[$i]['product'], "quantity" => $newDataRecap[$i]['quantity'], "stock_relation" => $idStockRelation, "created_by" => $data[0]['created_by'], "updated_by" => $data[0]['updated_by'], "status" => $receiptType]);
+            $insertToStock = $builder->insert("receipt_stock", $newDataRecap[$i]);
             
-            if(!$insertToReceiptProduct || !$insertToStock){
-                $isSuccessInsertToReceiptProduct=false;
+            if(!$insertToStock){
+                $isSuccessInsertToReceiptStock=false;
             }
         }
 
@@ -1945,15 +1947,6 @@ class FormController{
             recordLog('Receipt form', returnMessage()['receiptForm']['createFail'] );
             redirectWithMessage(['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.2', 0],getLastVisitedPage());
             exit();
-        }
-
-
-        if(!$isSuccessInsertToReceiptProduct){
-            recordLog('Receipt form', returnMessage()['receiptForm']['createFail'] );
-            redirectWithMessage([['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.', 0]],getLastVisitedPage());
-            exit();
-        }else{
-            recordLog('Receipt form', returnMessage()['receiptForm']['createSuccess'] );
         }
 
         $builder->save();
@@ -2004,11 +1997,13 @@ class FormController{
         e.phone as bphone,
         GROUP_CONCAT(c.name ORDER by c.id asc SEPARATOR '<br>') as product,
         GROUP_CONCAT(b.quantity ORDER by c.id asc SEPARATOR '<br>') as quantity,
-        GROUP_CONCAT(b.price_unit ORDER by c.id asc SEPARATOR '<br>') as price,
+        GROUP_CONCAT(b.price ORDER by c.id asc SEPARATOR '<br>') as price,
+        GROUP_CONCAT(b.discount ORDER by c.id asc SEPARATOR '<br>') as discount,
         a.remark,
-        f.id as ddata
+        f.id as ddata,
+        case a.supplier when $parameterData[company] then '2' else '1' end  as receipt_type
         FROM `form_receipt` as a 
-        INNER JOIN receipt_product as b on a.id=b.receipt
+        INNER JOIN receipt_stock as b on a.id=b.receipt
         INNER JOIN products as c on b.product=c.id
         INNER JOIN companies as d on a.supplier=d.id
         INNER JOIN companies as e on a.buyer=e.id
@@ -2017,21 +2012,29 @@ class FormController{
         GROUP BY a.id
         ORDER BY a.id DESC","Document");
 
-        /* $receiptItems = $builder->custom("SELECT b.product, c.name, b.quantity
+        $receiptItems = $builder->custom("SELECT b.id, b.product as pid, c.name as product, b.quantity, b.price, b.discount
         FROM form_receipt as a 
-        INNER JOIN receipt_product as b on b.receipt=a.id
+        INNER JOIN receipt_stock as b on b.receipt=a.id
         INNER JOIN products as c on b.product=c.id 
         WHERE a.id=$id
-        GROUP BY c.id", "Document"); */
+        GROUP BY c.id", "Document");
 
-        $receivedItems = $builder->custom("SELECT b.name as product, a.quantity 
+        /* $receivedItems = $builder->custom("SELECT b.name as product, a.quantity 
         FROM receipt_stock as a 
         INNER JOIN products as b on a.product=b.id 
         INNER JOIN stock_relation as c on a.stock_relation=c.id
         WHERE c.do_or_receipt_in=0 and c.doc_in=$id or c.do_or_receipt_out=0 and c.doc_out=$id
-        GROUP BY a.product","Document");
+        GROUP BY a.product","Document"); */
 
         view('form/receipt_form_detail', compact('receiptData', 'receiptItems', 'receivedItems', 'attachments', 'uploadFiles'));
+    }
+
+    public function receiptFormItemUpdate(){
+
+    }
+    
+    public function receiptFormItemRemove(){
+
     }
 
 //=====================================================================================================//   
@@ -2154,6 +2157,9 @@ class FormController{
             redirectWithMessage([[ returnMessage()['quoForm']['accessRight']['create'] , 0]], getLastVisitedPage());
         }
 
+        //insert into form_quo table in database
+        $title = filterUserInput($_POST['title']);
+
         $builder = App::get('builder');
 
         //checking form requirement
@@ -2258,14 +2264,14 @@ class FormController{
         
         if(!$insertToFormPo){
             recordLog('QUO form', returnMessage()['quoForm']['createFail'] );
-            redirectWithMessage(['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.', 0],getLastVisitedPage());
+            redirectWithMessage([['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.', 0]],getLastVisitedPage());
             exit();
         }
 
         $idFormPo = $builder->getPdo()->lastInsertId();
 
         //insert to db:form_quo
-        $insertToFormQuo = $builder->insert("form_quo", ['quo'=>$idFormPo, 'quo_number'=>$quoNumber]);
+        $insertToFormQuo = $builder->insert("form_quo", ['title' => $title, 'quo'=>$idFormPo, 'quo_number'=>$quoNumber]);
 
         if(!$insertToFormQuo){
             recordLog('QUO form', returnMessage()['quoForm']['createFail'] );
@@ -2302,7 +2308,7 @@ class FormController{
         $insertToDocumentData = $builder->insert("document_data", ['document'=>'9', 'document_number'=>$idFormQuo]);
         if(!$insertToDocumentData){
             recordLog('Quotation form', returnMessage()['quoForm']['createFail'] );
-            redirectWithMessage(['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.', 0],getLastVisitedPage());
+            redirectWithMessage([['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.', 0]],getLastVisitedPage());
             exit();
         }
 
@@ -2508,6 +2514,19 @@ class FormController{
         }
 
         $data['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
+
+        //Update data
+        $quoNumber = filterUserInput($_POST['quo_number']);
+        $updateQuoNumber = $builder->update('form_quo', ['quo_number' => $quoNumber], ['id' => $quo], '', 'Document');
+
+        //dd($idFormQuo);
+
+        if(!$updateQuoNumber){
+            recordLog('QUO form', returnMessage()['quoForm']['updateFail'] );
+            redirectWithMessage([['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.', 0]],getLastVisitedPage());
+        }else{
+            recordLog('QUO form', returnMessage()['quoForm']['updateSuccess'] );
+        }
         
         //Get id of the quo $quo
         $idFormQuo = $builder->getSpecificData("form_quo", ['quo'], ['id' => $quo], '', 'Document');
@@ -2960,6 +2979,7 @@ class FormController{
         group by a.id
         order by a.id","Document"); */
 
+
         $poData = $builder->custom("SELECT a.id, g.po_number,
         date_format(a.doc_date, '%d %M %Y') as doc_date, 
         c.name as supplier,
@@ -2975,6 +2995,7 @@ class FormController{
         WHERE $whereClause && po_or_quo=1
         GROUP BY a.id
         ORDER BY a.id DESC","Document");
+
 
         if(isset($_GET['quo'])&&!empty($_GET['quo'])){
 
@@ -3613,6 +3634,7 @@ class FormController{
 
     }
 
+    //Get the PO number while creating DO
     public function poFormNumber(){
         if(!$this->role->can("view-data-po")){
             if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
@@ -3626,22 +3648,30 @@ class FormController{
         $builder = App::get('builder');
 
         $company = filterUserInput($_GET['company']);
-        $doType = filterUserInput($_GET['do_type']);
 
         //$doType=1 -> DO in
         //$doType=0 -> DO out
+        $doType = filterUserInput($_GET['do_type']);
+
         if($doType==1){
             $whereClause="a.supplier=$company";
         }elseif($doType==0){
             $whereClause="a.buyer=$company";
         }
 
+        if(isset($_GET['do_type'])&&!empty($_GET['do_type'])&&$_GET['do_type']!=''){     
+            if($doType==1){
+                $whereClause="b.id not in (select po_quo from form_do) and a.supplier=$company";
+            }elseif($doType==0){
+                $whereClause="b.id not in (select po_quo from form_do) and a.buyer=$company";
+            }
+        }
+
         //Only get PO number that not yet processed to DO
         $poNumber = $builder->custom("SELECT a.id, b.id as po_quo, b.po_number 
         FROM `form_po` as a 
         INNER JOIN po_quo as b on a.id=b.po 
-        WHERE b.id not in (select po_quo from form_do) 
-        and $whereClause
+        WHERE $whereClause
         ORDER BY b.id" , "Document");
         
         echo json_encode($poNumber);
@@ -3942,14 +3972,24 @@ class FormController{
         GROUP BY a.id", "Document");
 
 
+        //1: DO IN, 2: DO OUT
+        $doType = $doData[0]->do_type;
+        if($doType==2){
+            //statusStock: 1=>in, 0=>out
+            $whereClause = "a.status=2";
+        }else{
+            $whereClause = 1;
+        }
+
         $receivedItems = $builder->custom("SELECT b.name as product, count(*) as qty, 
         GROUP_CONCAT(a.serial_number order by a.id asc SEPARATOR '<br>') as serial_number 
         FROM `stocks` as a 
         INNER JOIN products as b on a.product=b.id 
         INNER JOIN stock_relation as c on a.stock_relation=c.id
-        WHERE c.do_or_receipt_in=1 and c.doc_in=$id or c.do_or_receipt_out=1 and c.doc_out=$id
+        WHERE c.do_or_receipt_in=1 and c.doc_in=$id or c.do_or_receipt_out=1 and c.doc_out=$id && $whereClause 
         GROUP BY a.product","Document");
 
+        //Get the PO product for processed to DO item
         $doItems = $builder->custom("SELECT h.product, i.name, h.quantity
         FROM form_do as a 
         INNER JOIN po_quo as d on a.po_quo=d.id
@@ -3966,7 +4006,9 @@ class FormController{
         INNER JOIN form_po as j on e.quo=j.id 
         INNER JOIN quo_product as h on e.id=h.quo
         INNER JOIN products as i on h.product=i.id 
-        WHERE i.id=$id", "Document");
+        WHERE a.id=$id
+        GROUP BY i.id", "Document");
+
 
         view('form/do_form_detail', compact('doData', 'attachments', 'uploadFiles', 'doItems', 'vendors', 'receivedItems'));
     }
@@ -4109,6 +4151,24 @@ class FormController{
         }
         
         $builder = App::get('builder');
+
+        if(isset($_FILES["attachment"]) && !empty($_FILES["attachment"]) && $_FILES["attachment"]!='' && $_FILES["attachment"]['size']!=0){
+           
+            $processingUpload = new UploadController();
+
+            $uploadResult = $processingUpload->processingUpload($_FILES["attachment"]);
+
+            if($uploadResult){
+                $lastUploadedId=$processingUpload->getLastUploadedId();
+
+                $data['attachment']=$lastUploadedId;
+            }else{
+                //$_SESSION['sim-messages']=[['Maaf, gagal upload signature', 0]];
+                redirectWithMessage([["Maaf, gagal upload signature", 0]],'/home');
+            }
+            unset($processingUpload);
+
+        }
 
         $insertAttachment = $builder->insert('document_attachments', $data);
 

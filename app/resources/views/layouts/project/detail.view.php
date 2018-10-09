@@ -314,7 +314,7 @@ $priceTotal=0;
                 </div>
                 <div class="col-md-9">
                     <?php if(count($projectItemRequested)==0): ?>
-                        <p style="color:red">Belum terdapat request.</p>
+                        <p style="color:red" class="text-center">Belum terdapat request.</p>
                     <?php else: $printBtn=true; ?>
                         <table class="table table-striped">
                             <thead>

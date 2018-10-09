@@ -59,6 +59,8 @@ $router->post('partner/create', 'PartnerController@create');
 $router->get('partner/detail', 'PartnerController@detail');
 $router->post('partner/status', 'PartnerController@toggleStatus');
 $router->post('partner/update', 'PartnerController@update');
+$router->get('register-first-company', 'PartnerController@registerFirstCompany');
+$router->post('register-first-company', 'UserController@registerFirstCompany');
 
 //FORM
 
@@ -104,7 +106,8 @@ $router->post('form/reimburse/remove', 'FormController@reimburseFormItemRemove')
 $router->get('form/receipt', 'FormController@receiptFormIndex');
 $router->get('form/receipt/detail', 'FormController@receiptFormDetail');
 $router->post('form/receipt/create', 'FormController@receiptFormCreate');
-$router->post('form/receipt/update', 'FormController@receiptFormUpdate');
+$router->post('form/receipt/update-item', 'FormController@receiptFormItemUpdate');
+$router->post('form/receipt/remove-item', 'FormController@receiptFormItemRemove');
 $router->post('form/receipt/remove', 'FormController@receiptFormItemRemove');
 $router->post('form/receipt/new-item', 'FormController@receiptFormCreateNewItem');
 $router->post('form/receipt/approve', 'FormController@receiptFormApproval');
@@ -162,6 +165,7 @@ $router->post('stock/new-stock', 'StockController@stockAdd');
 $router->post('stock/stock-create-from-form', 'StockController@stockCreateFromForm');
 $router->get('stock/get-serial-number', 'StockController@stockSerialNumber');
 $router->get('stock/get-stock-list', 'StockController@getStockList');
+$router->get('stock/check-stock-available', 'StockController@checkStock');
 
 //tested
 $router->post('stock/in', 'StockController@stockIn');

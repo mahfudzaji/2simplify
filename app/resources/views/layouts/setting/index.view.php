@@ -31,7 +31,7 @@ require base.'base/header.view.php';
                     <div class="col-md-10">
                         <h3 data-item='name'><?= ucwords($p->name); ?></h3>
                         <h3 data-item='email'><?= makeFirstLetterUpper($p->email); ?></h3>
-                        <h3><?= "Code: ".$p->code; ?></h3>
+                        <h3>Code: <span data-item='code'><?= ($p->code=='')?'-':$p->code; ?></span></h3>
                         <h3 data-item='department' data-item-val=<?= $p->idd; ?>><?= "Departemen: ".makeFirstLetterUpper($p->department); ?></h3>
                         <h3><?= "Status: ".$p->active; ?></h3>
                         <h3><?= "Terdaftar pada: ".$p->created_at; ?></h3>
@@ -61,6 +61,11 @@ require base.'base/header.view.php';
                     <div class="form-group">
                         <label>Email</label>
                         <input type="text" name="email" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Code</label>
+                        <input type="text" name="code" class="form-control" required>
                     </div>
 
                     <div class="form-group">
@@ -95,11 +100,13 @@ require base.'base/header.view.php';
  
             var department = $(this).parent().find("[data-item~='department']").attr("data-item-val");
             var name = $(this).parent().find("[data-item~='name']").html();
+            var code = $(this).parent().find("[data-item~='code']").html();
             var email = $(this).parent().find("[data-item~='email']").html();
 
-            $("#modal-update-profile").find("select[name~='department']").find("option").attr("selected", false);
+            //$("#modal-update-profile").find("select[name~='department']").find("option").attr("selected", false);
             $("#modal-update-profile").find("select[name~='department']").find("option[value~='"+department+"']").attr("selected", true);
             $("#modal-update-profile").find("input[name~='name']").val(name); 
+            $("#modal-update-profile").find("input[name~='code']").val(code); 
             $("#modal-update-profile").find("input[name~='email']").val(email);
             
         });

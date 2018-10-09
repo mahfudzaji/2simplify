@@ -147,6 +147,10 @@ require base.'base/header.view.php';
                             <input type="radio" name="quo_type" value="0"><strong>QUO OUT</strong>
                         </div>
                     </div>
+                    <div class='form-group'>
+                        <label>Subject</label>
+                        <input type='text' name='title' class='form-control' required>
+                    </div>
                     <div class="form-group">
                         <label>Tanggal QUO</label>
                         <input type="date" name="doc_date" class="form-control" required>

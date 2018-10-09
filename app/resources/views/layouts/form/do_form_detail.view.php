@@ -46,6 +46,8 @@ $printBtn = false;
                 </div>
                 <br> 
                 <button class="btn btn-danger btn-close" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+
             </div>
         </div>
 
@@ -75,6 +77,7 @@ $printBtn = false;
                     </form>
                 </div>
                 <button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -149,6 +152,52 @@ $printBtn = false;
             <span class="modal-nav modal-nav-left glyphicon glyphicon-chevron-left"></span>
             <img class="modal-image image-responsive" src="">
             <p class="description"></p>            
+        </div>
+
+        <div class="app-form modal" id="modal-add-stock-item">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Menambahkan Item DO</h3>
+                </div>
+                <form action="/stock/in" method="POST">
+                    <input type="hidden" name="do_or_receipt" value=1>
+                    <input type="hidden" name="doc" value=<?= $_GET['do']; ?>>
+                    <?php /* do in: 1, do out:2,  */ ?>                              
+                    <input type="hidden" name="do_type" value=<?= $doData[0]->do_type; ?>>
+                    <div class="form-group">
+                        <label>Product</label>
+                        <select name="product" class="form-control" required>
+                            <option value=''>PRODUCT</option>
+                            <?php foreach($doItems as $item): ?> 
+                                <option value= <?= $item->product; ?> data-qty=<?= $item->quantity ?>><?= ucfirst($item->name); ?></option>             
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="detail-respond row" style="margin-bottom:5px;">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-8"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Diterima pada</label>
+                        <input type="date" class="form-control" name="received_at" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Jumlah</label>
+                        <input type="number" class="form-control" name="quantity" min=1 step=1 required>
+                    </div>
+                    <div class="form-group">
+                        <label>Serial number</label>
+                        <select name="serial_number[]" class="form-control" required>
+                            <option value="">Serial number</option>
+                        </select>
+                    </div>
+
+                    <button type="button" class="btn btn-danger btn-close">Tutup</button>
+                    <button type="submit" class="btn btn-primary" style="float:right;">Kirim <span class="glyphicon glyphicon-send"></span></button>
+                
+                </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+            </div>
         </div>
 
         <!-- MAIN -->
@@ -238,6 +287,12 @@ $printBtn = false;
                         <?php endforeach; ?>
                     </table>
 
+                    <?php foreach($doData as $data2): ?>
+                        <div style="margin-bottom:20px;">
+                            <p>Keterangan: <?= ($data2->remark==null||empty($data2->remark))?"-":makeFirstLetterUpper($data2->remark); ?></p>
+                        </div>
+                    <?php endforeach; ?>
+
                     <div>
                         <h3>Deskripsi unit</h3>
                         <?php if(count($receivedItems)==0): ?>
@@ -263,67 +318,13 @@ $printBtn = false;
                         <button class="btn btn-md btn-primary btn-modal" id="add-stock-item">Tambahkan item</button>
                     </div>
 
-                    <?php foreach($doData as $data2): ?>
-                        <div style="margin-bottom:20px;">
-                            <p>Keterangan: <?= ($data2->remark==null||empty($data2->remark))?"-":makeFirstLetterUpper($data2->remark); ?></p>
-                        </div>
-                    <?php endforeach; ?>
-                    
                     <?php if($printBtn): ?>
-                        <a target="_blank" href="/print/do?do=<?= $_GET['do']; ?>"><button type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-print"></span> Cetak</button></a>
+                        <div style="margin-top:10px;">
+                            <a target="_blank" href="/print/do?do=<?= $_GET['do']; ?>"><button type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-print"></span> Cetak</button></a>
+                        </div>
                     <?php endif; ?>
 
                 </div>
-
-                <div class="app-form modal" id="modal-add-stock-item">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>Menambahkan Item DO</h3>
-                        </div>
-                        <form action="/stock/in" method="POST">
-                            <input type="hidden" name="do_or_receipt" value=1>
-                            <input type="hidden" name="doc" value=<?= $_GET['do']; ?>>
-                            <?php /* do in: 1, do out:2,  */ if($doData[0]->do_type==1): ?>
-                                <input type="hidden" name="do_type" value="1">
-                            <?php elseif($doData[0]->do_type==2): ?>
-                                <input type="hidden" name="do_type" value="2">
-                            <?php endif; ?>
-                            <div class="form-group">
-                                <label>Product</label>
-                                <select name="product" class="form-control" required>
-                                    <option value=''>PRODUCT</option>
-                                    <?php foreach($doItems as $item): ?> 
-                                        <option value= <?= $item->product; ?> data-qty=<?= $item->quantity ?>><?= ucfirst($item->name); ?></option>             
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="detail-respond row" style="margin-bottom:5px;">
-                                <div class="col-md-4"></div>
-                                <div class="col-md-8"></div>
-                            </div>
-                            <div class="form-group">
-                                <label>Diterima pada</label>
-                                <input type="date" class="form-control" name="received_at" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Jumlah</label>
-                                <input type="number" class="form-control" name="quantity" min=1 step=1 required>
-                            </div>
-                            <div class="form-group">
-                                <label>Serial number</label>
-                                <select name="serial_number[]" class="form-control" required>
-                                    <option value="">Serial number</option>
-                                </select>
-                            </div>
-
-                            <button type="button" class="btn btn-danger btn-close">Tutup</button>
-                            <button type="submit" class="btn btn-primary" style="float:right;">Kirim <span class="glyphicon glyphicon-send"></span></button>
-                        
-                        </form>
-                        <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
-                    </div>
-                </div>
-
                 <!-- SHOW ATTACHMENT -->
                 <div class="col-md-4 vertical-overflow-space">         
                     <h3>Daftar lampiran</h3>
@@ -405,7 +406,6 @@ $(document).ready(function(){
 
             var detail ="<ul>";
             detail+="<li>Nama : "+productDetail.name+"</li>";
-            detail+="<li>Vendor : "+productDetail.vendor+"</li>";
             detail+="<li>Part number : "+productDetail.part_number+"</li>";
             detail+="<li>Deskripsi : "+productDetail.description+"</li>";
             detail+="<li>Link : "+productDetail.link+"</li>";
@@ -413,6 +413,18 @@ $(document).ready(function(){
 
             $("select[name~='product']").closest("form").find(".detail-respond").find(".col-md-4").empty().append("<img src='/public/upload/"+productDetail.upload_file+"' class='img-responsive'>");
             $("select[name~='product']").closest("form").find(".detail-respond").find(".col-md-8").empty().append(detail);
+
+        });
+
+        $.get('/stock/check-stock-available', {product:product, status:1}, function(data, status){
+            var responds = JSON.parse(data);
+            var stockIn=0;
+            
+            if(responds.length>0){
+                stockIn = Number(responds[0].stock_in)+Number(responds[0].qty_pro_in)+Number(responds[0].qty_receipt_in);
+            }
+
+            $("select[name~='product']").closest("form").find(".detail-respond").find(".col-md-8").find("li").last().append("<li><strong>Available: "+stockIn+"</strong></li>");
 
         });
 

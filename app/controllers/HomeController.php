@@ -39,7 +39,18 @@ class HomeController{
             
             $events = $builder->getSpecificData('events', ['*'], ['created_by' => $this->userId ], '', 'Internal');
 
-            view('home', compact('users', 'roleOfUser', 'departments', 'activities', 'events'));
+            $checkIfAnyCompanyRegistered=App::get('builder')->getAllData('companies', 'User');
+
+            if(!$checkIfAnyCompanyRegistered){
+
+                $provinces = $builder->getAllData('provinces', 'Partner');
+    
+                view('register_first_company', compact('provinces'));
+            }else{
+                
+                view('home', compact('users', 'roleOfUser', 'departments', 'activities', 'events'));
+            
+            }
 
         }else{
 

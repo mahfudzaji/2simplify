@@ -140,7 +140,7 @@ require base.'base/header.view.php';
                         </select>
                     </div>  
                     <div class="form-group">
-                        <label>PO</label>
+                        <label>PO in</label>
                         <select name="po_quo" class="form-control" required>
                             <option value=''>PO</option>
                         </select>

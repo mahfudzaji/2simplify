@@ -176,7 +176,8 @@ require base.'base/header.view.php';
                         </div>
                         <div class="form-group">
                             <label>Keterangan</label>
-                            <input type="text" name="remark" class="form-control" placeholder="Keterangan tambahan">
+                            <!-- <input type="text" name="remark" class="form-control" placeholder="Keterangan tambahan"> -->
+                            <div id="remark"></div>
                         </div>
                         <div class="form-group">
                             <label>Disetujui oleh</label>
@@ -231,6 +232,8 @@ require base.'base/header.view.php';
 <script type="text/javascript">
     
     $(document).ready(function(){
+
+        $("#remark").trumbowyg();
 
         $("#modal-create-do-form").on("change", "input[name~='do_type']", function(){
             var doType = $(this).val();

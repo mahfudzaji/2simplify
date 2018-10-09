@@ -79,7 +79,7 @@ require base.'base/header.view.php';
             <?php else: ?>
                 <div class="container-fluid">
                     <?php foreach($stocksData as $data): ?>
-                        <div class='content' style="width:55%; margin:5px auto;">
+                        <!-- <div class='content' style="width:55%; margin:5px auto;">
                             <div style="border-bottom:2px solid;cursor:pointer;background-color:#ffffe6;">
                                 <div class="content-preview row" id="<?= $data->pid; ?>">
                                     <div class="col-md-4">
@@ -88,14 +88,32 @@ require base.'base/header.view.php';
                                     <div class="col-md-8">
                                         <h2><?= $data->product; ?></h2>
                                         <p><?= $data->description; ?></p>
-                                        <p>IN: <?= $data->stock_in; ?></p>
+                                        <p>IN: <?= $data->stock_in+$data->qty_pro_in+$data->qty_receipt_in; ?></p>
                                         <p>OUT: <?= $data->stock_out; ?></p>
                                     </div>
                                 </div>
                                 <div class='table-responsive detail' style="background-color:#fff;">
                                 </div>
                             </div> 
+                        </div> -->
+                        <div class='content' style="width:55%; margin:5px auto;">
+                            <div style="border-bottom:2px solid;cursor:pointer;background-color:#ffffe6;">
+                                <div class="content-preview row" id="<?= $data->cid; ?>">
+                                    <div class="col-md-4">
+                                        <!-- <img src='/public/upload/<?= $data->pic; ?>' class="img-responsive"> -->
+                                    </div>
+                                    <div class="col-md-8">
+                                        <h2><?= $data->category; ?></h2>
+                                        <p><?= $data->description; ?></p>
+                                        <p>IN: <?= $data->stock_in+$data->qty_pro_in+$data->qty_receipt_in; ?></p>
+                                        <p>OUT: <?= $data->stock_out+$data->qty_pro_out+$data->qty_receipt_out; ?></p>
+                                    </div>
+                                </div>
+                                <div class='table-responsive detail' style="background-color:#fff;">
+                                </div>
+                            </div> 
                         </div>
+
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
@@ -243,7 +261,7 @@ require base.'base/header.view.php';
                 let responds = JSON.parse(data);
                 
                 let unitList = "<table class='table table-hover'><thead>";
-				unitList += "<tr><th>Serial number</th><th>Stock condition</th><th>Location</th><th>Receive date</th><th>Send date</th><th>Status</th><th>Update</th></tr>";
+				unitList += "<tr><th>Serial number</th><th>Stock condition</th><th>Location</th><th>Receive date</th><th>Send date</th><th>Status</th><th>Action</th></tr>";
                 unitList += "</thead><tbody>";
                 
 
@@ -255,7 +273,7 @@ require base.'base/header.view.php';
                     unitList += "<td data-item='receive-date' data-item-val="+responds[i].ra+">"+responds[i].received_at+"</td>";
                     unitList += "<td data-item='send-date' data-item-val="+responds[i].sa+">"+responds[i].send_at+"</td>";
                     unitList += "<td>"+makeFirstLetterUpper(responds[i].status)+"</td>";
-                    unitList += "<td><button type='button' class='btn btn-sm btn-primary btn-modal' data-id='update-stock'>Update</button></td>";
+                    unitList += "<td><button type='button' class='btn btn-sm btn-primary btn-modal' data-id='update-stock'>More</button></td>";
                     unitList += "</tr>";
                 }
 

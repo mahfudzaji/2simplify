@@ -11,13 +11,13 @@ class PartnerController{
     private $placeholder=[
             'name'=>'required', 
             'code'=>'required',
-            'entity'=>'required', 
+            'bussiness_entity'=>'required', 
             'province'=>'required', 
             'address'=>'required',
             'phone'=>'', 
             'email'=>'email', 
-            'relationship'=>'required', 
-            'remark'=>''
+            'relationship'=>'', 
+            'remark'=>'',
         ];
 
     public function __construct(){
@@ -123,7 +123,7 @@ class PartnerController{
 
         //checking access right
         if(!$this->role->can("create-partner")){
-            redirectWithMessage([["anda tidak memiliki hak untuk melihat daftar partner", 0]],'partner');
+            redirectWithMessage([["anda tidak memiliki hak untuk melihat daftar partner", 0]], getLastVisitedPage());
         }
 
         //checking form requirement
@@ -148,8 +148,8 @@ class PartnerController{
 
         //if not the passing requirements
         if(!$passingRequirement){
-            redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
-            //redirect(getLastVisitedPage());
+            //redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
+            redirect(getLastVisitedPage());
         }
         
         //post the data to database
@@ -168,9 +168,10 @@ class PartnerController{
             if($uploadResult){
                 $lastUploadedId=$processingUpload->getLastUploadedId();
 
-                $parameters['logo']=$lastUploadedId;
+                $data['logo']=$lastUploadedId;
             }else{
-                $_SESSION['sim-messages']=[['Maaf, gagal upload logo', 0]];
+                //$_SESSION['sim-messages']=[['Maaf, gagal upload logo', 0]];
+                redirectWithMessage([["Maaf, gagal upload logo", 0]], getLastVisitedPage());
             }
             unset($processingUpload);
   
@@ -178,12 +179,9 @@ class PartnerController{
 
         $insertPartner= $builder->insert('companies', $data);
 
-       // dd(insertPartner);
-
         if(!$insertPartner){
             recordLog('Partner', "Pendaftaran partner gagal");
-            redirect('/partner');
-            exit();
+            redirectWithMessage([["Pendaftaran partner gagal", 0]], getLastVisitedPage());
         }
 
         recordLog('Partner', "Pendaftaran partner berhasil");
@@ -191,7 +189,7 @@ class PartnerController{
         $builder->save();
 
         //redirect to partner page with message
-        redirectWithMessage([["Pendaftaran partner berhasil",1]],'/partner');
+        redirectWithMessage([["Pendaftaran partner berhasil",1]], getLastVisitedPage());
     
     }
 

@@ -142,6 +142,23 @@ $printBtn = false;
             </div>
         </div>
 
+        <!-- REMOVE RECEIPT ITEM -->
+        <div class="app-form modal" id="modal-remove-receipt-item">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Konfirmasi</h3>
+                </div>
+                <div class="modal-main-content">
+                    <form action="/form/receipt/remove" method="post">
+                        <input type="hidden" name="receipt-item" value="">
+                        <button type="submit" class="btn btn-danger btn-sm form-control"><span class="glyphicon glyphicon-remove"></span> Hapus data</button>
+                    </form>
+                </div>
+                <br><button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+            </div>
+        </div>
+
         <!-- IMAGE SCROLL -->
         <div class="modal image-scroll-modal scroll-modal-horizontal">          
             <span class="btn-close glyphicon glyphicon-remove"></span>
@@ -177,21 +194,37 @@ $printBtn = false;
                     <hr>
                     <div>
                         <h3>Item list</h3>
-                        <?php if(count($receivedItems)==0): ?>
+                        <?php if(count($receiptItems)==0): ?>
                             <p style="color:red">Belum terdapat data item do.</p>
                         <?php else: $printBtn=true; ?>
                             <table class="table table-striped">
                                 <thead>
                                     <th>Produk</th>
                                     <th>Quantity</th>
-                                    <th>Action</th>
+                                    <th>Price unit</th>
+                                    <th>Discount(%)</th>
+                                    <th>Price total</th>
+                                    <th class="text-center">Action</th>
                                 </thead>
                                 <tbody>
-                                    <?php foreach($receivedItems as $item): ?>
-                                        <tr>
-                                            <td><?= $item->product; ?></td>
-                                            <td><?= $item->quantity; ?></td>
-                                            <td><button type="button" class="btn btn-default btn-modal" id="update-stock-item"><span class="glyphicon glyphicon-pencil"></span> Update</button>
+                                    <?php foreach($receiptItems as $item): $priceTotal=0; $price=(100-$item->discount)*$item->price*0.01; $priceTotal+=$price;  ?>
+                                        <tr id=<?= $item->id; ?>>
+                                            <td data-item="product" data-item-val=<?= $item->pid; ?>><?= $item->product; ?></td>
+                                            <td data-item="quantity"><?= $item->quantity; ?></td>
+                                            <td data-item="price"><?= $item->price; ?></td>
+                                            <td data-item="discount"><?= $item->discount; ?></td>
+                                            <td data-item="total"><?= $priceTotal; ?></td>
+                                            <td class="text-center">
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        Action <span class="caret"></span>
+                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        <li><a href="#" class="btn-modal btn-action" data-id="update-receipt-item"><span class="glyphicon glyphicon-pencil"></span> Update</a></li>
+                                                        <li><a href="#" class="btn-modal btn-action" data-id="remove-receipt-item"><span class="glyphicon glyphicon-remove"></span> Remove</a></li>
+                                                    </ul>
+                                                </div>
+                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -240,25 +273,21 @@ $printBtn = false;
             </div>
         </div>
 
-        <div class="app-form modal" id="modal-update-stock-item">
+        <div class="app-form modal" id="modal-update-receipt-item">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>Menambahkan Item DO</h3>
+                    <h3>Memperbarui data</h3>
                 </div>
                 <form action="/stock/in" method="POST">
-                    <input type="hidden" name="do_or_receipt" value=1>
-                    <input type="hidden" name="doc" value=<?= $_GET['do']; ?>>
-                    <?php /* do in: 1, do out:2,  */ if($doData[0]->do_type==1): ?>
-                        <input type="hidden" name="do_type" value="1">
-                    <?php elseif($doData[0]->do_type==2): ?>
-                        <input type="hidden" name="do_type" value="2">
-                    <?php endif; ?>
+                    <input type="hidden" name="id" value=<?= $item->id; ?>>
+                    <?php /* rcp in: 1, rcp out:2,  */ ?>
+                        <input type="hidden" name="receipt_type" value=<?= $receiptData[0]->receipt_type; ?> >
                     <div class="form-group">
                         <label>Product</label>
                         <select name="product" class="form-control" required>
                             <option value=''>PRODUCT</option>
                             <?php foreach($receiptItems as $item): ?> 
-                                <option value= <?= $item->product; ?> data-qty=<?= $item->quantity ?>><?= ucfirst($item->name); ?></option>             
+                                <option value= <?= $item->pid; ?> ><?= ucfirst($item->product); ?></option>             
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -267,20 +296,17 @@ $printBtn = false;
                         <div class="col-md-8"></div>
                     </div>
                     <div class="form-group">
-                        <label>Diterima pada</label>
-                        <input type="date" class="form-control" name="received_at" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Jumlah</label>
+                        <label>Quantity</label>
                         <input type="number" class="form-control" name="quantity" min=1 step=1 required>
                     </div>
                     <div class="form-group">
-                        <label>Serial number</label>
-                        <select name="serial_number[]" class="form-control" required>
-                            <option value="">Serial number</option>
-                        </select>
+                        <label>Price</label>
+                        <input type="number" class="form-control" name="price" min=1 step=1 required>
                     </div>
-
+                    <div class="form-group">
+                        <label>Discount</label>
+                        <input type="number" class="form-control" name="discount" min=1 step=1 required>
+                    </div>
                     <button type="button" class="btn btn-danger btn-close">Tutup</button>
                     <button type="submit" class="btn btn-primary" style="float:right;">Kirim <span class="glyphicon glyphicon-send"></span></button>
                 
@@ -296,20 +322,20 @@ $printBtn = false;
 $(document).ready(function(){
 
     /* UPDATE DO ITEM */
-    $(".btn-action").on("click", function(){
+    /* $(".btn-action").on("click", function(){
         var dataId= $(this).attr("data-id");
 
         var poItem = $(this).parent().closest("tr").attr("data-item");
 
-        if(dataId=='update-do-form'){        
+        if(dataId=='update-receipt-form'){        
             var receivedBy = $(this).parent().closest("tr").find("[data-item~='received_by']").html();
             var deliveredBy = $(this).parent().closest("tr").find("[data-item~='delivered_by']").html();
 
-            $("#modal-update-do-form").find("input[name~='received_by']").val(receivedBy);
-            $("#modal-update-do-form").find("input[name~='delivered_by']").val(deliveredBy); 
+            $("#modal-update-receipt-form").find("input[name~='received_by']").val(receivedBy);
+            $("#modal-update-receipt-form").find("input[name~='delivered_by']").val(deliveredBy); 
 
         }
-    });
+    }); */
 
     /* SHOW ATTACHMENT */
     $("select[name~='attachment']").on("change", function(){
@@ -324,11 +350,6 @@ $(document).ready(function(){
             $("#modal-create-attachment").find(".image-appear").empty();
             $("#modal-create-attachment").find(".image-appear").append("<img src="+image+" alt='Attachment' class='img-responsive'><p class='text-center'>"+description+"</p>");
         });
-    });
-
-    $("#btn-add-sn").on("click", function(){
-        var clone = $(this).parent().find("select[name~='serial_number[]']:first").clone().val("");
-        $(this).before(clone);
     });
 
     //show the detail of the product
@@ -391,15 +412,29 @@ $(document).ready(function(){
 
     });
 
-    $("#modal-add-stock-item").on("change", "input[name~='quantity']", function(){
-        var quantity = $(this).val();
-        var snColumn = $(this).closest("form").find("[name~='serial_number[]']");
-        snColumn.not(":first").remove();
-        var firstSNColumn = snColumn.first();
+    /* UPDATE QUO ITEM */
+    $(".btn-action").on("click", function(){
+        var dataId= $(this).attr("data-id");
 
-        for(var i=1; i<quantity; i++){
-            $(this).closest("form").find("[name~='serial_number[]']:last").after(firstSNColumn.clone());
-        }
+        var receiptItem = $(this).parent().closest("tr").attr("id");
+
+        if(dataId=='update-receipt-item'){        
+            
+            var product = $(this).parent().closest("tr").find("[data-item~='product']").attr("data-item-val");
+            var quantity = $(this).parent().closest("tr").find("[data-item~='quantity']").html();
+            var price = $(this).parent().closest("tr").find("[data-item~='price']").html();
+            var discount = $(this).parent().closest("tr").find("[data-item~='discount']").html();
+
+            $("#modal-update-receipt-item").find("input[name~='receipt-item']").val(receiptItem);
+            //$("#modal-update-receipt-item").find("select[name~='product']").find("option").attr("selected", false);
+            $("#modal-update-receipt-item").find("select[name~='product']").find("option[value~='"+product+"']").attr("selected", true);
+            $("#modal-update-receipt-item").find("input[name~='quantity']").val(quantity); 
+            $("#modal-update-receipt-item").find("input[name~='price']").val(price);
+            $("#modal-update-receipt-item").find("input[name~='discount']").val(discount);
+            
+        }else{
+            $("#modal-remove-receipt-item, #modal-approve-receipt-item, #modal-reject-receipt-item, #modal-revision-receipt-item").find("input[name~='receipt-item']").val(receiptItem);
+        } 
     });
 
 });

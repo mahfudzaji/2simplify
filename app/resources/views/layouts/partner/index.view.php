@@ -67,7 +67,7 @@ require base.'base/header.view.php';
                     </div>
                     <div class="form-group">
                         <label>Badan usaha</label>
-                        <select name="entity" class="form-control">
+                        <select name="bussiness_entity" class="form-control">
                             <option value=''>BADAN USAHA</option>
                             <option value='1'>PT</option>
                             <option value='2'>CV</option>
@@ -97,7 +97,7 @@ require base.'base/header.view.php';
                     </div>  
                     <div class="form-group">
                         <label>Hubungan</label><br>
-                        <input type="radio" name="relationship" value=2>Partner <br>
+                        <input type="radio" name="relationship" value=2 checked>Partner <br>
                         <input type="radio" name="relationship" value=3>Customer
                     </div>
                     <div class="form-group">
@@ -108,6 +108,8 @@ require base.'base/header.view.php';
                                                                                      
                     <button class="btn btn-danger btn-close">Tutup</button>
                 </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+
             </div>
         </div>
 
@@ -145,7 +147,7 @@ require base.'base/header.view.php';
                                         <td><a href="/partner/detail?p=<?= $data->id ?>"><strong><?= ucwords($data->name).", ".$data->bussiness_entity; ?></strong></a></td>
                                         <td><?= $thisProduct; ?></td>
                                         <td><?= makeFirstLetterUpper($data->address); ?></td>
-                                        <td><?= $data->province; ?></td>
+                                        <td><?= ucwords($data->province); ?></td>
                                         <td><?= $data->phone; ?></td>
                                         <td><?= $data->email; ?></td>
                                         <td><?= makeFirstLetterUpper($data->relationship); ?></td>

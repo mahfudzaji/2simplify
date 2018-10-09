@@ -10,16 +10,13 @@ class PAController{
     private $role, $userId;
 
     private $placeholderProduct=[
-        [
-            'name'=>'required', 
-            'description'=>'required',
-            'part_number'=>'required',
-            'link'=>''
-        ],
-        [
-            'category'=>'required',
-            'vendor'=>'required' 
-        ] 
+        
+        'name'=>'required', 
+        'description'=>'required',
+        'part_number'=>'required',
+        'link'=>'',
+        'category'=>'required'
+
     ];
 
     private $placeholderCategory=[
@@ -71,7 +68,7 @@ class PAController{
 
         $builder=App::get("builder");
 
-        $vendors = $builder->getAllData("vendors", "Product");
+        //$vendors = $builder->getAllData("vendors", "Product");
         
         $products=$builder->getAllData('products', 'Product');
         
@@ -87,7 +84,7 @@ class PAController{
 
             $search=array();
 
-            $search['vendor']=filterUserInput($_GET['vendor']);
+            //$search['vendor']=filterUserInput($_GET['vendor']);
             $search['category']=filterUserInput($_GET['category']);
             $search['a.id']=filterUserInput($_GET['product']);
 
@@ -111,45 +108,30 @@ class PAController{
 
         $productCat=$builder->getAllData("product_categories", "Product");
         
-        $paData=$builder->custom("SELECT DISTINCT(c.id), 
-        c.name as category, 
-        c.description, 
-        GROUP_CONCAT(d.name SEPARATOR '<br>') as vendors, 
-        GROUP_CONCAT(a.name SEPARATOR '<br>') as products,
-        GROUP_CONCAT(d.link SEPARATOR '<br>') as vlink, 
-        GROUP_CONCAT(a.link SEPARATOR '<br>') as plink
+        $paData=$builder->custom("SELECT DISTINCT(b.id), 
+        b.name as category, 
+        b.description, 
+        GROUP_CONCAT(a.name SEPARATOR '<br>') as products, 
+        GROUP_CONCAT(case when a.link IS NULL then '-' else a.link end SEPARATOR '<br>') as plink
         FROM products as a 
-        LEFT JOIN product_vendor as b on a.product_vendor=b.id 
-        LEFT JOIN product_categories as c on b.category=c.id 
-        LEFT JOIN vendors as d on b.vendor=d.id 
+        INNER JOIN product_categories as b on a.category=b.id 
         WHERE $whereClause 
-        GROUP BY c.id", "Document");
+        GROUP BY b.id", "Document");
 
-        //dd($paData);
 
-        $vd=[];
+        $pd=[];
         for($i=0; $i<count($paData); $i++){
-            $v = explode('<br>', $paData[$i]->vendors);
             $p = explode('<br>', $paData[$i]->products);
-            $vl = explode('<br>', $paData[$i]->vlink);
             $pl = explode('<br>', $paData[$i]->plink);
 
-            for($j=0; $j<count($v); $j++){
-                if(array_key_exists($v[$j], $vd)==false){
-                    $vd[$v[$j]][0]=[$p[$j], $pl[$j]];
-                }else{
-                    array_push($vd[$v[$j]], [$p[$j], $pl[$j]]);
-                }
+            for($j=0;$j<count($p);$j++){
+                array_push($pd, ['prod'=>$p[$j], 'link'=>$pl[$j]]);
             }
-            $paData[$i]->vendors=$vd;
-            unset($paData[$i]->products);
-            unset($paData[$i]->plink);
-            unset($paData[$i]->vlink);
-            $vd=[];
-        }
-        
-        //dd($paData);
 
+            $paData[$i]->products=$pd;
+            unset($paData[$i]->plink);
+        }
+        //dd($paData);
         //Pagination
         //only show data for specified page
         if(isset($_GET['p'])){
@@ -221,18 +203,18 @@ class PAController{
         $passingRequirement=true;
         $_SESSION['sim-messages']=[];
 
-        for($i=0; $i<count($this->placeholderProduct); $i++){
-            foreach($this->placeholderProduct[$i] as $k => $v){ 
-                if(checkRequirement($v, $k, $_POST[$k])){
-                    $data[$i][$k]=filterUserInput($_POST[$k]);
-                }else{
-                    $passingRequirement=false;
-                }  
-            }
-        }
 
-        $data[0]['created_by']=substr($_SESSION['sim-id'], 3, -3);
-        $data[0]['updated_by']=$data[0]['created_by'];
+        foreach($this->placeholderProduct as $k => $v){ 
+            if(checkRequirement($v, $k, $_POST[$k])){
+                $data[$k]=filterUserInput($_POST[$k]);
+            }else{
+                $passingRequirement=false;
+            }  
+        }
+        
+
+        $data['created_by']=substr($_SESSION['sim-id'], 3, -3);
+        $data['updated_by']=substr($_SESSION['sim-id'], 3, -3);
 
         
 
@@ -244,7 +226,7 @@ class PAController{
 
             $lastUploadedId=$processingUpload->getLastUploadedId();
 
-            $data[0]['picture']=$lastUploadedId;
+            $data['picture']=$lastUploadedId;
         }
 
         if(!$passingRequirement){
@@ -254,15 +236,7 @@ class PAController{
 
         $builder=App::get('builder');
 
-        $insertToProductVendor = $builder->insert('product_vendor', $data[1]);
-
-        if(!$insertToProductVendor){
-            redirectWithMessage([['Maaf mendaftarkan produk gagal, mohon coba lagi', 0]] , getLastVisitedPage());
-        }
-
-        $data[0]['product_vendor'] = $builder->getPdo()->lastInsertId();
-
-        $insertToProduct = $builder->insert('products', $data[0]);
+        $insertToProduct = $builder->insert('products', $data);
 
         if(!$insertToProduct){
             recordLog('Insert product', 'Mendaftarkan product gagal');
@@ -282,7 +256,7 @@ class PAController{
         
         //checking access right
         if(!$this->role->can("create-product")){
-            redirectWithMessage([["anda tidak memiliki membuat data kategori", 0]],'p-a');
+            redirectWithMessage([["anda tidak memiliki membuat data kategori", 0]],getLastVisitedPage());
         }
 
         //checking form requirement
@@ -325,11 +299,11 @@ class PAController{
 
             $builder->save();
 
-            redirectWithMessage([['Mendaftarkan Category berhasil', 1]] , '/p-a');
+            redirectWithMessage([['Mendaftarkan Category berhasil', 1]] , getLastVisitedPage());
 
         }else{
 
-            redirectWithMessage([['Maaf, mendaftarkan Category gagal', 1]] , '/p-a');
+            redirectWithMessage([['Maaf, mendaftarkan Category gagal', 1]] , getLastVisitedPage());
 
         }
 
@@ -337,7 +311,7 @@ class PAController{
 
     public function createVendor(){
         if(!$this->role->can("create-product")){
-            redirectWithMessage([["Anda tidak memiliki hak membuat data product", 0]], '/p-a');
+            redirectWithMessage([["Anda tidak memiliki hak membuat data product", 0]], getLastVisitedPage());
         }
 
         //checking form requirement

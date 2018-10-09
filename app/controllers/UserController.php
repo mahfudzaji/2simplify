@@ -160,9 +160,10 @@ class UserController{
 
         recordLog('Register owner', "Register user pertama berhasil");
 
-        redirectWithMessage([['Anda telah didaftarkan sebagai admin',1]],'/');
+        redirectWithMessage([['Anda telah didaftarkan sebagai admin',1]], '/');
     }
 
+    
     /*
         Registering user and if success, send link to user's email for verify the user's account. 
         the link redirect to a page that the user can fill the password. 
@@ -197,7 +198,7 @@ class UserController{
 
         $builder->save();
 
-        redirectWithMessage([['Pendaftaran user berhasil', 1]], 'home');
+        redirectWithMessage([['Pendaftaran user berhasil', 1]], getLastVisitedPage());
     }
 
     public function processingRegister($builder){
@@ -257,7 +258,7 @@ class UserController{
         ];
 
         //here is processing upload file then get the result
-        if(isset($_FILES["photo"]) && !empty($_FILES["photo"]) && $_FILES["photo"]!=''){
+        if(isset($_FILES["photo"]) && !empty($_FILES["photo"]) && $_FILES["photo"]!='' && $_FILES["photo"]['size']!=0){
             
             $processingUpload = new UploadController();
 
@@ -275,8 +276,8 @@ class UserController{
   
         }
 
-        if(isset($_FILES["signature"]) && !empty($_FILES["signature"]) && $_FILES["signature"]!=''){
-
+        if(isset($_FILES["signature"]) && !empty($_FILES["signature"]) && $_FILES["signature"]!='' && $_FILES["signature"]['size']!=0){
+           
             $processingUpload = new UploadController();
 
             $uploadResult = $processingUpload->processingUpload($_FILES["signature"]);

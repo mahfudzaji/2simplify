@@ -10,6 +10,7 @@ class ProjectController{
     private $role,$userId,$roleOfUser;
 
     private $placeholderProjectForm = array(
+        "po_quo" => 'required',
         "name" => "required",
         "description" => "",
         "start_date" => "required",
@@ -101,7 +102,8 @@ class ProjectController{
         INNER JOIN users as b on a.pic=b.id
         INNER JOIN users as c on a.created_by=c.id
         INNER JOIN users as d on a.updated_by=d.id
-        INNER JOIN form_po as e on a.po=e.id
+        INNER JOIN po_quo as h on a.po_quo=h.id
+        INNER JOIN form_po as e on h.po=e.id
         INNER JOIN companies as f on e.buyer=f.id
         INNER JOIN document_data as g on a.id=g.document_number
         WHERE $whereClause and g.document=10", "Project");
@@ -163,7 +165,7 @@ class ProjectController{
         $_SESSION['sim-messages']=[];
 
         
-        foreach($this->placeholderRequestItemProjectForm as $k => $v){
+        foreach($this->placeholderProjectForm as $k => $v){
             if(checkRequirement($v, $k, $_POST[$k])){
                 $data[$k]=filterUserInput($_POST[$k]);
             }else{
@@ -190,10 +192,20 @@ class ProjectController{
             recordLog('Project', returnMessage()['project']['createSuccess'] );
         }
 
+        $idProject = $builder->getPdo()->lastInsertId();
+
+        //insert into document_data
+        $insertToDocumentData = $builder->insert("document_data", ['document'=>'10', 'document_number'=>$idProject]);
+        if(!$insertToDocumentData){
+            recordLog('Project form', "Maaf gagal membuat data project" );
+            redirectWithMessage(['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.2', 0],getLastVisitedPage());
+            exit();
+        }
+
         $builder->save();
 
         //redirect to form page with message
-        redirectWithMessage([[ returnMessage()['project']['createSuccess'] ,1]],getLastVisitedPage());
+        redirectWithMessage([[ returnMessage()['project']['createSuccess'] ,1]], '/project');
 
     }
 
@@ -228,7 +240,8 @@ class ProjectController{
         INNER JOIN users as b on a.pic=b.id
         INNER JOIN users as c on a.created_by=c.id
         INNER JOIN users as d on a.updated_by=d.id
-        INNER JOIN form_po as e on a.po=e.id
+        INNER JOIN po_quo as i on a.po_quo=i.id
+        INNER JOIN form_po as e on i.po=e.id
         INNER JOIN companies as f on e.buyer=f.id
         INNER JOIN po_quo as g on e.id=g.po
         INNER JOIN document_data as h on a.id=h.document_number
@@ -250,30 +263,29 @@ class ProjectController{
 
         $projectItemRequested = $builder->custom("SELECT DATE_FORMAT(a.request_date, '%d %M %Y') as request_date,
         a.request_number, a.remark,  
-        GROUP_CONCAT(d.name SEPARATOR '<br>') as product,
-        GROUP_CONCAT(case when d.part_number IS NULL then '-' else d.part_number end SEPARATOR '<br>') as part_number,
-        e.name as requested_by,
-        GROUP_CONCAT(case c.status when 1 then 'IN' else 'OUT' end SEPARATOR '<br>') as status,
+        GROUP_CONCAT(DISTINCT(c.name) SEPARATOR '<br>') as product,
+        GROUP_CONCAT(DISTINCT(case when c.part_number IS NULL then '-' else c.part_number end) SEPARATOR '<br>') as part_number,
+        d.name as requested_by,
+        GROUP_CONCAT(case b.status when 1 then 'IN' else 'OUT' end SEPARATOR '<br>') as status,
         
-        (SELECT GROUP_CONCAT(c.quantity SEPARATOR '<br>') as qty FROM project_item_request as a 
-        INNER JOIN project_stock_relation as b on a.id=b.item_request
-        INNER JOIN receipt_stock as c on b.stock=c.id
-        INNER JOIN products as d on c.product=d.id
-        INNER JOIN users as e on a.requested_by=e.id
-        WHERE a.project=$id and c.status=1 GROUP BY a.id) as quantity_in,
+        (SELECT GROUP_CONCAT(b.quantity SEPARATOR '<br>') as qty 
+        FROM project_item_request as a 
+        INNER JOIN project_item as b on a.id=b.item_request
+        INNER JOIN products as c on b.product=c.id
+        INNER JOIN users as d on a.requested_by=d.id
+        WHERE a.project=$id and b.status=1 GROUP BY a.id) as quantity_in,
         
-        (SELECT GROUP_CONCAT(c.quantity SEPARATOR '<br>') as qty FROM project_item_request as a 
-        INNER JOIN project_stock_relation as b on a.id=b.item_request
-        INNER JOIN receipt_stock as c on b.stock=c.id
-        INNER JOIN products as d on c.product=d.id
-        INNER JOIN users as e on a.requested_by=e.id
-        WHERE a.project=$id and c.status=2 GROUP BY a.id)  as quantity_out
+        (SELECT GROUP_CONCAT(b.quantity SEPARATOR '<br>') as qty 
+        FROM project_item_request as a 
+        INNER JOIN project_item as b on a.id=b.item_request
+        INNER JOIN products as c on b.product=c.id
+        INNER JOIN users as d on a.requested_by=d.id
+        WHERE a.project=$id and b.status=2 GROUP BY a.id) as quantity_out
 
 		FROM project_item_request as a
-        INNER JOIN project_stock_relation as b on a.id=b.item_request
-        INNER JOIN receipt_stock as c on b.stock=c.id
-        INNER JOIN products as d on c.product=d.id
-        INNER JOIN users as e on a.requested_by=e.id
+        INNER JOIN project_item as b on a.id=b.item_request
+        INNER JOIN products as c on b.product=c.id
+        INNER JOIN users as d on a.requested_by=d.id
         WHERE a.project=$id
         GROUP BY a.id", "Project");
 
@@ -337,8 +349,11 @@ class ProjectController{
         $companyCode = strtoupper($companyData[0]->code);
         $data[0]['request_number'] = "BPB/".$numbering."-".$companyCode."/".$thisMonth."-".date('Y');
         // End of numbering format
-
+        
+        //dd($data);
+        
         $insertToProjectItemRequest = $builder->insert("project_item_request", $data[0]);
+        $idProjectItem = $builder->getPdo()->lastInsertId();
 
         if(!$insertToProjectItemRequest){
             recordLog('Project', returnMessage()['project']['createFail'] );
@@ -347,6 +362,8 @@ class ProjectController{
         }else{
             recordLog('Project', returnMessage()['project']['createSuccess'] );
         }
+
+        
 
         //check whether the value between keys is equal
         $dataKeys= array_keys($data[1]);
@@ -373,30 +390,33 @@ class ProjectController{
             foreach($dataKeys as $key){
                 $newData[$key]=$data[1][$key][$i];
             }
-            $newData['created_by'] = substr($_SESSION['sim-id'], 3, -3);
-            $newData['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
 
             //insert into receipt_stock with status 'out' because request item is always issuing stock
             $newData['status'] = 2;
+            $newData['item_request'] = $idProjectItem;
             array_push($newDataRecap, $newData);
         }
-
+        
         $isSuccessInsertToStock=true;
         for($i=0; $i<count($newDataRecap); $i++){
+
             //insert into receipt_stock with status 'out' because request item is always issuing stock
-            $insertToStock = $builder->insert("receipt_stock", $newDataRecap[$i]);
+            $insertToStock = $builder->insert("project_item", $newDataRecap[$i]);
             
             if(!$insertToStock){
                 $isSuccessInsertToStock=false;
             }
         }
 
+        //dd($newDataRecap);
+      
+
         if(!$isSuccessInsertToStock){
-            recordLog('Request project item', returnMessage()['receiptForm']['createFail'] );
+            recordLog('Request project item', "Gagal menambahkan project item" );
             redirectWithMessage([['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator2.', 0]],getLastVisitedPage());
             exit();
         }else{
-            recordLog('Request project item', returnMessage()['receiptForm']['createSuccess'] );
+            recordLog('Request project item', "Gagal menambahkan project item" );
         }
 
         $builder->save();

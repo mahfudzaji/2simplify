@@ -50,6 +50,7 @@ $priceTotal=0;
                 </div>
                 <br> 
                 <button class="btn btn-danger btn-close" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -60,19 +61,20 @@ $priceTotal=0;
                     <h3>Lampiran</h3>
                 </div>
                 <div class="modal-main-content">
-                    <form action="/attachment" method="post">
+                    <form action="/attachment" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="document_data" value=<?= $quoData[0]->ddata; ?>>
                         <div class="form-group">
                             <label>Lampiran</label>
                             <textarea class="form-control" name="description" placeholder="Tuliskan deskripsi lampiran..." required></textarea>
                         </div>
                         <div class="form-group">
-                            <select name="attachment" class="form-control select-ajax" required>
+                            <!-- <select name="attachment" class="form-control select-ajax" required>
                                 <option value=''>PILIH LAMPIRAN</option>
                                 <?php foreach($uploadFiles as $uploadFile): ?>
                                     <option value=<?= $uploadFile->id; ?>><?= $uploadFile->title; ?></option>
                                 <?php endforeach; ?>
-                            </select>
+                            </select> -->
+                            <input type="file" name="attachment" required>
                         </div>
                         <div class="image-appear"></div>
                         <br>
@@ -80,6 +82,7 @@ $priceTotal=0;
                     </form>
                 </div>
                 <button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -97,6 +100,11 @@ $priceTotal=0;
                 </div>
                 <form action="/form/quo/update" method="post">
                     <input type="hidden" name="quo" value=<?= $_GET['quo']; ?>>
+
+                    <div class="form-group">
+                        <label>Quotation number</label>
+                        <input type="text" class="form-control" name="quo_number" placeholder="Quotation number" required>
+                    </div>
 
                     <div class="form-group">
                         <label>Tanggal quo</label>
@@ -134,6 +142,7 @@ $priceTotal=0;
                         <button type="submit" name="submit" class="btn btn-primary btn-next">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </div>
                 </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -181,6 +190,7 @@ $priceTotal=0;
                         <button type="submit" name="submit" class="btn btn-primary btn-next">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </div>
                 </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -197,6 +207,7 @@ $priceTotal=0;
                     </form>
                 </div>
                 <br><button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -215,6 +226,7 @@ $priceTotal=0;
                     </form>
                 </div>
                 <br><button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -233,6 +245,7 @@ $priceTotal=0;
                     </form>
                 </div>
                 <br><button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -251,6 +264,7 @@ $priceTotal=0;
                     </form>
                 </div>
                 <br><button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -299,6 +313,7 @@ $priceTotal=0;
                         <button type="submit" name="submit" class="btn btn-primary btn-next">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </div>
                 </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -367,6 +382,7 @@ $priceTotal=0;
                         <button type="submit" name="submit" class="btn btn-primary btn-next">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </div>
                 </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -389,6 +405,7 @@ $priceTotal=0;
                 </div>
                 <br> 
                 <button class="btn btn-danger btn-close" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -404,7 +421,7 @@ $priceTotal=0;
                             <h4>PIC: <span data-item="pic_buyer"><?= $data2->pic_buyer; ?></span></h4>
                         </div>
                         <div class="col-md-6 text-left" style="padding-right:0">
-                            <h3><span style="background-color:#95DEE3;"><?= (isset($_GET['revision']) && !empty($_GET['revision']))?$data2->quo_number."/Rev".$_GET['revision']:$data2->quo_number ?></span></h3>
+                            <h3><span style="background-color:#95DEE3;" data-item="quo_number"><?= (isset($_GET['revision']) && !empty($_GET['revision']))?$data2->quo_number."/Rev".$_GET['revision']:$data2->quo_number ?></span></h3>
                             <h4>QUO DATE: <span data-item="quo_date" data-item-val="<?= $data2->dd; ?>"><?= $data2->quo_date; ?></span></h4>
                             <h4>PIC: <span data-item="pic_supplier"><?= $data2->pic_supplier; ?></span></h4>
                             <h4>Telp/Fax: <?= $data2->sphone; ?> / <?= $data2->sfax; ?></h4>
@@ -574,12 +591,14 @@ $(document).ready(function(){
             priceUnit = $(this).parent().closest("tr").find("[data-item~='price_unit']").html();
             itemDiscount = $(this).parent().closest("tr").find("[data-item~='item_discount']").html();
 
+
             $("#modal-update-quo-form").find("input[name~='quo-item']").val(quoItem);
             $("#modal-update-quo-form").find("select[name~='product']").find("option").attr("selected", false);
             $("#modal-update-quo-form").find("select[name~='product']").find("option[value~='"+product+"']").attr("selected", true);
             $("#modal-update-quo-form").find("input[name~='quantity']").val(quantity); 
             $("#modal-update-quo-form").find("input[name~='price_unit']").val(priceUnit);
-            $("#modal-update-quo-form").find("input[name~='item_discount']").val(itemDiscount); 
+            $("#modal-update-quo-form").find("input[name~='item_discount']").val(itemDiscount);
+ 
             
         }else{
             $("#modal-remove-quo-form, #modal-approve-quo-form, #modal-reject-quo-form, #modal-revision-quo-form").find("input[name~='quo-item']").val(quoItem);
@@ -594,14 +613,17 @@ $(document).ready(function(){
         var supplier = $("[data-item~='pic_supplier']").html();
         var currency = $("[data-item~='currency']").attr("data-item-val");
         var remark = $("[data-item~='remark']").html();
+        var quoNumber = $("[data-item~='quo_number']").html();
 
         $("#modal-update-quo").find("input[name~='pic_buyer']").val(buyer);
         $("#modal-update-quo").find("input[name~='pic_supplier']").val(supplier);
         $("#modal-update-quo").find("input[name~='doc_date']").val(quoDate);
         $("#modal-update-quo").find("#remark").trumbowyg('html', remark);
 		$("#modal-update-quo").find("#remark").trumbowyg('html');
-        $("#modal-update-quo").find("select[name~='currency']").find("option").attr("selected", false);
+        //$("#modal-update-quo").find("select[name~='currency']").find("option").attr("selected", false);
         $("#modal-update-quo").find("select[name~='currency']").find("option[value~='"+currency+"']").attr("selected", true);
+        $("#modal-update-quo").find("input[name~='quo_number']").val(quoNumber);
+
     });
 
     $("#create-revision").on("click", function(){

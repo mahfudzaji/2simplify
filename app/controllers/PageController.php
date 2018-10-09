@@ -36,8 +36,10 @@ class PageController{
             if(!isset($_SESSION['sim-isLogin'])||$_SESSION['sim-isLogin']==false||empty($_SESSION)){
                 view('index', compact('recaptcha')); 
             }else{
+
                 redirect('home');
                 exit;
+
             }
             
         }

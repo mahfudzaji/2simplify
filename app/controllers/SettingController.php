@@ -98,7 +98,7 @@ class SettingController{
         $passingRequirement=true;
         $_SESSION['sim-messages']=[];
 
-        foreach(['name' => 'required', 'email' => 'required', 'department' => 'required'] as $k => $v){
+        foreach(['name' => 'required', 'code' => 'required', 'email' => 'required', 'department' => 'required'] as $k => $v){
             if(checkRequirement($v, $k, $_POST[$k])){
                 $data[$k]=filterUserInput($_POST[$k]);
             }else{
