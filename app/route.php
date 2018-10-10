@@ -166,6 +166,8 @@ $router->post('stock/stock-create-from-form', 'StockController@stockCreateFromFo
 $router->get('stock/get-serial-number', 'StockController@stockSerialNumber');
 $router->get('stock/get-stock-list', 'StockController@getStockList');
 $router->get('stock/check-stock-available', 'StockController@checkStock');
+$router->get('stock/check-stock-category', 'StockController@checkStockByCategory');
+
 
 //tested
 $router->post('stock/in', 'StockController@stockIn');

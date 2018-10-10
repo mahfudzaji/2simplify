@@ -52,7 +52,11 @@ require base.'base/header.view.php';
                             <div style="border-bottom:2px solid;cursor:pointer;background-color:#ffffe6;">
                                 <div class="content-preview row" id="<?= $data->cid; ?>">
                                     <div class="col-md-4">
-                                        <!-- <img src='/public/upload/<?= $data->pic; ?>' class="img-responsive"> -->
+                                        <?php if($data->pic==''): ?>
+                                            <!-- <div><?= substr($data->category, 0, 1); ?></div> -->
+                                        <?php else: ?>
+                                            <img src='/public/upload/<?= $data->pic; ?>' class="img-responsive">
+                                        <?php endif; ?>
                                     </div>
                                     <div class="col-md-8">
                                         <h2><?= $data->category; ?></h2>
@@ -203,40 +207,46 @@ require base.'base/header.view.php';
         });
 
         $(".content-preview").on("click", function(){
-            let product = $(this).attr("id");
+            let category = $(this).attr("id");
             
             $('.content').removeClass('active');
             $('.content').children('.detail').hide();
             $(this).closest('.content').addClass('active');
 
-            $.get("/stock/get-stock-list", {product:product}, function(data, status){
+            $.get("/stock/check-stock-category", {category:category}, function(data, status){
                 let responds = JSON.parse(data);
+
+                console.log(responds);
                 
-                let unitList = "<table class='table table-hover'><thead>";
-				unitList += "<tr><th>Serial number</th><th>Stock condition</th><th>Location</th><th>Receive date</th><th>Send date</th><th>Status</th><th>Action</th></tr>";
-                unitList += "</thead><tbody>";
+                let stockList = "<table class='table table-hover'><thead>";
+				stockList += "<tr><th>Product</th><th>Stock in</th><th>Stock out</th><th>Total</th><th>Action</th></tr>";
+                stockList += "</thead><tbody>";
                 
 
                 for(let i=0; i<responds.length; i++){
-                    unitList += "<tr id="+responds[i].id+">";
-                    unitList += "<td data-item='serial-number'>"+responds[i].serial_number+"</td>";
-                    unitList += "<td>"+makeFirstLetterUpper(responds[i].stock_condition)+"</td>";
-                    unitList += "<td data-item='service-point' data-item-val="+responds[i].idsp+">"+makeFirstLetterUpper(responds[i].service_point)+"</td>";
-                    unitList += "<td data-item='receive-date' data-item-val="+responds[i].ra+">"+responds[i].received_at+"</td>";
-                    unitList += "<td data-item='send-date' data-item-val="+responds[i].sa+">"+responds[i].send_at+"</td>";
-                    unitList += "<td>"+makeFirstLetterUpper(responds[i].status)+"</td>";
-                    unitList += "<td><button type='button' class='btn btn-sm btn-primary btn-modal' data-id='update-stock'>More</button></td>";
-                    unitList += "</tr>";
+                    
+                    let stockReceipt = Number(responds[i].qty_receipt_in)-Number(responds[i].qty_receipt_out);
+                    let stockProject = Number(responds[i].qty_pro_in)-Number(responds[i].qty_pro_out);
+
+                    let stockIn = Number(responds[i].stock_in)+stockReceipt+stockProject;
+                    let stockOut = Number(responds[i].stock_out)+stockReceipt+stockProject;
+                    let total = stockIn+stockOut
+
+                    stockList += "<tr id="+responds[i].pid+">";
+                    stockList += "<td data-item='product'>"+responds[i].product+"</td>";
+                    stockList += "<td data-item='stock-in' data-item-val="+stockIn+">"+stockIn+"</td>";
+                    stockList += "<td data-item='stock-out' data-item-val="+stockOut+">"+stockOut+"</td>";
+                    stockList += "<td data-item='total' data-item-val="+responds[i].ra+">"+total+"</td>";
+                    stockList += "<td><button type='button' class='btn btn-sm btn-primary btn-modal' data-id='update-stock'>More</button></td>";
+                    stockList += "</tr>";
                 }
 
-                unitList += "</tbody></table>";
+                stockList += "</tbody></table>";
 
-                /* $('.active>.detail').empty();
-                $('.active>.detail').append(unitList); */
                 $('.content.active').find('.detail').empty();
-                $('.content.active').find('.detail').append(unitList);
+                $('.content.active').find('.detail').append(stockList); 
 
-                console.log(unitList);
+                //console.log(unitList);
 
             });
 

@@ -84,7 +84,7 @@ class StockController{
 
 
         //Based on product category
-        $stocksData = $builder->custom("SELECT d.id as cid, d.name as category, d.description,
+        $stocksData = $builder->custom("SELECT d.id as cid, d.name as category, d.description, d.picture as pic,
         IFNULL((select count(*) from stocks inner join products on stocks.product=products.id where products.category=d.id and status=1),0) as stock_in, 
         IFNULL((select sum(quantity) as quantity from project_item inner join products on project_item.product=products.id where products.category=d.id and status=1),0) as qty_pro_in,
         IFNULL((select sum(quantity) as quantity from receipt_stock inner join products on receipt_stock.product=products.id where products.category=d.id and status=1),0) as qty_receipt_in,
@@ -286,16 +286,40 @@ class StockController{
         $builder = App::get('builder');
 
         $product = filterUserInput($_GET['product']);
-        $status = filterUserInput($_GET['status']);
+        //$status = filterUserInput($_GET['status']);
 
         $stockAvailable = $builder->custom("SELECT a.product as pid, 
         (select count(*) from stocks where product=a.product and status=1) as stock_in, 
-        (select sum(quantity) as quantity from project_item where status=1 and product=a.id) as qty_pro_in,
-        (select sum(quantity) as quantity from receipt_stock where status=1 and product=a.id) as qty_receipt_in
+        (select sum(quantity) as quantity from project_item where status=1 and product=a.product) as qty_pro_in,
+        (select sum(quantity) as quantity from receipt_stock where status=1 and product=a.product) as qty_receipt_in
         FROM `stocks` as a 
         INNER JOIN products as b on a.product=b.id 
-        WHERE a.product=$product and a.status=$status
-        GROUP BY a.product", 'Stock');
+        WHERE b.id=$product
+        GROUP BY b.id", 'Stock');
+
+        if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+            echo json_encode($stockAvailable);
+        }else{
+            return $stockAvailable;
+        }
+    }
+
+    public function checkStockByCategory(){
+        $builder = App::get('builder');
+
+        $category = filterUserInput($_GET['category']);
+
+        $stockAvailable = $builder->custom("SELECT b.id as pid, b.name as product,
+        (select count(*) from stocks where product=a.product and status=1) as stock_in, 
+        (select sum(quantity) as quantity from project_item where status=1 and product=a.product) as qty_pro_in,
+        (select sum(quantity) as quantity from receipt_stock where status=1 and product=a.product) as qty_receipt_in,
+        (select count(*) from stocks where product=a.product and status=2) as stock_out, 
+        (select sum(quantity) as quantity from project_item where status=2 and product=a.product) as qty_pro_out,
+        (select sum(quantity) as quantity from receipt_stock where status=2 and product=a.product) as qty_receipt_out
+        FROM `stocks` as a 
+        INNER JOIN products as b on a.product=b.id 
+        WHERE b.category=$category
+        GROUP BY b.id ", 'Stock');
 
         if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
             echo json_encode($stockAvailable);
