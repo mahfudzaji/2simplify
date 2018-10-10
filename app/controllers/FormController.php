@@ -117,7 +117,8 @@ class FormController{
             "product" => 'required',
             "quantity" => 'required',
             "price" => 'required',
-            "discount" => ''
+            "discount" => '',
+            "remark" => ''
         ]
     );
 
@@ -1722,31 +1723,6 @@ class FormController{
         GROUP BY a.id
         ORDER BY a.id DESC","Document");
 
-        /* if(isset($_GET['quo'])&&!empty($_GET['quo'])){
-
-            $withQuo = filterUserInput($_GET['quo']);
-            
-            if($withQuo == 1){
-                
-                $poData = $builder->custom("SELECT d.id, b.quo_number, 
-                a.po_number,
-                date_format(d.doc_date, '%d %M %Y') as doc_date, 
-                e.name as supplier,
-                f.name as buyer, 
-                GROUP_CONCAT(DISTINCT(g.name) ORDER by g.id asc SEPARATOR '<br>') as product 
-                FROM po_quo as a 
-                INNER JOIN form_quo as b on a.quo=b.id 
-                INNER JOIN form_po as d on a.po=d.id 
-                INNER JOIN quo_product as c on a.quo=c.quo
-                INNER JOIN companies as e on d.supplier=e.id 
-                INNER JOIN companies as f on d.buyer=f.id 
-                INNER JOIN products as g on c.product=g.id
-                WHERE $whereClause && po_or_quo=1
-                GROUP BY d.id
-                ORDER BY d.id DESC", "Document");
-            }
-        } */
-
         //download all the data
         if(isset($_GET['download']) && $_GET['download']==true){
             
@@ -1883,8 +1859,6 @@ class FormController{
         if(!$isSame){
             redirectWithMessage([["Mohon isi data product dengan lengkap", 0]], getLastVisitedPage());
         }
-        
-        //dd($data);
 
         //insert to db:form_receipt
         $insertToFormReceipt = $builder->insert('form_receipt', $data[0]);
@@ -1910,35 +1884,28 @@ class FormController{
             array_push($newDataRecap, $newData);
         }
 
-        //$newDataRecap is the data that will be inserted into table po_product
-        //$data[0] is the data that will be inserted into table form_po
-        
-        //dd($newDataRecap);
-        //dd($data);
-
-        //insert into stock_relation
-        //$insertToStockRelation = $builder->insert("stock_relation", ['do_or_receipt_in' => 0, 'doc_in' => $idReceiptForm ]);
-        
-        //$idStockRelation = $builder->getPdo()->lastInsertId();
-
-        /* if(!$insertToStockRelation){
-            recordLog('Stock', returnMessage()['stock']['createFail'] );
-            redirectWithMessage([[ returnMessage()['databaseOperationFailed'], 0]],getLastVisitedPage());
-            exit();
-        }else{
-            recordLog('Stock', returnMessage()['stock']['createSuccess'] );
-        } */
-
-        $isSuccessInsertToReceiptStock=true;
+        $flag = true;
         for($i=0; $i<count($newDataRecap); $i++){
-            //$insertToReceiptProduct = $builder->insert('receipt_product', $newDataRecap[$i]);
 
-            //insert into receipt_stock
-            $insertToStock = $builder->insert("receipt_stock", $newDataRecap[$i]);
+            //insert into receipt_product
+            $insertToStockProduct = $builder->insert("receipt_product", $newDataRecap[$i]);
+
+            $idReceiptStock = $builder->getPdo()->lastInsertId();
+
+            $insertToStockRelation = $builder->insert("stock_relation", ['document' => 11, 'spec_doc' => $idReceiptStock]);
+
+            $stockRelation = $builder->getPdo()->lastInsertId();
+
+            $insertToStock = $builder->insert("stocks", ['receipt_date' => $data[0]['receipt_date'], 'product'=>$data[0]['product'], 'quantity'=>$data[0]['quantity'], 'stockRelation' => $stockRelation]);
             
-            if(!$insertToStock){
-                $isSuccessInsertToReceiptStock=false;
+            if(!$insertToStockProduct || !$insertToStock || !$insertToStockRelation){
+                $flag = false;
             }
+
+        }
+
+        if(!$flag){
+            redirectWithMessage([['Maaf, Gagal membuat receipt form', 0]],getLastVisitedPage());
         }
 
         //insert into document_data
@@ -2003,7 +1970,7 @@ class FormController{
         f.id as ddata,
         case a.supplier when $parameterData[company] then '2' else '1' end  as receipt_type
         FROM `form_receipt` as a 
-        INNER JOIN receipt_stock as b on a.id=b.receipt
+        INNER JOIN receipt_product as b on a.id=b.receipt
         INNER JOIN products as c on b.product=c.id
         INNER JOIN companies as d on a.supplier=d.id
         INNER JOIN companies as e on a.buyer=e.id
@@ -2014,17 +1981,10 @@ class FormController{
 
         $receiptItems = $builder->custom("SELECT b.id, b.product as pid, c.name as product, b.quantity, b.price, b.discount
         FROM form_receipt as a 
-        INNER JOIN receipt_stock as b on b.receipt=a.id
+        INNER JOIN receipt_product as b on b.receipt=a.id
         INNER JOIN products as c on b.product=c.id 
         WHERE a.id=$id
         GROUP BY c.id", "Document");
-
-        /* $receivedItems = $builder->custom("SELECT b.name as product, a.quantity 
-        FROM receipt_stock as a 
-        INNER JOIN products as b on a.product=b.id 
-        INNER JOIN stock_relation as c on a.stock_relation=c.id
-        WHERE c.do_or_receipt_in=0 and c.doc_in=$id or c.do_or_receipt_out=0 and c.doc_out=$id
-        GROUP BY a.product","Document"); */
 
         view('form/receipt_form_detail', compact('receiptData', 'receiptItems', 'receivedItems', 'attachments', 'uploadFiles'));
     }
@@ -3982,11 +3942,11 @@ class FormController{
         }
 
         $receivedItems = $builder->custom("SELECT b.name as product, count(*) as qty, 
-        GROUP_CONCAT(a.serial_number order by a.id asc SEPARATOR '<br>') as serial_number 
+        DATE_FORMAT(a.received_at, '%d %M %Y')
         FROM `stocks` as a 
         INNER JOIN products as b on a.product=b.id 
         INNER JOIN stock_relation as c on a.stock_relation=c.id
-        WHERE c.do_or_receipt_in=1 and c.doc_in=$id or c.do_or_receipt_out=1 and c.doc_out=$id && $whereClause 
+        WHERE c.document=6 and c.spec_doc=$id && $whereClause 
         GROUP BY a.product","Document");
 
         //Get the PO product for processed to DO item

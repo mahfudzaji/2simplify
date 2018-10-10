@@ -17,8 +17,8 @@ require 'base/header.view.php';
 
         <button type='button' class='btn btn-default btn-modal' id='btn-login'>Mulai disini</button>
 
-        <div style="max-width: 50%;margin:20px auto 5px auto;">
-            <img style="border-radius:5px;" src="/public/upload/pexels-Unsplash.jpg" class="img-responsive">
+        <div style="max-width: 50%; margin:20px auto 5px auto;">
+            <img style="border-radius:5px;width:100%" src="/public/upload/pexels-Unsplash2.jpg" class="img-responsive">
         </div>
 
     </div>

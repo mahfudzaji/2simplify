@@ -98,7 +98,7 @@ class ProjectController{
         d.name as updated_by,
         f.name as customer,
         g.id as ddata
-        FROM projects as a
+        FROM form_project as a
         INNER JOIN users as b on a.pic=b.id
         INNER JOIN users as c on a.created_by=c.id
         INNER JOIN users as d on a.updated_by=d.id

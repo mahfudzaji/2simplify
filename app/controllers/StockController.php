@@ -21,11 +21,11 @@ class StockController{
     private $placeholderStock = array(
         [
             "product" => "required",
-            "serial_number" => "required",
+            "quantity" => "required",
         ],
         [
-            "do_or_receipt" => "required",
-            "doc" => "required",
+            "document" => "required",
+            "spec_doc" => "required",
         ]
     );
 
@@ -84,13 +84,23 @@ class StockController{
 
 
         //Based on product category
-        $stocksData = $builder->custom("SELECT d.id as cid, d.name as category, d.description, d.picture as pic,
+        /* $stocksData = $builder->custom("SELECT d.id as cid, d.name as category, d.description, d.picture as pic,
         IFNULL((select count(*) from stocks inner join products on stocks.product=products.id where products.category=d.id and status=1),0) as stock_in, 
         IFNULL((select sum(quantity) as quantity from project_item inner join products on project_item.product=products.id where products.category=d.id and status=1),0) as qty_pro_in,
         IFNULL((select sum(quantity) as quantity from receipt_stock inner join products on receipt_stock.product=products.id where products.category=d.id and status=1),0) as qty_receipt_in,
         IFNULL((select count(*) from stocks inner join products on stocks.product=products.id where products.category=d.id and status=2),0) as stock_out, 
         IFNULL((select sum(quantity) as quantity from project_item inner join products on project_item.product=products.id where products.category=d.id and status=2),0) as qty_pro_out,
         IFNULL((select sum(quantity) as quantity from receipt_stock inner join products on receipt_stock.product=products.id where products.category=d.id and status=2),0) as qty_receipt_out
+        FROM `stocks` as a 
+        INNER JOIN products as b on a.product=b.id 
+        INNER JOIN product_categories as d on b.category=d.id
+        WHERE $whereClause
+        GROUP BY b.category
+        ORDER BY d.name asc", 'Stock'); */
+        
+        $stocksData = $builder->custom("SELECT d.id as cid, d.name as category, d.description, d.picture as pic,
+        IFNULL((select sum(quantity) as quantity from stocks inner join products on stocks.product=products.id where products.category=d.id and status=1),0) as stock_in,
+        IFNULL((select sum(quantity) as quantity from stocks inner join products on stocks.product=products.id where products.category=d.id and status=2),0) as stock_out
         FROM `stocks` as a 
         INNER JOIN products as b on a.product=b.id 
         INNER JOIN product_categories as d on b.category=d.id
@@ -480,33 +490,22 @@ class StockController{
 
         $data[0]['created_by'] = substr($_SESSION['sim-id'], 3, -3);
         $data[0]['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
+        $data[0]['status'] = 1;
 
         $serialNumber = $data[0]['serial_number'];
 
         $builder = App::get('builder');
 
         $flag = true;
+
+        $insertToStockRelation = $builder->insert("stock_relation", ['document' => $data[1]['document'], 'spec_doc' => $data[1]['spec_doc']]);
+
+        $data[0]['stock_relation'] = $builder->getPdo()->lastInsertId();
+
+        $insertToStock = $builder->insert("stocks", $data[0]);
         
-        for($i=0; $i<count($serialNumber); $i++){
-            $data[0]['serial_number'] = $serialNumber[$i];
-            
-            //check whether serial number and product already registered in db or not
-            $getSpecificStock = $builder->getSpecificData("stocks", ['*'], ['product' => $data[0]['product'], 'serial_number' => $serialNumber[$i]], "&&", "Document");
-            if(count($getSpecificStock)>0){
-                redirectWithMessage([[ "Serial number telah terdapat pada daftar stock", 0]],getLastVisitedPage());
-                exit();
-            }
-
-            //insert to stock relation
-            $insertToStockRelation = $builder->insert("stock_relation", ['do_or_receipt_in' => $data[1]['do_or_receipt'], 'doc_in' => $data[1]['doc']]);
-            
-            $data[0]['stock_relation'] = $builder->getPdo()->lastInsertId();
-
-            $insertToStock = $builder->insert("stocks", $data[0]);
-            
-            if(!$insertToStock){
-                $flag = false;
-            }
+        if(!$insertToStock || !$insertToStockRelation){
+            $flag = false;
         }
 
         if(!$flag){

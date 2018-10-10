@@ -185,12 +185,6 @@ $printBtn = false;
                         <label>Jumlah</label>
                         <input type="number" class="form-control" name="quantity" min=1 step=1 required>
                     </div>
-                    <div class="form-group">
-                        <label>Serial number</label>
-                        <select name="serial_number[]" class="form-control" required>
-                            <option value="">Serial number</option>
-                        </select>
-                    </div>
 
                     <button type="button" class="btn btn-danger btn-close">Tutup</button>
                     <button type="submit" class="btn btn-primary" style="float:right;">Kirim <span class="glyphicon glyphicon-send"></span></button>

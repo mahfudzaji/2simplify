@@ -3,7 +3,7 @@
 return [
     'connection' => [
         'host'=>'mysql:host=127.0.0.1',
-        'database'=>'2simplify',
+        'database'=>'2simplify-rev',
         'username'=>'root',
         'password'=>'ajidb',
         'option'=>[],

@@ -133,11 +133,12 @@ class UserController{
 
         //$this->checkSession();
 
+        
         $builder=App::get('builder');
         
         $checkAnyUser=$builder->getAllData('users', 'User');
-        
-        if($checkAnyUser){
+
+        if(count($checkAnyUser)>0){
             redirectWithMessage(['Maaf, anda bukan merupakan pengguna pertama',0], '/');
             
         }
@@ -179,8 +180,6 @@ class UserController{
         }
 
         $userRole=filterUserInput($_POST['role']);
-
-        //dd($_POST);
 
         $builder=App::get('builder');
 
@@ -302,9 +301,9 @@ class UserController{
             //send verification mail
             $mail = App::get('mail');
 
-            $mail->setFrom('mahfudz.aji16@gmail.com', 'Mailer');
+            $mail->setFrom(App::get('config')['username'], 'Mailer');
             $mail->addAddress($parameters['email'], $name);     
-            $mail->addReplyTo('mahfudz.aji16@gmail.com', 'Information');
+            $mail->addReplyTo(App::get('config')['username'], 'Information');
 
             $mail->isHTML(true);                                  
 

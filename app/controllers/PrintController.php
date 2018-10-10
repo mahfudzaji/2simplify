@@ -252,6 +252,9 @@ class PrintController{
 
         $products=$builder->getAllData('products', 'Product');
 
+        $ownCompany = $builder->custom("SELECT b.upload_file as logo, a.name, a.address, a.province, a.phone, a.fax, a.email FROM companies as a 
+        INNER JOIN upload_files as b on a.logo=b.id WHERE a.relationship=1", "Document");
+
         $attachments=$builder->custom("SELECT b.id, 
         c.upload_file,
         c.title, 
@@ -371,7 +374,7 @@ class PrintController{
             echo json_encode(["quoData"=>$quoData, "quoDetailData"=>$quoDetailData]);
             exit();
         }else{
-            printData('quotation_form',compact('quoData', 'quoDetailData', 'uploadFiles', 'attachments', 'products', 'countDataQuoRevision'));
+            printData('quotation_form',compact('quoData', 'quoDetailData', 'uploadFiles', 'attachments', 'products', 'countDataQuoRevision', 'ownCompany'));
         }   
     }
 
