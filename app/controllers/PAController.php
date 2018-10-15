@@ -281,7 +281,7 @@ class PAController{
         }
 
         if(!$passingRequirement){
-            redirect('/p-a');
+            redirect('/product');
             exit();
         }
 

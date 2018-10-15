@@ -50,6 +50,8 @@ $priceTotal=0;
                 </div>
                 <br> 
                 <button class="btn btn-danger btn-close" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+
             </div>
         </div>
 
@@ -77,13 +79,20 @@ $priceTotal=0;
                         <div class="image-appear"></div>
                         <button type="submit" class="btn btn-primary pull-right">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </form>
+                    <div style="clear:both">
+                        <label>Daftar lampiran</label>
+                        
+                        <div class="modal-list"></div>
+                    </div>
                 </div>
-                <button class="btn btn-danger btn-close clear" >Tutup</button>
+                <br> 
+                <button class="btn btn-danger btn-close" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
-        <!-- UPDATE PO FORM -->
-        <div class="app-form modal" id="modal-update-po-form">         
+        <!-- UPDATE REQUEST ITEM -->
+        <div class="app-form modal" id="modal-update-item">         
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Perbaharui Data <?= $titlePage; ?></h3>
@@ -93,15 +102,12 @@ $priceTotal=0;
                     <p>Form ini digunakan untuk memperbaharui data <?= $titlePage; ?>.</p>
                     <p><span style="color:red;">*</span>Catatan: <br> Setelah mengirim form, kemudian upload bukti dan beri notes jika diperlukan</p>
                 </div>
-                <form action="/form/po/update" method="post">
-                    <input type="hidden" name="po-item" value="">
+                <form action="/project/update-item" method="post">
+                    <input type="hidden" name="item_request" value="">
                     <div class="form-group">
-                        <label>Product</label>
+                        <label>Request item</label>
                         <select name="product" class="form-control" required>
                             <option value=''>PRODUK</option>
-                            <?php foreach($products as $product): ?>
-                                <option value=<?= $product->id ?> title=" <?= $product->description ?> " ><?= ucfirst($product->name).'|'.strtoupper($product->part_number); ?></option>
-                            <?php endforeach; ?>
                         </select>
                     </div>
                     
@@ -111,13 +117,8 @@ $priceTotal=0;
                     </div>
                     
                     <div class="form-group">
-                        <label>Price unit</label>
-                        <input type="number" name="price_unit" min=0 class="form-control" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Diskon (%)</label>
-                        <input type="number" min=0 name="item_discount" class="form-control" required>
+                        <label>Returned</label>
+                        <input type="number" name="returned" min=0 class="form-control" required>
                     </div>
 
                     <button type="button" class="btn btn-danger btn-close" >Tutup</button>
@@ -126,24 +127,31 @@ $priceTotal=0;
                         <button type="submit" name="submit" class="btn btn-primary btn-next">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </div>
                 </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
-        <!-- REMOVE PO FORM -->
-        <div class="app-form modal" id="modal-remove-po-form">
+        <!-- REMOVE REQUEST ITEM -->
+        <div class="app-form modal" id="modal-remove-item">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Konfirmasi</h3>
                 </div>
                 <div class="modal-main-content">
-                    <form action="/form/po/remove" method="post">
-                        <input type="hidden" name="po-item" value="">
-                        <input type="hidden" name="po" value=<?= $_GET['po']; ?>>
+                    <form action="/project/remove-item" method="post">
+                        <input type="hidden" name="request_item" value="">
+                        <div class="form-group">
+                            <label>Request item</label>
+                            <select name="product" class="form-control" required>
+                                <option value=''>PRODUK</option>
+                            </select>
+                        </div>
                         <button type="submit" class="btn btn-danger btn-sm form-control"><span class="glyphicon glyphicon-remove"></span> Hapus data</button>
                     </form>
                 </div>
                 <br><button class="btn btn-danger btn-close clear" >Tutup</button>
             </div>
+            <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
         </div>
 
         <!-- APPROVAL PO FORM -->
@@ -260,7 +268,7 @@ $priceTotal=0;
                         <?php foreach($projectDetailData as $data): ?>
                             <tr>
                                 <th>PO</th>
-                                <td><?= ucfirst($data->po_number); ?></td>
+                                <td><a href='/form/po/detail?po=<?= $data->po; ?>' target=_blank><?= ucfirst($data->po_number); ?></a></td>
                             </tr>
                             <tr>
                                 <th>Customer</th>
@@ -304,7 +312,21 @@ $priceTotal=0;
                             </tr>
                             <tr>
                                 <th>Status</th>
-                                <td><?= ucfirst($data->updated_at); ?></td>
+                                <td>
+                                    <?php if($data->psid!=3): ?>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <?= ucfirst($data->project_status); ?> <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#" class="btn-modal btn-action" data-id="update-item"><span class="glyphicon glyphicon-pencil"></span> Sedang Dikerjakan</a></li>
+                                            <li><a href="#" class="btn-modal btn-action" data-id="remove-item"><span class="glyphicon glyphicon-remove"></span> Selesai</a></li>
+                                        </ul>
+                                    </div>
+                                    <?php else: ?>    
+                                        Selesai
+                                    <?php endif; ?>          
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </table>
@@ -313,8 +335,9 @@ $priceTotal=0;
                     
                 </div>
                 <div class="col-md-9">
+                    <h3>Daftar Project Item Request</h3>
                     <?php if(count($projectItemRequested)==0): ?>
-                        <p style="color:red" class="text-center">Belum terdapat request.</p>
+                        <p>Belum terdapat data Request item</p>  
                     <?php else: $printBtn=true; ?>
                         <table class="table table-striped">
                             <thead>
@@ -333,20 +356,20 @@ $priceTotal=0;
                                     <tr>
                                         <td><?= $item->request_date; ?></td>
                                         <td><?= $item->request_number; ?></td>
-                                        <td><?= $item->requested_by; ?></td>
+                                        <td><?= ucwords($item->requested_by); ?></td>
                                         <td><?= $item->part_number; ?></td>
                                         <td><?= $item->product; ?></td>
                                         <td><?= $item->quantity_out; ?></td>
-                                        <td><?= $item->quantity_in; ?></td>
-                                        <td><?= $item->remark; ?></td>
+                                        <td><?= $item->quantity_in==''?'0':$item->quantity_in; ?></td>
+                                        <td><?= makeFirstLetterUpper($item->remark); ?></td>
                                         <td class="text-center">
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     Action <span class="caret"></span>
                                                 </button>
                                                 <ul class="dropdown-menu">
-                                                    <li><a href="#" class="btn-modal btn-action" data-id="update-do-form"><span class="glyphicon glyphicon-pencil"></span> Update</a></li>
-                                                    <li><a href="#" class="btn-modal btn-action" data-id="update-do-form"><span class="glyphicon glyphicon-remove"></span> Remove</a></li>
+                                                    <li><a href="#" class="btn-modal btn-action" data-id="update-item"><span class="glyphicon glyphicon-pencil"></span> Update</a></li>
+                                                    <li><a href="#" class="btn-modal btn-action" data-id="remove-item"><span class="glyphicon glyphicon-remove"></span> Remove</a></li>
                                                 </ul>
                                             </div>
                                         </td>

@@ -368,6 +368,15 @@ main .main-data .grid-view .cover-grid{
     overflow-y: auto;
 }
 
+
+.form-in{
+    border-bottom:#00008b 5px solid !important;
+}
+
+.form-out{
+    border-bottom:#b22222 5px solid !important;
+}
+
 main .main-data .grid-view .cover-grid:hover{
     background-color:var(--theme-color4);
     color:var(--theme-color-white);

@@ -137,6 +137,86 @@ class StockController{
     
     }
 
+    public function stockHistory(){
+        if(!$this->role->can("view-stock")){
+            redirectWithMessage([[ returnMessage()['stock']['accessRight']['view'] , 0]], getLastVisitedPage());
+        }
+
+        $builder = App::get('builder');
+
+        $servicePoints=$builder->getAllData('service_points', 'Internal');
+
+        $category = $builder->getAllData('product_categories', 'Product');
+
+        $products=$builder->getAllData('products', 'Product');
+
+        $vendors = $builder->getAllData("vendors", "Product");
+
+        //Searching for specific category
+        //category: status, ownership, delivered_date, product, is it receive form or do?
+        
+        $whereClause='';
+        
+        if(isset($_GET['search']) && $_GET['search']==true){
+
+            $search=array();
+
+            $search['d.id']=filterUserInput($_GET['category']);
+    
+            $operator='&&';
+
+            foreach($search as $k => $v){
+                if($search[$k]!=""){
+                    $whereClause.=$k."=".$v.$operator;
+                }
+            }
+
+            $whereClause=trim($whereClause, '&&');
+    
+        }
+
+        if($whereClause==''){
+            $whereClause=1;
+        }
+        
+        $stocksData = $builder->custom("SELECT d.id as cid, d.name as category, d.description, d.picture as pic,
+        
+        FROM `stocks` as a 
+        INNER JOIN products as b on a.product=b.id 
+        INNER JOIN product_categories as d on b.category=d.id
+        WHERE $whereClause
+        GROUP BY b.category
+        ORDER BY d.name asc", 'Stock');
+
+        //Pagination
+        //only show data for specified page
+        if(isset($_GET['p'])){
+            $p=$_GET['p'];
+
+            if(!is_numeric($p)){
+                redirectWithMessage([["Halaman yang anda tuju tidak diketahui",0]],getLastVisitedPage());
+            }
+            
+        }else{
+            $p=1;
+        }
+        
+        $limitStart=$p*maxDataInAPage()-maxDataInAPage();
+
+        $pages=ceil(count($stocksData)/maxDataInAPage());
+    
+        //End of pagination
+
+        //======================//
+
+        $sumOfAllData=count($stocksData);
+        
+        $stocksData=array_slice($stocksData,$limitStart,maxDataInAPage());
+
+        view('stock/index', compact('stocksData', 'partners', 'approvalPerson', 'products', 'vendors', 'pages', 'servicePoints', 'sumOfAllData', 'category'));
+    
+    }
+
     public function getProduct(){
         if(!$this->role->can("view-stock")){
             if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
@@ -284,27 +364,16 @@ class StockController{
         redirectWithMessage([[ returnMessage()['stock']['createSuccess'] ,1]],getLastVisitedPage());
     }
 
-    public function stockReduce(){
-
-    }
-
-    public function stockProcessAction(){
-
-    }
-
     public function checkStock(){
         $builder = App::get('builder');
 
         $product = filterUserInput($_GET['product']);
         //$status = filterUserInput($_GET['status']);
 
-        $stockAvailable = $builder->custom("SELECT a.product as pid, 
-        (select count(*) from stocks where product=a.product and status=1) as stock_in, 
-        (select sum(quantity) as quantity from project_item where status=1 and product=a.product) as qty_pro_in,
-        (select sum(quantity) as quantity from receipt_stock where status=1 and product=a.product) as qty_receipt_in
+        $stockAvailable = $builder->custom("SELECT a.product as pid, sum(quantity) as quantity
         FROM `stocks` as a 
         INNER JOIN products as b on a.product=b.id 
-        WHERE b.id=$product
+        WHERE b.id=$product and a.status=1
         GROUP BY b.id", 'Stock');
 
         if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
@@ -320,12 +389,8 @@ class StockController{
         $category = filterUserInput($_GET['category']);
 
         $stockAvailable = $builder->custom("SELECT b.id as pid, b.name as product,
-        (select count(*) from stocks where product=a.product and status=1) as stock_in, 
-        (select sum(quantity) as quantity from project_item where status=1 and product=a.product) as qty_pro_in,
-        (select sum(quantity) as quantity from receipt_stock where status=1 and product=a.product) as qty_receipt_in,
-        (select count(*) from stocks where product=a.product and status=2) as stock_out, 
-        (select sum(quantity) as quantity from project_item where status=2 and product=a.product) as qty_pro_out,
-        (select sum(quantity) as quantity from receipt_stock where status=2 and product=a.product) as qty_receipt_out
+        (select sum(quantity) as quantity from stocks where status=1 and product=a.product) as stock_in,
+        (select sum(quantity) as quantity from stocks where status=2 and product=a.product) as stock_out
         FROM `stocks` as a 
         INNER JOIN products as b on a.product=b.id 
         WHERE b.category=$category
@@ -471,7 +536,14 @@ class StockController{
         $passingRequirement = true;
         $_SESSION['sim-messages']=[];
 
-        $this->placeholderStock[0]['received_at']= "required";
+        $doType = filterUserInput($_POST['do_type']);
+
+        if($doType==1){
+            $this->placeholderStock[0]['received_at']= "required";
+        }elseif($doType==2){
+            $this->placeholderStock[0]['send_at']= "required";
+        }
+        
 
         for($i=0; $i<count($this->placeholderStock); $i++){
             foreach($this->placeholderStock[$i] as $k => $v){
@@ -490,9 +562,9 @@ class StockController{
 
         $data[0]['created_by'] = substr($_SESSION['sim-id'], 3, -3);
         $data[0]['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
-        $data[0]['status'] = 1;
+        $data[0]['status'] = $doType;
 
-        $serialNumber = $data[0]['serial_number'];
+        //$serialNumber = $data[0]['serial_number'];
 
         $builder = App::get('builder');
 
@@ -501,6 +573,8 @@ class StockController{
         $insertToStockRelation = $builder->insert("stock_relation", ['document' => $data[1]['document'], 'spec_doc' => $data[1]['spec_doc']]);
 
         $data[0]['stock_relation'] = $builder->getPdo()->lastInsertId();
+
+        //dd($data);
 
         $insertToStock = $builder->insert("stocks", $data[0]);
         
@@ -522,83 +596,32 @@ class StockController{
         redirectWithMessage([[ returnMessage()['stock']['createSuccess'] ,1]],getLastVisitedPage());
     }
 
-    public function stockOut(){
-        if(!$this->role->can("update-stock")){
-            redirectWithMessage([[ returnMessage()['stock']['accessRight']['update'] , 0]], getLastVisitedPage());
-        }
-
-        //checking form requirement
-        $data=[];
-        $passingRequirement = true;
-        $_SESSION['sim-messages']=[];
-
-        $this->placeholderStock[0]['send_at']= "required";
-
-        for($i=0; $i<count($this->placeholderStock); $i++){
-            foreach($this->placeholderStock[$i] as $k => $v){
-                if(checkRequirement($v, $k, $_POST[$k])){
-                    $data[$i][$k]=filterUserInput($_POST[$k]);
-                }else{
-                    $passingRequirement=false;
-                }
-            }
-        }
- 
-        //if not the passing requirements
-        if(!$passingRequirement){
-            redirectWithMessage( $_SESSION['sim-messages'] ,getLastVisitedPage());
-        }
-
-        $data[0]['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
-        //Status=> 1:in, 2:out
-        $data[0]['status'] = 2;
-
-        $serialNumber = $data[0]['serial_number'];
-
-        $builder = App::get('builder');
-
-        $flag = true;
-        
-        for($i=0; $i<count($serialNumber); $i++){
-            //$data['serial_number'] = $serialNumber[$i];
-            
-            //select stock that have specific sn and product name
-            $getSpecificStock = $builder->getSpecificData("stocks", ['stock_relation'], ['product' => $data[0]['product'], 'serial_number' => $serialNumber[$i]], "&&", "Document");
-            
-            //get the stock relation
-            $stockRelation = $getSpecificStock[0]->stock_relation;
-            
-            //update data stock_relation that have specific id
-            $updateStockRelation = $builder->update("stock_relation", ['do_or_receipt_out' => $data[1]['do_or_receipt'], 'doc_out' => $data[1]['doc']], ['id'=>$stockRelation], '', 'Document');
-            if(!$updateStockRelation){
-                recordLog('Stock', returnMessage()['stock']['createFail'] );
-                redirectWithMessage([[ returnMessage()['databaseOperationFailed'], 0]],getLastVisitedPage());
-                exit();
-            }else{
-                recordLog('Stock', returnMessage()['stock']['createSuccess'] );
-            }
-
-            //update stock data
-            $updateStock = $builder->update("stocks", $data[0], ['product' => $data[0]['product'], 'serial_number' => $serialNumber[$i]], '&&', 'Document');
-            
-            if(!$updateStock){
-                $flag = false;
-            }
-        }
-
-        if(!$flag){
-            recordLog('Stock', returnMessage()['stock']['createFail'] );
-            redirectWithMessage([[ returnMessage()['databaseOperationFailed'], 0]],getLastVisitedPage());
-            exit();
-        }else{
-            recordLog('Stock', returnMessage()['stock']['createSuccess'] );
-        }
-
-        $builder->save();
-
-        //redirect to form page with message
-        redirectWithMessage([[ returnMessage()['stock']['createSuccess'] ,1]],getLastVisitedPage());
-
+    public function stockDetail(){
+        $sql = "select b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
+        d.po_number as form_number
+        FROM stocks as a
+        INNER JOIN products as b on a.product=b.id
+        INNER JOIN stock_relation as c on a.stock_relation=c.id
+        INNER JOIN po_quo as d on c.spec_doc=d.id
+        INNER JOIN form_po as e on d.po=e.id
+        WHERE c.document=6
+        UNION
+        select b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
+        d.receipt_number as form_number
+        FROM stocks as a
+        INNER JOIN products as b on a.product=b.id
+        INNER JOIN stock_relation as c on a.stock_relation=c.id
+        INNER JOIN form_receipt as d on c.spec_doc=d.id
+        WHERE c.document=11
+        UNION
+        select b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
+        d.request_number as form_number
+        FROM stocks as a
+        INNER JOIN products as b on a.product=b.id
+        INNER JOIN stock_relation as c on a.stock_relation=c.id
+        INNER JOIN project_item_request as d on c.spec_doc=d.id
+        INNER JOIN form_project as e on d.project=e.id
+        WHERE c.document=10";
     }
 
 }

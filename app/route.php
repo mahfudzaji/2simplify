@@ -59,8 +59,6 @@ $router->post('partner/create', 'PartnerController@create');
 $router->get('partner/detail', 'PartnerController@detail');
 $router->post('partner/status', 'PartnerController@toggleStatus');
 $router->post('partner/update', 'PartnerController@update');
-$router->get('register-first-company', 'PartnerController@registerFirstCompany');
-$router->post('register-first-company', 'UserController@registerFirstCompany');
 
 //FORM
 
@@ -159,6 +157,7 @@ $router->post('product/asset/update', 'PAController@updateAsset');
 
 ////STOCKS
 $router->get('stock', 'StockController@index');
+$router->get('stock/history', 'StockController@stockHistory');
 $router->get('stock/getProduct', 'StockController@getProduct');
 $router->get('stock/getProductDetail', 'StockController@getProductDetail');
 $router->post('stock/new-stock', 'StockController@stockAdd');
@@ -171,7 +170,8 @@ $router->get('stock/check-stock-category', 'StockController@checkStockByCategory
 
 //tested
 $router->post('stock/in', 'StockController@stockIn');
-$router->post('stock/out', 'StockController@stockOut');
+//$router->post('stock/out', 'StockController@stockOut');
+$router->post('stock/update', 'StockController@stockUpdate');
 
 //SETTINGS
 $router->get('settings', 'SettingController@index');
@@ -183,6 +183,8 @@ $router->get('project', 'ProjectController@index');
 $router->post('project/create', 'ProjectController@projectCreate');
 $router->get('project/detail', 'ProjectController@projectDetail');
 $router->post('project/new-request', 'ProjectController@projectNewRequest');
+$router->post('project/update-item', 'ProjectController@projectUpdateItem');
+$router->post('project/remove-item', 'ProjectController@projectRemoveItem');
 
 ////ENGINEERING
 $router->get('engineering', '');

@@ -81,8 +81,9 @@ require base.'base/header.view.php';
             <?php else: ?>
                 <div class="container-fluid grid-view">
                     <?php foreach($quoData as $data): ?>
+                        <?php $signInOut = $parameterData['company']==$data->bid?'form-in':'form-out'; ?>
                         <a href="/form/quo/detail?quo=<?= $data->id ?>">
-                        <div class="cover-grid" style="overflow-y:auto;">
+                        <div class="cover-grid <?= $signInOut; ?>" style="overflow-y:auto;">
                             <ul>
                                 <li><?= ucfirst($data->quo_number); ?></li>
                                 <li>S: <?= ucfirst($data->supplier); ?></li>

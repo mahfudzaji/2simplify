@@ -65,8 +65,8 @@ tr{
                         <td width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" >
                             <table cellpadding='0' cellspacing='0'>
                                 <tbody>
-                                    <tr><td><?= makeFirstLetterUpper($data->supplier); ?></td></tr>
-                                    <tr><td><?= makeFirstLetterUpper($data->saddress); ?></td></tr>
+                                    <tr><td><?= makeFirstLetterUpper($data->buyer); ?></td></tr>
+                                    <tr><td><?= makeFirstLetterUpper($data->baddress); ?></td></tr>
                                     <tr><td>Telp: <?= $data->bphone; ?></td></tr>
                                 </tbody>
                             </table>    
@@ -93,13 +93,13 @@ tr{
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach($receivedItems as $data2):  $item=(100-$data2->item_discount)*$data2->total*0.01; $priceTotal+=$item; ?>
+                    <?php foreach($receiptItems as $data2):  $item=(100-$data2->discount)*$data2->quantity*$data2->price*0.01; $priceTotal+=$item; ?>
                         <tr>
                             <td style="border:1px solid; padding: 0 20px 0 10px;"><?= ($data2->part_number=='')?'-':$data2->part_number; ?></td>
                             <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->product; ?></td>
                             <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->quantity; ?></td>
-                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->price_unit; ?></td>
-                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->item_discount; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->price; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->discount; ?></td>
                             <td style="border:1px solid; padding: 0 20px 0 10px;" class="text-right"><?= $item; ?></td>
                         </tr>
                     <?php endforeach; ?>

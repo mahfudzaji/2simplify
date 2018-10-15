@@ -160,8 +160,8 @@ $printBtn = false;
                     <h3>Menambahkan Item DO</h3>
                 </div>
                 <form action="/stock/in" method="POST">
-                    <input type="hidden" name="do_or_receipt" value=1>
-                    <input type="hidden" name="doc" value=<?= $_GET['do']; ?>>
+                    <input type="hidden" name="document" value=6>
+                    <input type="hidden" name="spec_doc" value=<?= $_GET['do']; ?>>
                     <?php /* do in: 1, do out:2,  */ ?>                              
                     <input type="hidden" name="do_type" value=<?= $doData[0]->do_type; ?>>
                     <div class="form-group">
@@ -296,14 +296,14 @@ $printBtn = false;
                                 <thead>
                                     <th>Produk</th>
                                     <th>Quantity</th>
-                                    <th>Serial number</th>
+                                    <th><?= $doData[0]->do_type==1?"Diterima":"Dikirim"; ?></th>
                                 </thead>
                                 <tbody>
                                     <?php foreach($receivedItems as $item): ?>
                                         <tr>
                                             <td><?= $item->product; ?></td>
                                             <td><?= $item->qty; ?></td>
-                                            <td><?= $item->serial_number; ?></td>
+                                            <td><?= $doData[0]->do_type==1?$item->received_at:$item->send_at; ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -415,10 +415,10 @@ $(document).ready(function(){
             var stockIn=0;
             
             if(responds.length>0){
-                stockIn = Number(responds[0].stock_in)+Number(responds[0].qty_pro_in)+Number(responds[0].qty_receipt_in);
+                stockIn = Number(responds[0].quantity);
             }
 
-            $("select[name~='product']").closest("form").find(".detail-respond").find(".col-md-8").find("li").last().append("<li><strong>Available: "+stockIn+"</strong></li>");
+            $("select[name~='product']").closest("form").find(".detail-respond").find(".col-md-8").find("li").last().append("<li><strong>Stock : "+stockIn+"</strong></li>");
 
         });
 
@@ -434,20 +434,21 @@ $(document).ready(function(){
         
         if(doType == 1){
 
-            $(this).closest("form").find("[name~='serial_number[]']").replaceWith("<input type='text' name='serial_number[]' class='form-control' required>");
+            //$(this).closest("form").find("[name~='serial_number[]']").replaceWith("<input type='text' name='serial_number[]' class='form-control' required>");
         
         }else if(doType == 2){
+            alert("test");
 
-            $(this).closest("form").attr("action", "/stock/out");
+            //$(this).closest("form").attr("action", "/stock/out");
 
             $(this).closest("form").find("input[name~='received_at']").parent().find("label").html("Dikirim pada");
 
             $(this).closest("form").find("input[name~='received_at']").attr("name", "send_at");
 
             //change to select input
-            $(this).closest("form").find("[name~='serial_number[]']").replaceWith("<select name='serial_number[]' class='form-control' required>");
+            //$(this).closest("form").find("[name~='serial_number[]']").replaceWith("<select name='serial_number[]' class='form-control' required>");
 
-            $.get('/stock/get-serial-number', {product:product}, function(data, status){
+            /* $.get('/stock/get-serial-number', {product:product}, function(data, status){
                 var serialNumber = JSON.parse(data);
                 var snOption = "<option value=''>Serial Number</option>";
 
@@ -456,7 +457,7 @@ $(document).ready(function(){
                 }
 
                 $("#modal-add-stock-item").find("select[name~='serial_number[]']").empty().append(snOption);
-            });
+            }); */
         }
 
     });

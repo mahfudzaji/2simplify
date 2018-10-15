@@ -61,8 +61,8 @@ require base.'base/header.view.php';
                                     <div class="col-md-8">
                                         <h2><?= $data->category; ?></h2>
                                         <p><?= $data->description; ?></p>
-                                        <p>IN: <?= $data->stock_in+$data->qty_pro_in+$data->qty_receipt_in; ?></p>
-                                        <p>OUT: <?= $data->stock_out+$data->qty_pro_out+$data->qty_receipt_out; ?></p>
+                                        <p>IN: <?= $data->stock_in-$data->stock_out; ?></p>
+                                        <p>OUT: <?= $data->stock_out; ?></p>
                                     </div>
                                 </div>
                                 <div class='table-responsive detail' style="background-color:#fff;">
@@ -162,49 +162,6 @@ require base.'base/header.view.php';
 <script type="text/javascript">
     
     $(document).ready(function(){
-        
-        $("#btn-add-sn").on("click", function(){
-            var clone = $(this).parent().find("input[name~='serial_number[]']:first").clone().val("");
-            $(this).before(clone);
-        });
-
-        $("#modal-create-stock").on("change", "select[name~='vendor']", function(){
-            var vendor = $(this).val();
-            
-            $.get('/stock/getProduct', {vendor:vendor}, function(data, status){
-                var products = JSON.parse(data);
-                var productOption = "<option value=''>PRODUCT</option>";
-                
-                for(var i=0; i<products.length; i++){
-                    productOption+="<option value="+products[i].id+">"+products[i].name+"</option>";
-                }
-                //console.log(productOption);
-                $("select[name~='vendor']").closest("form").find("select[name~='product']").empty().append(productOption);
-            });
-            
-        });
-
-        //show the detail of the product
-        $("#modal-create-stock").on("change", "select[name~='product']", function(){
-            var product = $(this).val();
-
-            $.get('/stock/getProductDetail', {product:product}, function(data, status){
-
-                var productDetail = JSON.parse(data)[0];
-
-                var detail ="<ul>";
-                detail+="<li>Nama : "+productDetail.name+"</li>";
-                detail+="<li>Vendor : "+productDetail.vendor+"</li>";
-                detail+="<li>Part number : "+productDetail.part_number+"</li>";
-                detail+="<li>Deskripsi : "+productDetail.description+"</li>";
-                detail+="<li>Link : "+productDetail.link+"</li>";
-                detail+="</ul>";
-
-                $("select[name~='product']").closest("form").find(".detail-respond").find(".col-md-4").empty().append("<img src='/public/upload/"+productDetail.upload_file+"' class='img-responsive'>");
-                $("select[name~='product']").closest("form").find(".detail-respond").find(".col-md-8").empty().append(detail);
-
-            });
-        });
 
         $(".content-preview").on("click", function(){
             let category = $(this).attr("id");
@@ -225,19 +182,19 @@ require base.'base/header.view.php';
 
                 for(let i=0; i<responds.length; i++){
                     
-                    let stockReceipt = Number(responds[i].qty_receipt_in)-Number(responds[i].qty_receipt_out);
-                    let stockProject = Number(responds[i].qty_pro_in)-Number(responds[i].qty_pro_out);
-
-                    let stockIn = Number(responds[i].stock_in)+stockReceipt+stockProject;
-                    let stockOut = Number(responds[i].stock_out)+stockReceipt+stockProject;
+                    let stockIn = Number(responds[i].stock_in)-Number(responds[i].stock_out)
+                    let stockOut = Number(responds[i].stock_out)
                     let total = stockIn+stockOut
+
+                    console.log(stockIn-stockOut)
 
                     stockList += "<tr id="+responds[i].pid+">";
                     stockList += "<td data-item='product'>"+responds[i].product+"</td>";
                     stockList += "<td data-item='stock-in' data-item-val="+stockIn+">"+stockIn+"</td>";
                     stockList += "<td data-item='stock-out' data-item-val="+stockOut+">"+stockOut+"</td>";
                     stockList += "<td data-item='total' data-item-val="+responds[i].ra+">"+total+"</td>";
-                    stockList += "<td><button type='button' class='btn btn-sm btn-primary btn-modal' data-id='update-stock'>More</button></td>";
+                    stockList += "<td><button type='button' class='btn btn-link'>More</button></td>";
+                    //stockList += "<td><button type='button' class='btn btn-sm btn-primary btn-modal' data-id='update-stock'>More</button></td>";
                     stockList += "</tr>";
                 }
 

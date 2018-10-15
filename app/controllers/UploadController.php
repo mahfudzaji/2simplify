@@ -76,7 +76,7 @@ class UploadController{
 	}
 
 	//make upload data
-	public function processingUpload($upload_file, $title=null, $description=null){
+	public function processingUpload($upload_file, $allowFileType=null, $title=null, $description=null){
 
 		$createdBy = substr($_SESSION['sim-id'], 3, -3);
 
@@ -108,19 +108,19 @@ class UploadController{
 				//file_type 2 ->audio
 				//file_type 3 ->video
 				$file_type=1;
-				$uploadOk = 1;
+				//$uploadOk = 1;
 			} else {
 				// check apakah type video
 				//die(pathinfo($target_file,PATHINFO_EXTENSION));
 				if(strstr($upload_file['type'],"audio")){
 					$file_type=2;
-					$uploadOk = 1;
+					//$uploadOk = 1;
 				}elseif (strstr($upload_file['type'],"video")){
 					$file_type=3;
-					$uploadOk = 1;
+					//$uploadOk = 1;
 				}elseif(strstr($upload_file['type'],"application")){
 					$file_type=4;
-					$uploadOk = 1;
+					//$uploadOk = 1;
 				}else{
 					
 					$msg= ["File bukan merupakan gambar, video atau audio", 0];
@@ -146,19 +146,29 @@ class UploadController{
 				$uploadOk = 0;
 			}
 
-			$allowFileType=[1=>['jpg', 'png', 'jpeg', 'gif'], 2=>['mp3'], 3=>['mp4','mov'], 4=>['pdf']];
+			$fileTypeCategory=[1=>['jpg', 'png', 'jpeg', 'gif'], 2=>['mp3'], 3=>['mp4','mov'], 4=>['pdf']];
 
-			if(array_key_exists($file_type, $allowFileType)){
+			if($allowFileType!=null){
+				if($allowFileType!=$file_type){
+					$e=implode(',', $fileTypeCategory[$allowFileType]);
+					$msg= ["Maaf, hanya file $e yang diijinkan", 0];
+					array_push($this->messages,$msg);
+
+					return false;
+				}
+			}
+
+			if(array_key_exists($file_type, $fileTypeCategory)){
 				$uploadOk=0;
 
-				for($i=0; $i<count($allowFileType[$file_type]); $i++){
-					if($uploadFileType==$allowFileType[$file_type][$i]){
+				for($i=0; $i<count($fileTypeCategory[$file_type]); $i++){
+					if($uploadFileType==$fileTypeCategory[$file_type][$i]){
 						$uploadOk = 1;
 					}
 				}
 
 				if($uploadOk==0){
-					$e=implode(',', $allowFileType[$file_type]);
+					$e=implode(',', $fileTypeCategory[$file_type]);
 					$msg= ["Maaf, hanya file $e yang diijinkan", 0];
 					array_push($this->messages,$msg);
 				}

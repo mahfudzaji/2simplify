@@ -56,8 +56,8 @@ class ProjectController{
 
             $search=array();
 
-            $search['requisite']=filterUserInput($_GET['requisite']);
-            $search['submitter']=filterUserInput($_GET['submitter']);
+            $search['product']=filterUserInput($_GET['product']);
+            $search['pic']=filterUserInput($_GET['pic']);
 
             $searchByDateStart=filterUserInput($_GET['start_date']);
             $searchByDateEnd=filterUserInput($_GET['end_date']);
@@ -182,7 +182,9 @@ class ProjectController{
             redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
         }
 
-        $insertToProjects = $builder->insert("projects", $data);
+        $insertToProjects = $builder->insert("form_project", $data);
+
+        $idProject = $builder->getPdo()->lastInsertId();
 
         if(!$insertToProjects){
             recordLog('Project', returnMessage()['project']['createFail'] );
@@ -192,13 +194,11 @@ class ProjectController{
             recordLog('Project', returnMessage()['project']['createSuccess'] );
         }
 
-        $idProject = $builder->getPdo()->lastInsertId();
-
         //insert into document_data
         $insertToDocumentData = $builder->insert("document_data", ['document'=>'10', 'document_number'=>$idProject]);
         if(!$insertToDocumentData){
             recordLog('Project form', "Maaf gagal membuat data project" );
-            redirectWithMessage(['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.2', 0],getLastVisitedPage());
+            redirectWithMessage(['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.', 0],getLastVisitedPage());
             exit();
         }
 
@@ -233,10 +233,11 @@ class ProjectController{
         d.name as updated_by,
         f.name as customer,
         g.po_number as po_number,
+        g.po,
         h.id as ddata,
         DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, 
         DATE_FORMAT(a.updated_at, '%d %M %Y') as updated_at
-        FROM projects as a
+        FROM form_project as a
         INNER JOIN users as b on a.pic=b.id
         INNER JOIN users as c on a.created_by=c.id
         INNER JOIN users as d on a.updated_by=d.id
@@ -261,7 +262,7 @@ class ProjectController{
         WHERE c.do_or_receipt_in=2 and c.doc_in=$id or c.do_or_receipt_out=2 and c.doc_out=$id
         GROUP BY a.product","Document"); */
 
-        $projectItemRequested = $builder->custom("SELECT DATE_FORMAT(a.request_date, '%d %M %Y') as request_date,
+        /* $projectItemRequested = $builder->custom("SELECT DATE_FORMAT(a.request_date, '%d %M %Y') as request_date,
         a.request_number, a.remark,  
         GROUP_CONCAT(DISTINCT(c.name) SEPARATOR '<br>') as product,
         GROUP_CONCAT(DISTINCT(case when c.part_number IS NULL then '-' else c.part_number end) SEPARATOR '<br>') as part_number,
@@ -287,9 +288,38 @@ class ProjectController{
         INNER JOIN products as c on b.product=c.id
         INNER JOIN users as d on a.requested_by=d.id
         WHERE a.project=$id
-        GROUP BY a.id", "Project");
+        GROUP BY a.id", "Project"); */
 
         //dd($projectItemRequested);
+
+        $projectItemRequested = $builder->custom("SELECT DATE_FORMAT(a.request_date, '%d %M %Y') as request_date,
+        a.request_number, a.remark,  
+        GROUP_CONCAT(DISTINCT(d.name) SEPARATOR '<br>') as product,
+        GROUP_CONCAT(DISTINCT(case when d.part_number IS NULL then '-' else d.part_number end) SEPARATOR '<br>') as part_number,
+        e.name as requested_by,
+        GROUP_CONCAT(case c.status when 1 then 'IN' else 'OUT' end SEPARATOR '<br>') as status,
+
+        (SELECT GROUP_CONCAT(c.quantity SEPARATOR '<br>') as qty 
+        FROM project_item_request as a 
+        INNER JOIN stock_relation as b on a.id=b.spec_doc
+        INNER JOIN stocks as c on c.stock_relation=b.id
+        INNER JOIN products as d on c.product=d.id
+        WHERE b.document=10 and a.project=$id and c.status=1 GROUP BY a.id) as quantity_in,
+        
+        (SELECT GROUP_CONCAT(c.quantity SEPARATOR '<br>') as qty 
+        FROM project_item_request as a 
+        INNER JOIN stock_relation as b on a.id=b.spec_doc
+        INNER JOIN stocks as c on c.stock_relation=b.id
+        INNER JOIN products as d on c.product=d.id
+        WHERE b.document=10 and a.project=$id and c.status=2 GROUP BY a.id) as quantity_out
+
+		FROM project_item_request as a
+        INNER JOIN stock_relation as b on a.id=b.spec_doc
+        INNER JOIN stocks as c on b.id=c.stock_relation
+        INNER JOIN products as d on c.product=d.id
+        INNER JOIN users as e on a.requested_by=e.id
+        WHERE b.document=10 and a.project=$id
+        GROUP BY a.id", "Project");
 
         if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
             echo json_encode(["projectDetailData"=>$projectDetailData]);
@@ -363,8 +393,6 @@ class ProjectController{
             recordLog('Project', returnMessage()['project']['createSuccess'] );
         }
 
-        
-
         //check whether the value between keys is equal
         $dataKeys= array_keys($data[1]);
 
@@ -398,14 +426,27 @@ class ProjectController{
         }
         
         $isSuccessInsertToStock=true;
+        $createdBy = substr($_SESSION['sim-id'], 3, -3);
+
         for($i=0; $i<count($newDataRecap); $i++){
 
-            //insert into receipt_stock with status 'out' because request item is always issuing stock
+            /* //insert into receipt_stock with status 'out' because request item is always issuing stock
             $insertToStock = $builder->insert("project_item", $newDataRecap[$i]);
             
             if(!$insertToStock){
                 $isSuccessInsertToStock=false;
+            } */
+
+            $insertToStockRelation = $builder->insert("stock_relation", ['document' => 10, 'spec_doc' => $idProjectItem]);
+
+            $stockRelation = $builder->getPdo()->lastInsertId();
+
+            $insertToStock = $builder->insert("stocks", ['created_by' => $createdBy,'updated_by' => $createdBy, 'send_at' => $data[0]['request_date'], 'product'=>$newDataRecap[$i]['product'], 'quantity'=>$newDataRecap[$i]['quantity'], 'stock_relation' => $stockRelation, 'status' => 2]);
+
+            if(!$insertToStock || !$insertToStockRelation){
+                $isSuccessInsertToStock=false;
             }
+
         }
 
         //dd($newDataRecap);
@@ -424,6 +465,12 @@ class ProjectController{
         //redirect to form page with message
         redirectWithMessage([[ returnMessage()['project']['createSuccess'] ,1]],getLastVisitedPage());
 
+    }
+
+    public function projectUpdateItem(){
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+        }
     }
 }
 

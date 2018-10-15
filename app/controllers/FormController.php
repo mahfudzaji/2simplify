@@ -117,8 +117,7 @@ class FormController{
             "product" => 'required',
             "quantity" => 'required',
             "price" => 'required',
-            "discount" => '',
-            "remark" => ''
+            "discount" => ''
         ]
     );
 
@@ -1661,8 +1660,13 @@ class FormController{
 
         $partners = $builder->getAllData('companies', 'Partner');
 
+        $parameterData=[];
+        $parameters = $builder->getAllData('default_parameter', 'Internal');
+        for($i=0; $i<count($parameters); $i++){
+            $parameterData[$parameters[$i]->parameter]=$parameters[$i]->value;
+        }
+
         //Searching for specific category
-        //category: buyer, supplier, po_date, product, is there any quo
         
         $whereClause='';
     
@@ -1715,7 +1719,7 @@ class FormController{
         GROUP_CONCAT(b.discount ORDER by c.id asc SEPARATOR '<br>') as discount,
         a.remark
         FROM `form_receipt` as a 
-        INNER JOIN receipt_stock as b on a.id=b.receipt
+        INNER JOIN receipt_product as b on a.id=b.receipt
         INNER JOIN products as c on b.product=c.id
         INNER JOIN companies as d on a.supplier=d.id
         INNER JOIN companies as e on a.buyer=e.id
@@ -1726,7 +1730,7 @@ class FormController{
         //download all the data
         if(isset($_GET['download']) && $_GET['download']==true){
             
-            $dataColumn = ['receipt_date', 'receipt_number', 'supplier', 'buyer', 'product', 'quantity', 'price', 'remark'];
+            $dataColumn = ['receipt_date', 'receipt_number', 'supplier', 'buyer', 'product',  'price', 'quantity','remark'];
 
             $this->download(toDownload($receiptData, $dataColumn));
 
@@ -1759,7 +1763,7 @@ class FormController{
 
         setSearchPage();
         
-        view('form/receipt_form', compact('receiptData', 'products', 'pages', 'sumOfAllData', 'partners'));
+        view('form/receipt_form', compact('receiptData', 'products', 'pages', 'sumOfAllData', 'partners', 'parameterData'));
         
     }
 
@@ -1860,6 +1864,8 @@ class FormController{
             redirectWithMessage([["Mohon isi data product dengan lengkap", 0]], getLastVisitedPage());
         }
 
+        //dd($data);
+
         //insert to db:form_receipt
         $insertToFormReceipt = $builder->insert('form_receipt', $data[0]);
         $idReceiptForm = $builder->getPdo()->lastInsertId();
@@ -1880,9 +1886,11 @@ class FormController{
             }
             $newData['receipt'] = $idReceiptForm;
             $newData['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
-            $newData['status'] = $receiptType;
+            $newData['remark'] = filterUserInput($_POST['remark']);
             array_push($newDataRecap, $newData);
         }
+
+        //dd($newData);
 
         $flag = true;
         for($i=0; $i<count($newDataRecap); $i++){
@@ -1896,8 +1904,8 @@ class FormController{
 
             $stockRelation = $builder->getPdo()->lastInsertId();
 
-            $insertToStock = $builder->insert("stocks", ['receipt_date' => $data[0]['receipt_date'], 'product'=>$data[0]['product'], 'quantity'=>$data[0]['quantity'], 'stockRelation' => $stockRelation]);
-            
+            $insertToStock = $builder->insert("stocks", ['received_at' => $data[0]['receipt_date'], 'product'=>$newDataRecap[$i]['product'], 'quantity'=>$newDataRecap[$i]['quantity'], 'stock_relation' => $stockRelation, 'status' => $receiptType]);
+
             if(!$insertToStockProduct || !$insertToStock || !$insertToStockRelation){
                 $flag = false;
             }
@@ -2013,6 +2021,11 @@ class FormController{
 
         $approvalPerson = $builder->custom("SELECT a.user_id, b.name FROM role_user as a inner join users as b on a.user_id=b.id WHERE a.role_id=2", "Document");
 
+        $parameterData=[];
+        $parameters = $builder->getAllData('default_parameter', 'Internal');
+        for($i=0; $i<count($parameters); $i++){
+            $parameterData[$parameters[$i]->parameter]=$parameters[$i]->value;
+        }
         //Searching for specific category
         
         $whereClause='';
@@ -2058,7 +2071,10 @@ class FormController{
         date_format(a.doc_date, '%d %M %Y') as doc_date, 
         c.name as supplier,
         d.name as buyer,
-        GROUP_CONCAT(f.name ORDER by f.id asc SEPARATOR '<br>') as product
+        GROUP_CONCAT(f.name ORDER by f.id asc SEPARATOR '<br>') as product,
+        e.quantity,
+        a.supplier as sid,
+        a.buyer as bid
         FROM `form_po` as a 
         inner join form_quo as g on g.quo=a.id
         inner join companies as c on a.supplier=c.id
@@ -2072,7 +2088,7 @@ class FormController{
         //download all the data
         if(isset($_GET['download']) && $_GET['download']==true){
             
-            $dataColumn = ['doc_date', 'quo_number', 'supplier', 'buyer', 'product'];
+            $dataColumn = ['doc_date', 'quo_number', 'supplier', 'buyer', 'product', 'quantity'];
 
             $this->download(toDownload($quoData, $dataColumn));
 
@@ -2103,7 +2119,7 @@ class FormController{
         
         $quoData=array_slice($quoData,$limitStart,maxDataInAPage());
         
-        view('form/quotation_form', compact('quoData', 'partners', 'approvalPerson', 'products', 'pages', 'sumOfAllData'));
+        view('form/quotation_form', compact('quoData', 'partners', 'approvalPerson', 'products', 'pages', 'sumOfAllData', 'parameterData'));
         
     }
 
@@ -2881,6 +2897,12 @@ class FormController{
 
         $approvalPerson = $builder->custom("SELECT a.user_id, b.name FROM role_user as a inner join users as b on a.user_id=b.id WHERE a.role_id=2", "Document");
 
+        $parameterData=[];
+        $parameters = $builder->getAllData('default_parameter', 'Internal');
+        for($i=0; $i<count($parameters); $i++){
+            $parameterData[$parameters[$i]->parameter]=$parameters[$i]->value;
+        }
+
         //Searching for specific category
         //category: buyer, supplier, po_date, product, is there any quo
         
@@ -2940,11 +2962,13 @@ class FormController{
         order by a.id","Document"); */
 
 
-        $poData = $builder->custom("SELECT a.id, g.po_number,
+        $poData = $builder->custom("SELECT a.id, g.po_number, e.quantity,
         date_format(a.doc_date, '%d %M %Y') as doc_date, 
         c.name as supplier,
         d.name as buyer,
-        GROUP_CONCAT(f.name ORDER by f.id asc SEPARATOR '<br>') as product
+        GROUP_CONCAT(f.name ORDER by f.id asc SEPARATOR '<br>') as product,
+        a.supplier as sid,
+        a.buyer as bid
         FROM `form_po` as a 
         inner join po_quo as g on g.po=a.id
         inner join companies as c on a.supplier=c.id
@@ -2984,7 +3008,8 @@ class FormController{
                 date_format(d.doc_date, '%d %M %Y') as doc_date, 
                 e.name as supplier,
                 f.name as buyer, 
-                GROUP_CONCAT(DISTINCT(g.name) ORDER by g.id asc SEPARATOR '<br>') as product 
+                GROUP_CONCAT(DISTINCT(g.name) ORDER by g.id asc SEPARATOR '<br>') as product,
+                c.quantity 
                 FROM po_quo as a 
                 INNER JOIN form_quo as b on a.quo=b.id 
                 INNER JOIN form_po as d on a.po=d.id 
@@ -3001,7 +3026,7 @@ class FormController{
         //download all the data
         if(isset($_GET['download']) && $_GET['download']==true){
             
-            $dataColumn = ['doc_date', 'po_number', 'quo_number', 'supplier', 'buyer', 'product'];
+            $dataColumn = ['doc_date', 'po_number', 'quo_number', 'supplier', 'buyer', 'product', 'quantity'];
 
             $this->download(toDownload($poData, $dataColumn));
 
@@ -3034,7 +3059,7 @@ class FormController{
 
         setSearchPage();
         
-        view('form/po_form', compact('poData', 'partners', 'approvalPerson', 'products', 'pages', 'sumOfAllData', 'quoData', 'poWithQuoData'));
+        view('form/po_form', compact('poData', 'partners', 'approvalPerson', 'products', 'pages', 'sumOfAllData', 'quoData', 'poWithQuoData', 'parameterData'));
         
     }
 
@@ -3099,6 +3124,7 @@ class FormController{
             if($data[0]['supplier']!=$parameterData['company']){
                 redirectWithMessage([['Mohon isi data supplier dengan benar', 0 ]], getLastVisitedPage());
             }
+            $poNumber = filterUserInput($_POST['po_number']);
         }else{
             //if 'company' value in default parameter is checked in mode 'PO OUT' 
             //buyer must be value of 'company' parameter
@@ -3654,6 +3680,12 @@ class FormController{
 
         $approvalPerson = $builder->custom("SELECT a.user_id, b.name FROM role_user as a inner join users as b on a.user_id=b.id WHERE a.role_id=2", "Document");
 
+        $parameterData=[];
+        $parameters = $builder->getAllData('default_parameter', 'Internal');
+        for($i=0; $i<count($parameters); $i++){
+            $parameterData[$parameters[$i]->parameter]=$parameters[$i]->value;
+        }
+
         //Searching for specific category
         //category: buyer, supplier, po_date, product, is there any quo
         
@@ -3704,7 +3736,10 @@ class FormController{
         c.name as updated_by,
         f.name as supplier,
         g.name as buyer,
-        GROUP_CONCAT(DISTINCT(i.name) ORDER by i.id asc SEPARATOR '<br>') as product
+        e.supplier as sid,
+        e.buyer as bid,
+        GROUP_CONCAT(DISTINCT(i.name) ORDER by i.id asc SEPARATOR '<br>') as product,
+        h.quantity
         FROM form_do as a 
         INNER JOIN users as b on a.created_by=b.id
         INNER JOIN users as c on a.updated_by=c.id
@@ -3725,7 +3760,10 @@ class FormController{
         c.name as updated_by,
         f.name as supplier,
         g.name as buyer,
-        GROUP_CONCAT(DISTINCT(i.name) ORDER by i.id asc SEPARATOR '<br>') as product
+        j.supplier as sid,
+        j.buyer as bid,
+        GROUP_CONCAT(DISTINCT(i.name) ORDER by i.id asc SEPARATOR '<br>') as product,
+        h.quantity
         FROM form_do as a 
         INNER JOIN users as b on a.created_by=b.id
         INNER JOIN users as c on a.updated_by=c.id
@@ -3744,7 +3782,7 @@ class FormController{
         //download all the data
         if(isset($_GET['download']) && $_GET['download']==true){
             
-            $dataColumn = ['do_date', 'do_number', 'po_number', 'supplier', 'buyer', 'product'];
+            $dataColumn = ['do_date', 'do_number', 'po_number', 'supplier', 'buyer', 'product', 'quantity'];
 
             $this->download(toDownload($doData, $dataColumn));
 
@@ -3777,7 +3815,7 @@ class FormController{
 
         setSearchPage();
         
-        view('form/do_form', compact('doData', 'partners', 'approvalPerson', 'products', 'pages', 'sumOfAllData'));
+        view('form/do_form', compact('doData', 'partners', 'approvalPerson', 'products', 'pages', 'sumOfAllData', 'parameterData'));
         
     }
 
@@ -3941,8 +3979,8 @@ class FormController{
             $whereClause = 1;
         }
 
-        $receivedItems = $builder->custom("SELECT b.name as product, count(*) as qty, 
-        DATE_FORMAT(a.received_at, '%d %M %Y')
+        $receivedItems = $builder->custom("SELECT b.name as product, a.quantity as qty, 
+        DATE_FORMAT(a.received_at, '%d %M %Y') as received_at,DATE_FORMAT(a.send_at, '%d %M %Y') as send_at
         FROM `stocks` as a 
         INNER JOIN products as b on a.product=b.id 
         INNER JOIN stock_relation as c on a.stock_relation=c.id
@@ -4206,10 +4244,12 @@ class FormController{
         $documentNumber=filterUserInput($data['document_number']);
         $notes=filterUserInput($data['notes']);
 
+        //dd($data);
+
         $builder=App::get('builder');
 
         $idOfDocumentData = $builder->getSpecificData("document_data", ["id"], ["document"=>$documentType, "document_number"=>$documentNumber], "&&", "Document");
-        
+
         $parameters=[
             'document_data'=>$idOfDocumentData[0]->id,
             'notes'=>$notes,
@@ -4220,20 +4260,17 @@ class FormController{
 
         $insertNotes=$builder->insert('document_notes', $parameters);
 
-        if($insertNotes){
+        if(!$insertNotes){
 
-            recordLog('Insert document notes', 'Mendaftarkan notes $notes berhasil');
-
-            $builder->save();
-
-            redirectWithMessage([['Memberikan notes berhasil', 1]] , getLastVisitedPage());
-
-        }else{
-
-            redirect(getLastVisitedPage());
-            exit;
+            redirectWithMessage([['Memberikan notes gagal', 0]] , getLastVisitedPage());
 
         }
+
+        recordLog('Insert document notes', 'Mendaftarkan notes $notes berhasil');
+
+        $builder->save();
+
+        redirectWithMessage([['Memberikan notes berhasil', 1]] , getLastVisitedPage());
 
     }
 

@@ -149,7 +149,7 @@ require base.'base/header.view.php';
                         </div>
                         <div class="form-group">
                             <label>Deskripsi</label>
-                            <textarea name="description" class="form-control" placeholder="Deskripsi"></textarea>
+                            <textarea name="description" class="form-control" placeholder="Deskripsi" required></textarea>
                         </div>                                                                             
                         <button class="btn btn-danger btn-close">Tutup</button>
                         <button type="submit" name="submit" class="btn btn-primary" style="float:right;"><span class="glyphicon glyphicon-send"></span> Kirim</button>

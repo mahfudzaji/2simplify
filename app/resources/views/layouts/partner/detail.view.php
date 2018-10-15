@@ -33,7 +33,7 @@
         <header id="main-header">
             <h1><?= strtoupper($partner[0]->name); ?></h1>
             <p><?php echo ucwords($partner[0]->province);echo "-"; echo ucfirst($partner[0]->remark); ?></p>
-            <button class="btn btn-sm btn-header" onclick="toggleStatus()"><span class="glyphicon glyphicon-ok"></span> <?= ucfirst($partner[0]->status); ?></button>
+            <!-- <button class="btn btn-sm btn-header" onclick="toggleStatus()"><span class="glyphicon glyphicon-ok"></span> <?= ucfirst($partner[0]->status); ?></button> -->
         </header>
 
         <!-- <div class="sub-bar">

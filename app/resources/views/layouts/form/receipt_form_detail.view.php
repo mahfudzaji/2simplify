@@ -29,7 +29,7 @@ $printBtn = false;
                 <div class="modal-main-content">
                     <form action="/form/notes/create" method="POST">
                         <input type="hidden" name="document_number" value=<?= $_GET['r']; ?>>
-                        <input type="hidden" name="document_type" value=5>
+                        <input type="hidden" name="document_type" value=11>
                         <div class="form-group">
                             <label>Catatan</label>
                             <textarea class="form-control" name="notes" placeholder="Tuliskan catatan anda..." required></textarea>
@@ -46,6 +46,7 @@ $printBtn = false;
                 </div>
                 <br> 
                 <button class="btn btn-danger btn-close" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -75,6 +76,8 @@ $printBtn = false;
                     </form>
                 </div>
                 <button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+
             </div>
         </div>
 
@@ -108,6 +111,7 @@ $printBtn = false;
             </div>
         </div>
 
+        <!-- NOT USED -->
         <!-- APPROVAL PO FORM -->
         <div class="app-form modal" id="modal-approve-do-form">
             <div class="modal-content">
@@ -155,6 +159,50 @@ $printBtn = false;
                     </form>
                 </div>
                 <br><button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+            </div>
+        </div>
+        <!-- NOT USED -->
+
+        <!-- UPDATE RECEIPT ITEM -->
+        <div class="app-form modal" id="modal-update-receipt-item">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Memperbarui data</h3>
+                </div>
+                <form action="/stock/update" method="POST">
+                    <input type="hidden" name="id" value=''>
+                    <?php /* rcp in: 1, rcp out:2,  */ ?>
+                        <input type="hidden" name="receipt_type" value=<?= $receiptData[0]->receipt_type; ?> >
+                    <div class="form-group">
+                        <label>Product</label>
+                        <select name="product" class="form-control" required>
+                            <option value=''>PRODUCT</option>
+                            <?php foreach($receiptItems as $item): ?> 
+                                <option value= <?= $item->pid; ?> ><?= ucfirst($item->product); ?></option>             
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="detail-respond row" style="margin-bottom:5px;">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-8"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" class="form-control" name="quantity" min=1 step=1 required>
+                    </div>
+                    <div class="form-group">
+                        <label>Price</label>
+                        <input type="number" class="form-control" name="price" min=1 step=1 required>
+                    </div>
+                    <div class="form-group">
+                        <label>Discount</label>
+                        <input type="number" class="form-control" name="discount" min=1 step=1 required>
+                    </div>
+                    <button type="button" class="btn btn-danger btn-close">Tutup</button>
+                    <button type="submit" class="btn btn-primary" style="float:right;">Kirim <span class="glyphicon glyphicon-send"></span></button>
+                
+                </form>
                 <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
@@ -273,48 +321,6 @@ $printBtn = false;
             </div>
         </div>
 
-        <div class="app-form modal" id="modal-update-receipt-item">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Memperbarui data</h3>
-                </div>
-                <form action="/stock/in" method="POST">
-                    <input type="hidden" name="id" value=<?= $item->id; ?>>
-                    <?php /* rcp in: 1, rcp out:2,  */ ?>
-                        <input type="hidden" name="receipt_type" value=<?= $receiptData[0]->receipt_type; ?> >
-                    <div class="form-group">
-                        <label>Product</label>
-                        <select name="product" class="form-control" required>
-                            <option value=''>PRODUCT</option>
-                            <?php foreach($receiptItems as $item): ?> 
-                                <option value= <?= $item->pid; ?> ><?= ucfirst($item->product); ?></option>             
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="detail-respond row" style="margin-bottom:5px;">
-                        <div class="col-md-4"></div>
-                        <div class="col-md-8"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>Quantity</label>
-                        <input type="number" class="form-control" name="quantity" min=1 step=1 required>
-                    </div>
-                    <div class="form-group">
-                        <label>Price</label>
-                        <input type="number" class="form-control" name="price" min=1 step=1 required>
-                    </div>
-                    <div class="form-group">
-                        <label>Discount</label>
-                        <input type="number" class="form-control" name="discount" min=1 step=1 required>
-                    </div>
-                    <button type="button" class="btn btn-danger btn-close">Tutup</button>
-                    <button type="submit" class="btn btn-primary" style="float:right;">Kirim <span class="glyphicon glyphicon-send"></span></button>
-                
-                </form>
-                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
-            </div>
-        </div>
-
     </div>
 </main>
 <script>
@@ -425,7 +431,7 @@ $(document).ready(function(){
             var price = $(this).parent().closest("tr").find("[data-item~='price']").html();
             var discount = $(this).parent().closest("tr").find("[data-item~='discount']").html();
 
-            $("#modal-update-receipt-item").find("input[name~='receipt-item']").val(receiptItem);
+            $("#modal-update-receipt-item").find("input[name~='id']").val(receiptItem);
             //$("#modal-update-receipt-item").find("select[name~='product']").find("option").attr("selected", false);
             $("#modal-update-receipt-item").find("select[name~='product']").find("option[value~='"+product+"']").attr("selected", true);
             $("#modal-update-receipt-item").find("input[name~='quantity']").val(quantity); 

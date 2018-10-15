@@ -81,8 +81,9 @@ require base.'base/header.view.php';
             <?php else: ?>
                 <div class="container-fluid grid-view">
                     <?php foreach($doData as $data): ?>
+                        <?php $signInOut = $parameterData['company']==$data->bid?'form-in':'form-out'; ?>
                         <a href="/form/do/detail?do=<?= $data->id ?>">
-                        <div class="cover-grid" style="overflow-y:auto;">
+                        <div class="cover-grid <?= $signInOut; ?>" style="overflow-y:auto;">
                             <ul>
                                 <li><?= ucfirst($data->do_number); ?></li>
                                 <li>S: <?= ucfirst($data->supplier); ?></li>

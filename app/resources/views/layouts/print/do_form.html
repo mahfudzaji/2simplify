@@ -99,7 +99,7 @@ tr{
                             <td style="border:1px solid; padding: 0 20px 0 10px;"><?= ($data2->part_number==null||empty($data2->part_number))?"-":$data2->part_number; ?></td>
                             <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->product; ?></td>
                             <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->quantity; ?></td>
-                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= ($data2->serial_number==null||empty($data2->serial_number))?"-":$data2->serial_number; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= ($data2->received_at==null||empty($data2->received_at))?"-":$data2->received_at; ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>            

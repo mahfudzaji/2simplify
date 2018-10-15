@@ -81,8 +81,9 @@ require base.'base/header.view.php';
             <?php else: ?>
                 <div class="container-fluid grid-view">
                     <?php foreach($receiptData as $data): ?>
+                        <?php $signInOut = $parameterData['company']==$data->bid?'form-in':'form-out'; ?>
                         <a href="/form/receipt/detail?r=<?= $data->id ?>">
-                        <div class="cover-grid" style="overflow-y:auto;">
+                        <div class="cover-grid <?= $signInOut; ?>" style="overflow-y:auto;">
                             <ul>
                                 <li><span class="glyphicon glyphicon-calendar"></span> <?= ucfirst($data->receipt_date); ?></li>
                                 <li>NO: <?= $data->receipt_number==''?'-':ucfirst($data->receipt_number); ?></li>

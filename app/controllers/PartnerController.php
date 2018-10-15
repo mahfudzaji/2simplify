@@ -163,7 +163,8 @@ class PartnerController{
             
             $processingUpload = new UploadController();
 
-            $uploadResult = $processingUpload->processingUpload($_FILES["logo"]);
+            //Only accept img
+            $uploadResult = $processingUpload->processingUpload($_FILES["logo"], 1);
 
             if($uploadResult){
                 $lastUploadedId=$processingUpload->getLastUploadedId();

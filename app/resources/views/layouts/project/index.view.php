@@ -20,11 +20,11 @@ require base.'base/header.view.php';
         </header>
 
         <div class="sub-header"> 
-            <form action="/stock" method="GET" style="display:inherit">    
+            <form action="/project" method="GET" style="display:inherit">    
                 <input type="hidden" name="search" value="true">
                 <div class="search" id="product-based">
                     <div class="form-group">
-                        <select name="product" class="form-control">
+                        <select name="partner" class="form-control">
                             <option value=''>Customer</option>
                             <?php foreach($companies as $company): ?>
                                 <option title="<?= $company->name; ?>" value=<?= $company->id ?>><?= makeItShort($company->name, 50); ?></option>
@@ -55,7 +55,7 @@ require base.'base/header.view.php';
                         </div>
                     </div>
                 </div>
-                <div class="search" id="po-based">
+                <!-- <div class="search" id="po-based">
                     <div class="form-group">
                         <select name="po" class="form-control">
                             <option value=''>Ada PO?</option>
@@ -63,7 +63,7 @@ require base.'base/header.view.php';
                             <option value=0>Tidak</option>
                         </select>
                     </div>
-                </div> 
+                </div>  -->
                 <div class="search">
                     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button> 
                 </div>     

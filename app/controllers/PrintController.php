@@ -396,6 +396,9 @@ class PrintController{
 
         $products=$builder->getAllData('products', 'Product');
 
+        $ownCompany = $builder->custom("SELECT b.upload_file as logo, a.name, a.address, a.province, a.phone, a.fax, a.email FROM companies as a 
+        INNER JOIN upload_files as b on a.logo=b.id WHERE a.relationship=1", "Document");
+
         $poData = $builder->custom("SELECT j.po_number as po_number, DATE_FORMAT(a.doc_date, '%d %M %Y') as po_date,
         f.name as buyer, f.address as baddress, f.phone as bphone, IFNULL(f.fax, '-')as bfax,
         a.pic_buyer, 
@@ -517,7 +520,7 @@ class PrintController{
             echo json_encode(["poData"=>$poData, "poDetailData"=>$poDetailData]);
             exit();
         }else{
-            printData('po_form',compact('poData', 'poDetailData', 'uploadFiles', 'products'));
+            printData('po_form',compact('poData', 'poDetailData', 'uploadFiles', 'products', 'ownCompany'));
         }   
     }
 
@@ -534,6 +537,9 @@ class PrintController{
         $id = filterUserInput($_GET['do']);
         
         $builder = App::get('builder');
+
+        $ownCompany = $builder->custom("SELECT b.upload_file as logo, a.name, a.address, a.province, a.phone, a.fax, a.email FROM companies as a 
+        INNER JOIN upload_files as b on a.logo=b.id WHERE a.relationship=1", "Document");
 
         $doData = $builder->custom("SELECT a.id, d.id as poid, c.id as ddata, b.po, b.quo, b.po_number, DATE_FORMAT(d.doc_date, '%d %M %Y') as po_date, date_format(a.do_date, '%d %M %Y') as do_date, a.do_number, a.remark, 
         a.delivered_by, a.received_by, a.approved,
@@ -555,12 +561,19 @@ class PrintController{
         WHERE a.id=$id and c.document=6
         GROUP BY a.id", "Document");
 
-        $receivedItems = $builder->custom("SELECT b.part_number, b.name as product, count(*) as quantity, 
+        /* $receivedItems = $builder->custom("SELECT b.part_number, b.name as product, count(*) as quantity, 
         GROUP_CONCAT(a.serial_number order by a.id asc SEPARATOR '<br>') as serial_number 
         FROM `stocks` as a 
         INNER JOIN products as b on a.product=b.id 
         INNER JOIN stock_relation as c on a.stock_relation=c.id
         WHERE c.do_or_receipt_in=1 and c.doc_in=$id or c.do_or_receipt_out=1 and c.doc_out=$id
+        GROUP BY a.product","Document"); */
+        $receivedItems = $builder->custom("SELECT b.part_number, b.name as product, a.quantity as quantity, 
+        DATE_FORMAT(a.received_at, '%d %M %Y') as received_at
+        FROM `stocks` as a 
+        INNER JOIN products as b on a.product=b.id 
+        INNER JOIN stock_relation as c on a.stock_relation=c.id
+        WHERE c.document=6 and c.spec_doc=$id
         GROUP BY a.product","Document");
 
 
@@ -573,7 +586,7 @@ class PrintController{
             echo json_encode(["doData"=>$doData, "receivedItems"=>$receivedItems]);
             exit();
         }else{
-            printData('do_form',compact('doData', 'receivedItems'));
+            printData('do_form',compact('doData', 'receivedItems', 'ownCompany'));
         }  
     }
 
@@ -591,6 +604,9 @@ class PrintController{
         
         $builder = App::get('builder');
 
+        $ownCompany = $builder->custom("SELECT b.upload_file as logo, a.name, a.address, a.province, a.phone, a.fax, a.email FROM companies as a 
+        INNER JOIN upload_files as b on a.logo=b.id WHERE a.relationship=1", "Document");
+
         $receiptData = $builder->custom("SELECT a.id, a.receipt_number,
         date_format(a.receipt_date, '%d %M %Y') as receipt_date, 
         a.supplier as sid,
@@ -603,7 +619,7 @@ class PrintController{
         e.phone as bphone,
         GROUP_CONCAT(c.name ORDER by c.id asc SEPARATOR '<br>') as product,
         GROUP_CONCAT(b.quantity ORDER by c.id asc SEPARATOR '<br>') as quantity,
-        GROUP_CONCAT(b.price_unit ORDER by c.id asc SEPARATOR '<br>') as price,
+        GROUP_CONCAT(b.price ORDER by c.id asc SEPARATOR '<br>') as price,
         a.remark,
         f.id as ddata,
         g.name as currency
@@ -618,15 +634,14 @@ class PrintController{
         GROUP BY a.id
         ORDER BY a.id DESC","Document");
 
-        $receivedItems = $builder->custom("SELECT b.name as product, a.quantity , b.part_number, d.item_discount, d.price_unit,
-        a.quantity*d.price_unit as total
-        FROM receipt_stock as a 
-        INNER JOIN products as b on a.product=b.id 
-        INNER JOIN stock_relation as c on a.stock_relation=c.id
-        INNER JOIN receipt_product as d on d.receipt=$id
-        WHERE c.do_or_receipt_in=0 and c.doc_in=$id or c.do_or_receipt_out=0 and c.doc_out=$id
-        GROUP BY a.product","Document");
+        $receiptItems = $builder->custom("SELECT c.part_number, b.id, b.product as pid, c.name as product, b.quantity, b.price, b.discount
+        FROM form_receipt as a 
+        INNER JOIN receipt_product as b on b.receipt=a.id
+        INNER JOIN products as c on b.product=c.id 
+        WHERE a.id=$id
+        GROUP BY c.id", "Document");
 
+        //dd($receiptData);
 
         if(count($receiptData)<1){
             redirectWithMessage([['Data tidak tersedia atau telah dihapus',0]], getLastVisitedPage());
@@ -637,7 +652,7 @@ class PrintController{
             echo json_encode(["receiptData"=>$receiptData, "receivedItems"=>$receivedItems]);
             exit();
         }else{
-            printData('receipt_form',compact('receiptData', 'receivedItems'));
+            printData('receipt_form',compact('receiptData', 'receiptItems', 'ownCompany'));
         }  
     }
 }
