@@ -21,8 +21,8 @@ return [
 
     'host' => 'smtp.gmail.com',
     'smtpAuth' => true,
-    'username' => 'mahfudz.aji16@gmail.com',
-    'password' => 'pancasila',
+    'username' => 'simplifytest1210@gmail.com',
+    'password' => 'my$implifytest12',
     'smtpSecure' => 'ssl',
     'port' => 465,
 

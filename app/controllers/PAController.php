@@ -108,10 +108,13 @@ class PAController{
 
         $productCat=$builder->getAllData("product_categories", "Product");
         
-        $paData=$builder->custom("SELECT DISTINCT(b.id), 
+        $paData=$builder->custom("SELECT DISTINCT(b.id) as catid, 
         b.name as category, 
         b.description, 
+        GROUP_CONCAT(a.id SEPARATOR '<br>') as pid, 
         GROUP_CONCAT(a.name SEPARATOR '<br>') as products, 
+        GROUP_CONCAT(a.description SEPARATOR '<br>') as pdesc,
+        GROUP_CONCAT(a.part_number SEPARATOR '<br>') as part_number,  
         GROUP_CONCAT(case when a.link IS NULL then '-' else a.link end SEPARATOR '<br>') as plink
         FROM products as a 
         INNER JOIN product_categories as b on a.category=b.id 
@@ -121,15 +124,21 @@ class PAController{
 
         $pd=[];
         for($i=0; $i<count($paData); $i++){
+            $pid = explode('<br>', $paData[$i]->pid);
             $p = explode('<br>', $paData[$i]->products);
             $pl = explode('<br>', $paData[$i]->plink);
+            $pdesc = explode('<br>', $paData[$i]->pdesc);
+            $pn = explode('<br>', $paData[$i]->part_number);
 
             for($j=0;$j<count($p);$j++){
-                array_push($pd, ['prod'=>$p[$j], 'link'=>$pl[$j]]);
+                array_push($pd, ['id' => $pid[$j],'prod'=>$p[$j], 'link'=>$pl[$j], 'desc'=>$pdesc[$j], 'part_number'=>$pn[$j]]);
             }
 
             $paData[$i]->products=$pd;
             unset($paData[$i]->plink);
+            unset($paData[$i]->pdesc);
+            unset($paData[$i]->part_number);
+            $pd=[];
         }
         //dd($paData);
         //Pagination
@@ -488,6 +497,71 @@ class PAController{
             echo json_encode($vendor);
             exit();
         }
+    }
+
+    public function updateProduct(){
+        //checking access right
+        if(!$this->role->can("update-asset")){
+            redirectWithMessage([["Anda tidak memiliki hak untuk memperbaharui data product", 0]],'/product');
+        }
+
+        //checking form requirement
+        $data=[];
+        
+        //check the requirement
+        //if passing the requirement, put the data into $data array
+        //otherwise redirect back to the page
+
+        $passingRequirement=true;
+        $_SESSION['sim-messages']=[];
+
+
+        foreach($this->placeholderProduct as $k => $v){ 
+            if(checkRequirement($v, $k, $_POST[$k])){
+                $data[$k]=filterUserInput($_POST[$k]);
+            }else{
+                $passingRequirement=false;
+            }  
+        }
+        
+        $id = filterUserInput($_POST['pid']);
+        $data['updated_by']=substr($_SESSION['sim-id'], 3, -3);
+
+        
+
+        //here is processing upload file then get the result
+        if(isset($_FILES["picture"])){
+            $processingUpload = new UploadController();
+
+            $uploadResult = $processingUpload->processingUpload($_FILES["picture"]);
+
+            $lastUploadedId=$processingUpload->getLastUploadedId();
+
+            $data['picture']=$lastUploadedId;
+        }
+
+        if(!$passingRequirement){
+            redirect(getLastVisitedPage());
+            exit();
+        }
+
+        $builder = App::get('builder');
+
+        //dd($id);
+
+        $updateToProduct = $builder->update("products", $data, ['id' => $id], "", "Product");
+
+        if(!$updateToProduct){
+            recordLog('Insert product', 'Memperbaharui product gagal');
+            redirectWithMessage([['Maaf, Memperbaharui produk gagal', 0]] , getLastVisitedPage());
+
+        }else{
+            recordLog('Insert product', 'Memperbaharui product berhasil');
+        }
+
+        $builder->save();
+
+        redirectWithMessage([['Memperbaharui produk berhasil', 1]] , getLastVisitedPage());
     }
 
 }

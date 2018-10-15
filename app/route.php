@@ -149,6 +149,7 @@ $router->get('product/category', 'PAController@category');
 /* $router->get('product/vendor', 'PAController@vendor'); */
 $router->get('product/asset/detail', 'PAController@detailAsset');
 $router->post('product/create-product', 'PAController@createProduct');
+$router->post('product/update-product', 'PAController@updateProduct');
 $router->post('product/create-category', 'PAController@createCategory');
 /*$router->post('product/vendor/create', 'PAController@createVendor');
 $router->post('product/asset/create', 'PAController@createAsset');
@@ -166,6 +167,7 @@ $router->get('stock/get-serial-number', 'StockController@stockSerialNumber');
 $router->get('stock/get-stock-list', 'StockController@getStockList');
 $router->get('stock/check-stock-available', 'StockController@checkStock');
 $router->get('stock/check-stock-category', 'StockController@checkStockByCategory');
+$router->get('stock/detail', 'StockController@stockDetail');
 
 
 //tested

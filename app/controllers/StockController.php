@@ -65,6 +65,8 @@ class StockController{
             $search=array();
 
             $search['d.id']=filterUserInput($_GET['category']);
+            $searchByDateStart=filterUserInput($_GET['date_start']);
+            $searchByDateEnd=filterUserInput($_GET['date_end']);
     
             $operator='&&';
 
@@ -72,6 +74,14 @@ class StockController{
                 if($search[$k]!=""){
                     $whereClause.=$k."=".$v.$operator;
                 }
+            }
+
+            if(!empty($searchByDateStart) && !empty($searchByDateEnd)){
+                $whereClause.=" a.created_at between '$searchByDateStart' and '$searchByDateEnd'";
+            }elseif(!empty($searchByDateStart)){
+                $whereClause.=" a.created_at like '%$searchByDateStart%'";
+            }elseif(!empty($searchByDateEnd)){
+                $whereClause.=" a.created_at like '%$searchByDateEnd%'";
             }
 
             $whereClause=trim($whereClause, '&&');
@@ -107,6 +117,15 @@ class StockController{
         WHERE $whereClause
         GROUP BY b.category
         ORDER BY d.name asc", 'Stock');
+
+        //download all the data
+        if(isset($_GET['download']) && $_GET['download']==true){
+            
+            $dataColumn = ['category', 'stock_in', 'stock_out'];
+
+            $this->download(toDownload($stocksData, $dataColumn));
+
+        }
 
         //Pagination
         //only show data for specified page
@@ -144,16 +163,11 @@ class StockController{
 
         $builder = App::get('builder');
 
-        $servicePoints=$builder->getAllData('service_points', 'Internal');
-
         $category = $builder->getAllData('product_categories', 'Product');
 
         $products=$builder->getAllData('products', 'Product');
 
-        $vendors = $builder->getAllData("vendors", "Product");
-
         //Searching for specific category
-        //category: status, ownership, delivered_date, product, is it receive form or do?
         
         $whereClause='';
         
@@ -162,6 +176,8 @@ class StockController{
             $search=array();
 
             $search['d.id']=filterUserInput($_GET['category']);
+            $searchByDateStart=filterUserInput($_GET['date_start']);
+            $searchByDateEnd=filterUserInput($_GET['date_end']);
     
             $operator='&&';
 
@@ -169,6 +185,14 @@ class StockController{
                 if($search[$k]!=""){
                     $whereClause.=$k."=".$v.$operator;
                 }
+            }
+
+            if(!empty($searchByDateStart) && !empty($searchByDateEnd)){
+                $whereClause.=" a.created_at between '$searchByDateStart' and '$searchByDateEnd'";
+            }elseif(!empty($searchByDateStart)){
+                $whereClause.=" a.created_at like '%$searchByDateStart%'";
+            }elseif(!empty($searchByDateEnd)){
+                $whereClause.=" a.created_at like '%$searchByDateEnd%'";
             }
 
             $whereClause=trim($whereClause, '&&');
@@ -179,14 +203,45 @@ class StockController{
             $whereClause=1;
         }
         
-        $stocksData = $builder->custom("SELECT d.id as cid, d.name as category, d.description, d.picture as pic,
-        
-        FROM `stocks` as a 
-        INNER JOIN products as b on a.product=b.id 
-        INNER JOIN product_categories as d on b.category=d.id
-        WHERE $whereClause
-        GROUP BY b.category
-        ORDER BY d.name asc", 'Stock');
+        $stockData = $builder->custom("SELECT DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
+        e.do_number as form_number,
+        concat('/form/do/detail?do=', e.id) as link
+        FROM stocks as a
+        INNER JOIN products as b on a.product=b.id
+        INNER JOIN stock_relation as c on a.stock_relation=c.id
+        INNER JOIN po_quo as d on c.spec_doc=d.id
+        INNER JOIN form_do as e on d.id=e.po_quo
+        WHERE c.document=6 and $whereClause
+        UNION
+        SELECT DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
+        e.receipt_number as form_number,
+        concat('/form/receipt/detail?r=', e.id) as link
+        FROM stocks as a
+        INNER JOIN products as b on a.product=b.id
+        INNER JOIN stock_relation as c on a.stock_relation=c.id
+        INNER JOIN receipt_product as d on c.spec_doc=d.id
+        INNER JOIN form_receipt as e on e.id=d.receipt
+        WHERE c.document=11 and $whereClause
+        UNION
+        SELECT DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
+        d.request_number as form_number,
+        concat('/form/project/detail?pr=',e.id) as link
+        FROM stocks as a
+        INNER JOIN products as b on a.product=b.id
+        INNER JOIN stock_relation as c on a.stock_relation=c.id
+        INNER JOIN project_item_request as d on c.spec_doc=d.id
+        INNER JOIN form_project as e on d.project=e.id
+        WHERE c.document=10 and $whereClause
+        ORDER BY created_at", "Stock");
+
+        //download all the data
+        if(isset($_GET['download']) && $_GET['download']==true){
+            
+            $dataColumn = ['created_at', 'product', 'quantity', 'form_number', 'status'];
+
+            $this->download(toDownload($stockData, $dataColumn));
+
+        }
 
         //Pagination
         //only show data for specified page
@@ -203,17 +258,17 @@ class StockController{
         
         $limitStart=$p*maxDataInAPage()-maxDataInAPage();
 
-        $pages=ceil(count($stocksData)/maxDataInAPage());
+        $pages=ceil(count($stockData)/maxDataInAPage());
     
         //End of pagination
 
         //======================//
 
-        $sumOfAllData=count($stocksData);
+        $sumOfAllData=count($stockData);
         
-        $stocksData=array_slice($stocksData,$limitStart,maxDataInAPage());
+        $stockData=array_slice($stockData,$limitStart,maxDataInAPage());
 
-        view('stock/index', compact('stocksData', 'partners', 'approvalPerson', 'products', 'vendors', 'pages', 'servicePoints', 'sumOfAllData', 'category'));
+        view('stock/history', compact('stockData', 'partners', 'products', 'pages', 'sumOfAllData', 'category'));
     
     }
 
@@ -597,31 +652,83 @@ class StockController{
     }
 
     public function stockDetail(){
-        $sql = "select b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
-        d.po_number as form_number
+        if(!$this->role->can("view-stock")){
+            if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+                echo '{"access":false}';
+                exit();
+            }else{
+                redirectWithMessage([[ returnMessage()['stock']['accessRight']['view'] , 0]], getLastVisitedPage());
+            }
+        }
+
+        $product = filterUserInput($_GET['product']);
+
+        $builder = App::get('builder');
+
+        $stockData = $builder->custom("SELECT DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
+        e.do_number as form_number,
+        concat('/form/do/detail?do=', e.id) as link
         FROM stocks as a
         INNER JOIN products as b on a.product=b.id
         INNER JOIN stock_relation as c on a.stock_relation=c.id
         INNER JOIN po_quo as d on c.spec_doc=d.id
-        INNER JOIN form_po as e on d.po=e.id
-        WHERE c.document=6
+        INNER JOIN form_do as e on d.id=e.po_quo
+        WHERE c.document=6 and a.product=$product
         UNION
-        select b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
-        d.receipt_number as form_number
+        SELECT DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
+        e.receipt_number as form_number,
+        concat('/form/receipt/detail?r=', e.id) as link
         FROM stocks as a
         INNER JOIN products as b on a.product=b.id
         INNER JOIN stock_relation as c on a.stock_relation=c.id
-        INNER JOIN form_receipt as d on c.spec_doc=d.id
-        WHERE c.document=11
+        INNER JOIN receipt_product as d on c.spec_doc=d.id
+        INNER JOIN form_receipt as e on e.id=d.receipt
+        WHERE c.document=11 and a.product=$product
         UNION
-        select b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
-        d.request_number as form_number
+        SELECT DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
+        d.request_number as form_number,
+        concat('/form/project/detail?pr=',e.id) as link
         FROM stocks as a
         INNER JOIN products as b on a.product=b.id
         INNER JOIN stock_relation as c on a.stock_relation=c.id
         INNER JOIN project_item_request as d on c.spec_doc=d.id
         INNER JOIN form_project as e on d.project=e.id
-        WHERE c.document=10";
+        WHERE c.document=10 and a.product=$product
+        ORDER BY created_at", "Stock");
+
+        if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+            echo json_encode($stockData);
+        }else{
+            return $stockData;
+        }
+    }
+
+    /* DOWNLOAD */
+    public function download($formData){
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-Disposition: attachment; filename=STOCK_DATA.xls");
+        
+        $column = array_keys($formData[0]);
+        
+        echo "<table><thead><tr>";
+
+        for($i=0; $i<count($column); $i++){
+            echo "<th>".str_replace("_", " ", makeFirstLetterUpper($column[$i]))."</th>";
+        }
+
+        echo "</tr></thead><tbody>";
+
+        for($i=0; $i<count($formData); $i++){
+            echo "<tr>";
+            foreach($formData[$i] as $key => $value){
+                echo "<td>".makeFirstLetterUpper($value)."</td>";
+            }
+            echo "</tr>";
+        }
+
+        echo "</tbody></table>";
+
+        exit();
     }
 
 }

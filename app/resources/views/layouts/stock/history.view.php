@@ -20,7 +20,7 @@ require base.'base/header.view.php';
         </header>
 
         <div class="sub-header"> 
-            <form action="/stock" method="GET" style="display:inherit">    
+            <form action="/stock/history" method="GET" style="display:inherit">    
                 <input type="hidden" name="search" value="true">
                 <div class="search" id="product-based">
                     <div class="form-group">
@@ -56,34 +56,32 @@ require base.'base/header.view.php';
         </div>
 
         <div class="main-data" >
-            <?php if(count($stocksData)<1): ?>
+            <?php if(count($stockData)<1): ?>
                 <div class="text-center">Belum terdapat data tersimpan</div>
             <?php else: ?>
-                <div class="container-fluid">
-                    <?php foreach($stocksData as $data): ?>
-                        <div class='content' style="width:55%; margin:5px auto;">
-                            <div style="border-bottom:2px solid;cursor:pointer;background-color:#ffffe6;">
-                                <div class="content-preview row" id="<?= $data->cid; ?>">
-                                    <div class="col-md-4">
-                                        <?php if($data->pic==''): ?>
-                                            <!-- <div><?= substr($data->category, 0, 1); ?></div> -->
-                                        <?php else: ?>
-                                            <img src='/public/upload/<?= $data->pic; ?>' class="img-responsive">
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <h2><?= $data->category; ?></h2>
-                                        <p><?= $data->description; ?></p>
-                                        <p>IN: <?= $data->stock_in-$data->stock_out; ?></p>
-                                        <p>OUT: <?= $data->stock_out; ?></p>
-                                    </div>
-                                </div>
-                                <div class='table-responsive detail' style="background-color:#fff;">
-                                </div>
-                            </div> 
-                        </div>
-
-                    <?php endforeach; ?>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Bukti</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach($stockData as $data): ?>
+                                <tr>
+                                    <td><?= $data->created_at; ?></td>
+                                    <td><?= ucfirst($data->product); ?></td>
+                                    <td><?= $data->quantity; ?></td>
+                                    <td><a href="<?= $data->link; ?>" target="_blank"><?= $data->form_number; ?></a></td>
+                                    <td><?= ucfirst($data->status); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
                 <div>
                     <a href="<?= (strpos($_SERVER['REQUEST_URI'], '?')==false)?rtrim($_SERVER['REQUEST_URI'],'/').'?download=true':rtrim($_SERVER['REQUEST_URI'],'/').'&download=true'; ?>" target="_blank"><button type="button" class="btn btn-md btn-primary"><span class="glyphicon glyphicon-download-alt"></span> Download</button></a>

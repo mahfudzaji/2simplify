@@ -83,7 +83,59 @@ require base.'base/header.view.php';
                         </div>
                         <div class="form-group">
                             <label>Deskripsi</label>
-                            <textarea name="description" class="form-control" placeholder="Deskripsi"></textarea>
+                            <textarea name="description" class="form-control" placeholder="Deskripsi" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Link</label>
+                            <input type="text" name="link" class="form-control" placeholder="Link eksternal">
+                        </div>
+                        <div class="form-group">
+                            <label>Gambar</label>
+                            <input type="file" name="picture">
+                        </div>         
+
+                        <button class="btn btn-danger btn-close">Tutup</button>
+                        <button type="submit" name="submit" class="btn btn-primary" style="float:right;">Kirim <span class="glyphicon glyphicon-send"></span></button>
+                    </form>
+
+                    <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+
+                </div>
+            </div>  
+        </div>
+
+        <!-- UPDATE PRODUCT FORM -->
+        <div class="app-form modal" id="modal-update-product">   
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Memperbaharui Produk</h3>
+                </div>
+                <div class="modal-main-content">
+                    <div class="description">
+                        <p>Form ini digunakan untuk memperbaharui data produk.</p>
+                    </div>
+                    <form action="product/update-product" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="pid" value"">
+                        <div class="form-group">
+                            <label>Kategori</label>
+                            <select name="category" class="form-control" required>
+                                <option value=''>KATEGORI</option>
+                                <?php foreach($productCat as $cat): ?> 
+                                    <option value= <?= $cat->id; ?> ><?= ucfirst($cat->name); ?></option>             
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Kode/Part number</label>
+                            <input type="text" name="part_number" class="form-control" placeholder="Part number" autofocus required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nama Produk</label>
+                            <input type="text" name="name" class="form-control" placeholder="Nama" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Deskripsi</label>
+                            <textarea name="description" class="form-control" placeholder="Deskripsi" required></textarea>
                         </div>
                         <div class="form-group">
                             <label>Link</label>
@@ -165,8 +217,8 @@ require base.'base/header.view.php';
             <div class="container-fluid grid-view">
                 <?php echo count($paData)<1?'<div class="text-center">Belum terdapat data tersimpan</div>':''; ?>
                 <?php foreach($paData as $data): ?>
-                <div>
-                    <div class="cover-grid category fade-toggle-trigger">
+                <div data-item="product" id="<?= $data->catid; ?>">
+                    <div class="cover-grid category fade-toggle-trigger" >
                         <ul>
                             <li><strong><?= strtoupper($data->category); ?></strong></li>
                             <li><?= $data->description; ?></li> 
@@ -181,8 +233,7 @@ require base.'base/header.view.php';
                         <?php for($j=0; $j<count($prods); $j++): ?> 
                             <div class="product">
                                 <ul>
-                                    <li><?= $prods[$j]['prod']; ?><a href=<?= $prods[$j]['link']; ?> class="text-right" target="_blank" style="float:right; display:inline-block"><span class="glyphicon glyphicon-new-window"></span></a></li> 
-                                    <!-- <li><a href="//www.pertamina.com" target="_blank"><?= $vendors[$vendor][$j][0]; ?></a></li>  -->   
+                                    <li class="btn-modal" id="<?= $prods[$j]['id']; ?>" data-pn="<?= $prods[$j]['part_number']; ?>" data-desc="<?= $prods[$j]['desc']; ?>" data-id="update-product"><span><?= $prods[$j]['prod']; ?></span><a href="<?= $prods[$j]['link']; ?>" class="text-right" target="_blank" style="float:right; display:inline-block"><span class="glyphicon glyphicon-new-window"></span></a></li>  
                                 </ul>
                             </div>
                         <?php endfor; ?>
@@ -212,6 +263,26 @@ require base.'base/header.view.php';
         $(".fade-toggle-trigger").on("click", function(){
             $(this).next().fadeToggle();
         });
+
+        $("li[data-id~='update-product']").on("click", function(){
+            let pid = $(this).attr('id')
+            let desc = $(this).attr('data-desc');
+            let pn = $(this).attr('data-pn');
+            let product =$(this).find("span").html();
+            let link =$(this).find("a").attr("href");
+            let category = $(this).closest("[data-item~='product']").attr("id");
+
+            //console.log(desc+","+pn+","+product+","+link+","+category);
+            
+            $("#modal-update-product").find("select[name~='category']").find("option[value~='"+category+"']").attr("selected", true);
+            $("#modal-update-product").find("input[name~='part_number']").val(pn);
+            $("#modal-update-product").find("input[name~='name']").val(product);
+            $("#modal-update-product").find("textarea[name~='description']").val(desc);
+            $("#modal-update-product").find("input[name~='link']").val(link);
+            $("#modal-update-product").find("input[name~='pid']").val(pid);
+
+        });
+
     })
 </script>
 

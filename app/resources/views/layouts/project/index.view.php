@@ -122,9 +122,7 @@ require base.'base/header.view.php';
 
         </div>
 
-    </div>
-
-    <div class="app-form modal" id="modal-create-project">         
+        <div class="app-form modal" id="modal-create-project">         
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Menambahkan data <?= $titlePage; ?></h3>
@@ -184,7 +182,8 @@ require base.'base/header.view.php';
                 <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
-    </div>
+
+    </div> 
 
 </main>
 
