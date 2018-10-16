@@ -56,7 +56,7 @@ class ProjectController{
 
             $search=array();
 
-            $search['product']=filterUserInput($_GET['product']);
+            $search['e.buyer']=filterUserInput($_GET['partner']);
             $search['pic']=filterUserInput($_GET['pic']);
 
             $searchByDateStart=filterUserInput($_GET['start_date']);

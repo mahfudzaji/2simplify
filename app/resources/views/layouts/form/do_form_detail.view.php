@@ -58,26 +58,19 @@ $printBtn = false;
                     <h3>Lampiran</h3>
                 </div>
                 <div class="modal-main-content">
-                    <form action="/attachment" method="post">
+                    <form action="/attachment" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="document_data" value=<?= $doData[0]->ddata; ?>>
                         <div class="form-group">
                             <label>Lampiran</label>
                             <textarea class="form-control" name="description" placeholder="Tuliskan deskripsi lampiran..." required></textarea>
                         </div>
-                        <div class="form-group">
-                            <select name="attachment" class="form-control select-ajax" required>
-                                <option value=''>PILIH LAMPIRAN</option>
-                                <?php foreach($uploadFiles as $uploadFile): ?>
-                                    <option value=<?= $uploadFile->id; ?>><?= $uploadFile->title; ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="image-appear"></div>
+                        <input type="file" name="attachment"><br>
                         <button type="submit" class="btn btn-primary pull-right">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </form>
+                    <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+
                 </div>
                 <button class="btn btn-danger btn-close clear" >Tutup</button>
-                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -432,32 +425,12 @@ $(document).ready(function(){
         //do in: 1, do out:2,
         var doType = $(this).closest("form").find("input[name~='do_type']").val();
         
-        if(doType == 1){
-
-            //$(this).closest("form").find("[name~='serial_number[]']").replaceWith("<input type='text' name='serial_number[]' class='form-control' required>");
-        
-        }else if(doType == 2){
-            alert("test");
-
-            //$(this).closest("form").attr("action", "/stock/out");
+        if(doType == 2){
 
             $(this).closest("form").find("input[name~='received_at']").parent().find("label").html("Dikirim pada");
 
             $(this).closest("form").find("input[name~='received_at']").attr("name", "send_at");
-
-            //change to select input
-            //$(this).closest("form").find("[name~='serial_number[]']").replaceWith("<select name='serial_number[]' class='form-control' required>");
-
-            /* $.get('/stock/get-serial-number', {product:product}, function(data, status){
-                var serialNumber = JSON.parse(data);
-                var snOption = "<option value=''>Serial Number</option>";
-
-                for(var i=0; i<serialNumber.length; i++){
-                    snOption+="<option value="+serialNumber[i].serial_number+">"+serialNumber[i].serial_number+"</option>";
-                }
-
-                $("#modal-add-stock-item").find("select[name~='serial_number[]']").empty().append(snOption);
-            }); */
+            
         }
 
     });

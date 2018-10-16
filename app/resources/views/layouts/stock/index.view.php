@@ -185,7 +185,9 @@ require base.'base/header.view.php';
         $(".content").on("click", ".btn-action", function(){
             let product = $(this).closest("tr").attr("id");
             let productName = $(this).closest("tr").find("td[data-item~='product']").html();
-            $('#modal-stock-detail').find(".description").find("p").html(productName);
+            let stockIn = $(this).closest("tr").find("td[data-item~='stock-in']").html();
+            let stockOut = $(this).closest("tr").find("td[data-item~='stock-out']").html();
+            $('#modal-stock-detail').find(".description").find("p").html(productName+" | IN: "+stockIn+", OUT: "+stockOut);
 
             $.get("/stock/detail", {product:product}, function(data, status){
                 let responds = JSON.parse(data);

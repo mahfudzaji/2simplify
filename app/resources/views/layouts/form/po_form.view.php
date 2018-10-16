@@ -90,7 +90,7 @@ require base.'base/header.view.php';
             <?php else: ?>
                 <div class="container-fluid grid-view">
                     <?php foreach($poData as $data): ?>
-                        <?php $signInOut = $parameterData['company']==$data->bid?'form-in':'form-out'; ?>
+                        <?php $signInOut = $parameterData['company']==$data->bid?'form-out':'form-in'; ?>
                         <a href="/form/po/detail?po=<?= $data->id ?>">
                         <div class="cover-grid <?= $signInOut; ?>" style="overflow-y:auto;">
                             <ul>

@@ -57,21 +57,13 @@ $printBtn = false;
                     <h3>Lampiran</h3>
                 </div>
                 <div class="modal-main-content">
-                    <form action="/attachment" method="post">
+                    <form action="/attachment" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="document_data" value=<?= $receiptData[0]->ddata; ?>>
                         <div class="form-group">
                             <label>Lampiran</label>
                             <textarea class="form-control" name="description" placeholder="Tuliskan deskripsi lampiran..." required></textarea>
                         </div>
-                        <div class="form-group">
-                            <select name="attachment" class="form-control select-ajax" required>
-                                <option value=''>PILIH LAMPIRAN</option>
-                                <?php foreach($uploadFiles as $uploadFile): ?>
-                                    <option value=<?= $uploadFile->id; ?>><?= $uploadFile->title; ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="image-appear"></div>
+                        <input type="file" name="attachment" required><br>
                         <button type="submit" class="btn btn-primary pull-right">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </form>
                 </div>
@@ -302,14 +294,19 @@ $printBtn = false;
                                     <div class='note attachment active' style="margin-top:0;">
                                         <p><strong><?= $attachment->title; ?></strong>
                                         <span class="pull-right"><?= $attachment->created_at; ?></span></p>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <img src=/public/upload/<?= $attachment->upload_file; ?> class='img-responsive img-scroll-item clearfix' style="width:100%; max-width:100%;">
+                                        <?php if($attachment->file_type==1): ?>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <img src="/public/upload/<?= $attachment->upload_file; ?>" class='img-responsive img-scroll-item clearfix' style="width:100%; max-width:100%;">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p class='img-scroll-item-desc'><?= $attachment->description; ?></p>
+                                                </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <p class='img-scroll-item-desc'><?= $attachment->description; ?></p>
-                                            </div>
-                                        </div>
+                                        <?php else: ?>
+                                            <p><?= $attachment->description; ?></p>
+                                            <p><a href="/public/upload/<?= $attachment->upload_file; ?>" target="_blank">File</a></p>
+                                        <?php endif; ?>
                                     </div>
                                 <?php endforeach; ?>
                             <?php else: ?>

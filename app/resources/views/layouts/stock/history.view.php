@@ -64,6 +64,7 @@ require base.'base/header.view.php';
                         <thead>
                             <tr>
                                 <th>Tanggal</th>
+                                <th>Category</th>
                                 <th>Product</th>
                                 <th>Quantity</th>
                                 <th>Bukti</th>
@@ -74,6 +75,7 @@ require base.'base/header.view.php';
                             <?php foreach($stockData as $data): ?>
                                 <tr>
                                     <td><?= $data->created_at; ?></td>
+                                    <td><?= ucfirst($data->category); ?></td>
                                     <td><?= ucfirst($data->product); ?></td>
                                     <td><?= $data->quantity; ?></td>
                                     <td><a href="<?= $data->link; ?>" target="_blank"><?= $data->form_number; ?></a></td>

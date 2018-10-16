@@ -1656,9 +1656,16 @@ class FormController{
 
         $builder = App::get('builder');
 
-        $products = $builder->getAllData('products', 'Product');
+        //$products = $builder->getAllData('products', 'Product');
 
         $partners = $builder->getAllData('companies', 'Partner');
+
+        $products = $builder->custom("SELECT b.id, b.name, IFNULL(sum(quantity), 0) as quantity
+        FROM `stocks` as a 
+        RIGHT JOIN products as b on a.product=b.id 
+        GROUP BY b.id", 'Product');
+
+        //dd($products);
 
         $parameterData=[];
         $parameters = $builder->getAllData('default_parameter', 'Internal');
@@ -1953,6 +1960,7 @@ class FormController{
         $attachments=$builder->custom("SELECT b.id, 
         c.upload_file,
         c.title, 
+        c.file_type,
         date_format(b.created_at, '%d %M %Y') as created_at, 
         b.description
         FROM document_data as a RIGHT JOIN document_attachments as b on a.id=b.document_data 
@@ -3009,7 +3017,9 @@ class FormController{
                 e.name as supplier,
                 f.name as buyer, 
                 GROUP_CONCAT(DISTINCT(g.name) ORDER by g.id asc SEPARATOR '<br>') as product,
-                c.quantity 
+                c.quantity,
+                d.supplier as sid,
+                d.buyer as bid
                 FROM po_quo as a 
                 INNER JOIN form_quo as b on a.quo=b.id 
                 INNER JOIN form_po as d on a.po=d.id 

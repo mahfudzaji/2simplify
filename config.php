@@ -11,14 +11,6 @@ return [
     
     'salt' => '16101993',
 
-    //related to mail configuration
-    /* 'host' => 'srv21.niagahoster.com',
-    'smtpAuth' => true,
-    'username' => 'aji@sentranetcomindo.com',
-    'password' => 'aji123',
-    'smtpSecure' => 'ssl',
-    'port' => 465, */
-
     'host' => 'smtp.gmail.com',
     'smtpAuth' => true,
     'username' => 'simplifytest1210@gmail.com',

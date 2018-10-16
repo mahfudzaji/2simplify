@@ -34,7 +34,7 @@ require base.'base/header.view.php';
                 </div>
                 <div class="search" id="product-based">
                     <div class="form-group">
-                        <select name="product" class="form-control">
+                        <select name="pic" class="form-control">
                             <option value=''>PIC</option>
                             <?php foreach($users as $user): ?>
                                 <option title="<?= $user->name; ?>" value=<?= $user->id ?>><?= makeItShort($user->name, 50); ?></option>
@@ -47,10 +47,10 @@ require base.'base/header.view.php';
                     <div class="form-group" style="position: absolute;left: 50%;margin-top: 5px;transform: translateX(-50%);z-index: 5;display: none;width: 400px;">
                         <div class="row">
                             <div class="col-md-6">
-                                <input type="date" name="date_start" class="form-control">
+                                <input type="date" name="start_date" class="form-control">
                             </div>
                             <div class="col-md-6">
-                                <input type="date" name="date_end" class="form-control">
+                                <input type="date" name="end_date" class="form-control">
                             </div>
                         </div>
                     </div>

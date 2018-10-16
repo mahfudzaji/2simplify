@@ -175,7 +175,7 @@ class StockController{
 
             $search=array();
 
-            $search['d.id']=filterUserInput($_GET['category']);
+            $search['f.id']=filterUserInput($_GET['category']);
             $searchByDateStart=filterUserInput($_GET['date_start']);
             $searchByDateEnd=filterUserInput($_GET['date_end']);
     
@@ -203,7 +203,7 @@ class StockController{
             $whereClause=1;
         }
         
-        $stockData = $builder->custom("SELECT DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
+        $stockData = $builder->custom("SELECT DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, b.name as product, f.name as category, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
         e.do_number as form_number,
         concat('/form/do/detail?do=', e.id) as link
         FROM stocks as a
@@ -211,9 +211,10 @@ class StockController{
         INNER JOIN stock_relation as c on a.stock_relation=c.id
         INNER JOIN po_quo as d on c.spec_doc=d.id
         INNER JOIN form_do as e on d.id=e.po_quo
+        INNER JOIN product_categories as f on b.category=f.id
         WHERE c.document=6 and $whereClause
         UNION
-        SELECT DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
+        SELECT DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, b.name as product, f.name as category, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
         e.receipt_number as form_number,
         concat('/form/receipt/detail?r=', e.id) as link
         FROM stocks as a
@@ -221,23 +222,25 @@ class StockController{
         INNER JOIN stock_relation as c on a.stock_relation=c.id
         INNER JOIN receipt_product as d on c.spec_doc=d.id
         INNER JOIN form_receipt as e on e.id=d.receipt
+        INNER JOIN product_categories as f on b.category=f.id
         WHERE c.document=11 and $whereClause
         UNION
-        SELECT DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
+        SELECT DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, b.name as product, f.name as category, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
         d.request_number as form_number,
-        concat('/form/project/detail?pr=',e.id) as link
+        concat('/project/detail?pr=',e.id) as link
         FROM stocks as a
         INNER JOIN products as b on a.product=b.id
         INNER JOIN stock_relation as c on a.stock_relation=c.id
         INNER JOIN project_item_request as d on c.spec_doc=d.id
         INNER JOIN form_project as e on d.project=e.id
+        INNER JOIN product_categories as f on b.category=f.id
         WHERE c.document=10 and $whereClause
         ORDER BY created_at", "Stock");
 
         //download all the data
         if(isset($_GET['download']) && $_GET['download']==true){
             
-            $dataColumn = ['created_at', 'product', 'quantity', 'form_number', 'status'];
+            $dataColumn = ['created_at', 'category', 'product', 'quantity', 'form_number', 'status'];
 
             $this->download(toDownload($stockData, $dataColumn));
 
@@ -305,13 +308,11 @@ class StockController{
 
         $product = filterUserInput($_GET['product']);
 
-        //echo $product;
-
         $builder = App::get('builder');
 
         $getProductDetail = $builder->custom("SELECT ifnull(a.part_number, '-') as part_number, c.upload_file, a.name, a.description, a.link 
         FROM products as a 
-        INNER JOIN upload_files as c on a.picture=c.id
+        LEFT JOIN upload_files as c on a.picture=c.id
         WHERE a.id = $product", "Product");
 
         if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){

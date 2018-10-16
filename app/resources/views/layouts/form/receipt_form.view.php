@@ -202,7 +202,7 @@ require base.'base/header.view.php';
                                 <select name="product[]" class="form-control" required>
                                     <option value=''>PRODUK</option>
                                     <?php foreach($products as $product): ?>
-                                        <option title="<?= $product->name; ?>" value=<?= $product->id ?>><?= (strlen($product->name)>50)?substr(ucfirst($product->name),0, 50)."...":ucfirst($product->name); ?></option>
+                                        <option title="Available: <?= $product->quantity; ?>" value=<?= $product->id ?>><?= makeItShort(ucfirst($product->name), 50); ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -350,5 +350,7 @@ require base.'base/footer.view.php'
             });
             //console.log(typeof(parameters));
         });
+
+            
     })
 </script>
