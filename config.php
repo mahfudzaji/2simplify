@@ -11,6 +11,10 @@ return [
     
     'salt' => '16101993',
 
+<<<<<<< HEAD
+=======
+    //related to mail configuration
+>>>>>>> 392ac312bddfcc6855d0474ff621ef896134521b
     'host' => 'smtp.gmail.com',
     'smtpAuth' => true,
     'username' => 'simplifytest1210@gmail.com',
