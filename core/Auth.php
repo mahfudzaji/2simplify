@@ -33,7 +33,7 @@ class Auth{
         $checkUserEmailForAuthentication=App::get('builder')->getSpecificData('users',$parameters, $where,'','User');
         
         if(count($checkUserEmailForAuthentication)==0){
-            redirectWithMessage(['Maaf anda tidak memiliki hak akses masuk halaman ini', 0], getLastVisitedPage());
+            redirectWithMessage([['Maaf anda tidak memiliki hak akses masuk halaman ini', 0]], getLastVisitedPage());
         }
 
         return $checkUserEmailForAuthentication;

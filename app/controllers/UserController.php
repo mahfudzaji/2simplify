@@ -144,7 +144,8 @@ class UserController{
         }
 
         if(!$this->processingRegister($builder)){
-            redirectWithMessage([["Pendaftaran sebagai admin gagal. Coba lagi", 0]], '/');
+            //redirectWithMessage([["Pendaftaran sebagai admin gagal. Coba lagi", 0]], '/');
+            redirectWithMessage($_SESSION['sim-messages'], '/');
         }
 
         //give him admin role
@@ -161,7 +162,7 @@ class UserController{
 
         recordLog('Register owner', "Register user pertama berhasil");
 
-        redirectWithMessage([['Anda telah didaftarkan sebagai admin',1]], '/');
+        redirectWithMessage([['Anda telah didaftarkan sebagai admin. Link aktivasi akun anda telah dikirim ke email.',1]], '/');
     }
 
     
@@ -222,29 +223,41 @@ class UserController{
         }*/
 
         if(!isset($name,$email) || isEmpty([$name,$email])){
-            redirectWithMessage([["mohon untuk form diisi lengkap", 0]],'/home');
+            //redirectWithMessage([["mohon untuk form diisi lengkap", 0]],'/home');
+            $_SESSION['sim-messages']=[['Mohon untuk form diisi lengkap', 0]];
+            return false;
         }
 
         if(!preg_match("/^[a-zA-Z\s]*$/",$name)){
-            redirectWithMessage([["username hanya boleh berupa huruf", 0]],'/home');
+            //redirectWithMessage([["username hanya boleh berupa huruf", 0]],'/home');
+            $_SESSION['sim-messages']=[['Username hanya boleh berupa huruf', 0]];
+            return false;
         }
 
 
         if(!filter_var($email,FILTER_VALIDATE_EMAIL)){
-            redirectWithMessage([["periksa alamat email anda", 0]],'/home');
+            //redirectWithMessage([["periksa alamat email anda", 0]],'/home');
+            $_SESSION['sim-messages']=[['Periksa alamat email anda', 0]];
+            return false;
         }
         
         if(strlen($name)<3 || strlen($name)>20){
-            redirectWithMessage([["username yang diterima hanya boleh terdiri 3-20 karakter", 0]],'/home');
+            //redirectWithMessage([["username yang diterima hanya boleh terdiri 3-20 karakter", 0]],'/home');
+            $_SESSION['sim-messages']=[['Username yang diterima hanya boleh terdiri 3-20 karakter', 0]];
+            return false;
         }elseif(strlen($email)<3 || strlen($email)>30){
-            redirectWithMessage([["email yang diterima hanya boleh terdiri 3-30 karakter", 0]],'/home');
+            //redirectWithMessage([["email yang diterima hanya boleh terdiri 3-30 karakter", 0]],'/home');
+            $_SESSION['sim-messages']=[['Email yang diterima hanya boleh terdiri 3-30 karakter', 0]];
+            return false;
         }
 
         
         //check whether email already used or not
         $checkEmailExist = $builder->getSpecificData("users", ['*'], ['email' => $email], '', 'User');
         if(count($checkEmailExist)>0){
-            redirectWithMessage([["Email sudah pernah didaftarkan", 0]],'/home');
+            //redirectWithMessage([["Email sudah pernah didaftarkan", 0]],'/home');
+            $_SESSION['sim-messages']=[['Maaf, gagal upload photo', 0]];
+            return false;
         }
         
         $parameters=[
@@ -268,8 +281,9 @@ class UserController{
 
                 $parameters['photo']=$lastUploadedId;
             }else{
-                //$_SESSION['sim-messages']=[['Maaf, gagal upload photo', 0]];
-                redirectWithMessage([["Maaf, gagal upload photo", 0]],'/home');
+                $_SESSION['sim-messages']=[['Maaf, gagal upload photo', 0]];
+                return false;
+                //redirectWithMessage([["Maaf, gagal upload photo", 0]],'/home');
             }
             unset($processingUpload);
   
@@ -286,8 +300,9 @@ class UserController{
 
                 $parameters['signature']=$lastUploadedId;
             }else{
-                //$_SESSION['sim-messages']=[['Maaf, gagal upload signature', 0]];
-                redirectWithMessage([["Maaf, gagal upload signature", 0]],'/home');
+                $_SESSION['sim-messages']=[['Maaf, gagal upload signature', 0]];
+                return false;
+                //redirectWithMessage([["Maaf, gagal upload signature", 0]],'/home');
             }
             unset($processingUpload);
 
@@ -312,10 +327,10 @@ class UserController{
             $mail->AltBody = '';
 
             if(!$mail->send()) {
-                $_SESSION['sim-messages']=[['Message could not be sent.','Mailer Error: ' . $mail->ErrorInfo, 0]];
+                $_SESSION['sim-messages']=[['Maaf, pendaftaran gagal. Link aktivasi akun gagal dikirim. Cek koneksi internet anda.','Mailer Error: ' . $mail->ErrorInfo, 0]];
                 return false;
             } else {
-                $_SESSION['sim-messages']=[['Message has been sent', 1]];
+                //$_SESSION['sim-messages']=[['Link aktivasi akun anda telah dikirim ke email.', 1]];
                 return true;  
             }
                    
