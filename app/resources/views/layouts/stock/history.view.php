@@ -74,7 +74,7 @@ require base.'base/header.view.php';
                         <tbody>
                             <?php foreach($stockData as $data): ?>
                                 <tr>
-                                    <td><?= $data->created_at; ?></td>
+                                    <td><?= $data->receive_or_send_date; ?></td>
                                     <td><?= ucfirst($data->category); ?></td>
                                     <td><?= ucfirst($data->product); ?></td>
                                     <td><?= $data->quantity; ?></td>

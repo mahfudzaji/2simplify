@@ -16,8 +16,8 @@ class PartnerController{
             'address'=>'required',
             'phone'=>'', 
             'email'=>'email', 
-            'relationship'=>'', 
-            'remark'=>'',
+            'relationship'=>'required', 
+            'remark'=>''
         ];
 
     public function __construct(){
@@ -159,7 +159,7 @@ class PartnerController{
         $data['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
 
         //here is processing upload file then get the result
-        if(isset($_FILES["logo"]) && !empty($_FILES["logo"]) && $_FILES["logo"]!=''){
+        if(isset($_FILES["logo"]) && !empty($_FILES["logo"]) && $_FILES["logo"]!='' && $_FILES["logo"]['size']!=0){
             
             $processingUpload = new UploadController();
 
@@ -198,10 +198,12 @@ class PartnerController{
 
         //checking access right
         if(!$this->role->can("update-partner")){
-            redirectWithMessage(["anda tidak memiliki hak untuk memperbaharui data partner", 0],'partner');
+            redirectWithMessage([["anda tidak memiliki hak untuk memperbaharui data partner", 0]],'partner');
         }
 
         //checking form requirement
+
+        $id = filterUserInput($_POST['p']);
 
         $data=[];
 
@@ -223,36 +225,40 @@ class PartnerController{
         }
 
         if(!$passingRequirement){
-            redirect('/partner');
-            exit();
+            redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
         }
+
 
         //post the data to database
         $builder=App::get('builder');
 
-        $toUpdate=[
-            'name' => $data['name'],
-            'bussiness_entity' => $data['entity'], 
-            'address' => $data['address'],
-            'province' => $data['province'],
-            'phone' => $data['phone'],
-            'email' => $data['email'],
-            'relationship' => $data['rel'],
-            'remark' => $data['remark'],
-            'created_by' => substr($_SESSION['sim-id'], 3, -3),
-            'updated_by' => substr($_SESSION['sim-id'], 3, -3),
-        ];
+        $data['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
 
-        $where=[
-            'id'=>$_POST['p']
-        ];
+        //here is processing upload file then get the result
+        if(isset($_FILES["logo"]) && !empty($_FILES["logo"]) && $_FILES["logo"]!='' && $_FILES["logo"]['size']!=0){
+            
+            $processingUpload = new UploadController();
 
-        $updatePartner= $builder->update('companies', $toUpdate, $where, '', 'Partner');
+            //Only accept img
+            $uploadResult = $processingUpload->processingUpload($_FILES["logo"], 1);
+
+            if($uploadResult){
+                $lastUploadedId=$processingUpload->getLastUploadedId();
+
+                $toUpdate['logo']=$lastUploadedId;
+            }else{
+                //$_SESSION['sim-messages']=[['Maaf, gagal upload logo', 0]];
+                redirectWithMessage($_SESSION['sim-messages'], getLastVisitedPage());
+            }
+            unset($processingUpload);
+  
+        }
+
+        $updatePartner= $builder->update('companies', $data, ['id' => $id], '', 'Partner');
 
         if(!$updatePartner){
             recordLog('Partner', "Pembaharuan partner gagal");
-            redirect('/partner');
-            exit();
+            redirectWithMessage([["Maaf, Pembaharuan partner gagal", 0]], getLastVisitedPage());
         }
 
         recordLog('Partner', "Pembaharuan partner berhasil");
@@ -260,7 +266,7 @@ class PartnerController{
         $builder->save();
 
         //redirect to partner page with message
-        redirectWithMessage(["Pembaharuan partner berhasil",1],'/partner');
+        redirectWithMessage([["Pembaharuan partner berhasil",1]], getLastVisitedPage());
      
     }
 

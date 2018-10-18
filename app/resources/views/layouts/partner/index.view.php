@@ -56,7 +56,7 @@ require base.'base/header.view.php';
                     <h3>Tambahkan Partner</h3>
                 </div>
 
-                <form action="partner/create" method="POST">
+                <form action="partner/create" method="POST" enctype="multipart/form-data">
                     <div class="form-group">
                         <label>Nama</label>
                         <input type="text" name="name" class="form-control" placeholder="Nama" autofocus required>
@@ -97,6 +97,7 @@ require base.'base/header.view.php';
                     </div>  
                     <div class="form-group">
                         <label>Hubungan</label><br>
+                        <input type="radio" data-rel="1" name="rel" value=1>Own <br>
                         <input type="radio" name="relationship" value=2 checked>Partner <br>
                         <input type="radio" name="relationship" value=3>Customer
                     </div>
@@ -104,6 +105,7 @@ require base.'base/header.view.php';
                         <label>Keterangan tambahan</label>
                         <textarea name="remark" class="form-control" placeholder="Keterangan tambahan"></textarea>
                     </div>
+                    <input type="file" name="logo"><br>
                     <button type="submit" name="submit" class="btn btn-primary" style="float:right;"><span class="glyphicon glyphicon-send"></span> Kirim</button>
                                                                                      
                     <button class="btn btn-danger btn-close">Tutup</button>

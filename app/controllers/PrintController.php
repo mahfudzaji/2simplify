@@ -605,7 +605,7 @@ class PrintController{
         $builder = App::get('builder');
 
         $ownCompany = $builder->custom("SELECT b.upload_file as logo, a.name, a.address, a.province, a.phone, a.fax, a.email FROM companies as a 
-        INNER JOIN upload_files as b on a.logo=b.id WHERE a.relationship=1", "Document");
+        LEFT JOIN upload_files as b on a.logo=b.id WHERE a.relationship=1", "Document");
 
         $receiptData = $builder->custom("SELECT a.id, a.receipt_number,
         date_format(a.receipt_date, '%d %M %Y') as receipt_date, 
@@ -638,8 +638,7 @@ class PrintController{
         FROM form_receipt as a 
         INNER JOIN receipt_product as b on b.receipt=a.id
         INNER JOIN products as c on b.product=c.id 
-        WHERE a.id=$id
-        GROUP BY c.id", "Document");
+        WHERE a.id=$id", "Document");
 
         //dd($receiptData);
 

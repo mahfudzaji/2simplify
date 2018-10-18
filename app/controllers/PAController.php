@@ -226,21 +226,28 @@ class PAController{
         $data['updated_by']=substr($_SESSION['sim-id'], 3, -3);
 
         
-
         //here is processing upload file then get the result
-        if(isset($_FILES["picture"])){
+        if(isset($_FILES["picture"]) && !empty($_FILES["picture"]) && $_FILES["picture"]!='' && $_FILES["picture"]['size']!=0){
+            
             $processingUpload = new UploadController();
 
-            $uploadResult = $processingUpload->processingUpload($_FILES["picture"]);
+            //Only accept img
+            $uploadResult = $processingUpload->processingUpload($_FILES["picture"], 1);
 
-            $lastUploadedId=$processingUpload->getLastUploadedId();
+            if($uploadResult){
+                $lastUploadedId=$processingUpload->getLastUploadedId();
 
-            $data['picture']=$lastUploadedId;
+                $data['picture']=$lastUploadedId;
+            }else{
+                //$_SESSION['sim-messages']=[['Maaf, gagal upload picture', 0]];
+                redirectWithMessage($_SESSION['sim-messages'], getLastVisitedPage());
+            }
+            unset($processingUpload);
+  
         }
 
         if(!$passingRequirement){
-            redirect(getLastVisitedPage());
-            exit();
+            redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
         }
 
         $builder=App::get('builder');

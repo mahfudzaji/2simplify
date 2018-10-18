@@ -73,8 +73,8 @@ $printBtn = false;
             </div>
         </div>
 
-        <!-- UPDATE DO FORM -->
-        <div class="app-form modal" id="modal-update-do-form">         
+        <!-- UPDATE FORM -->
+        <div class="app-form modal" id="modal-update-receipt-form">         
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Perbaharui Data <?= $titlePage; ?></h3>
@@ -82,17 +82,58 @@ $printBtn = false;
 
                 <div class="description">
                     <p>Form ini digunakan untuk memperbaharui data <?= $titlePage; ?>.</p>
-                    <p><span style="color:red;">*</span>Catatan: <br> Setelah mengirim form, kemudian upload bukti dan beri notes jika diperlukan</p>
                 </div>
-                <form action="/form/do/update" method="post">
-                    <input type="hidden" name="do-form" value=<?= $_GET['do']; ?>>
+                <form action="/form/receipt/update" method="post">
+                    <input type="hidden" name="receipt_form" value=<?= $_GET['r']; ?>>
                     <div class="form-group">
-                        <label>Diserahkan oleh</label>
-                        <input type="text" name="delivered_by" class="form-control" required>
+                        <label>Tanggal receipt</label>
+                        <input type="date" name="receipt_date" class="form-control" required>
+                    </div>
+                    <div class='form-group'>
+                        <label>Receipt Number</label>
+                        <input type='text' name='receipt_number' class='form-control' required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Supplier</label>
+                                <select name="supplier" class="form-control">
+                                    <option value=''>SUPPLIER</option>
+                                    <?php foreach($partners as $partner): ?>
+                                        <option value="<?= $partner->id ?>"><?= ucfirst($partner->name); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Buyer</label>
+                                <select name="buyer" class="form-control">
+                                    <option value=''>BUYER</option>
+                                    <?php foreach($partners as $partner): ?>
+                                        <option value=<?= $partner->id ?> ><?= ucfirst($partner->name); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label>Diterima oleh</label>
-                        <input type="text" name="received_by" class="form-control" required>
+                        <label>Mata uang</label>
+                        <select name="currency" class="form-control">
+                            <option value=''>MATA UANG</option>
+                            <option value='1'>Rupiah</option>
+                            <option value='2'>Dollar</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>PPN (%)</label>
+                        <input type="number" min=0 max=100 name="ppn" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Keterangan</label>
+                        <!-- <textarea name="remark" class="form-control" placeholder="Keterangan tambahan"></textarea> -->
+                        <div id="remark"></div>
                     </div>
                     <button type="button" class="btn btn-danger btn-close" >Tutup</button>
 
@@ -100,53 +141,19 @@ $printBtn = false;
                         <button type="submit" name="submit" class="btn btn-primary btn-next">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </div>
                 </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
-        <!-- NOT USED -->
-        <!-- APPROVAL PO FORM -->
-        <div class="app-form modal" id="modal-approve-do-form">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Konfirmasi</h3>
-                </div>
-                <div class="modal-main-content">
-                    <form action="/form/do/approve" method="post">
-                        <input type="hidden" name="do-form" value=<?= $_GET['do']; ?>>
-                        <input type="hidden" name="approval" value="1">
-                        <button type="submit" class="btn btn-success btn-sm form-control"><span class="glyphicon glyphicon-ok"></span> Setuju</button>
-                    </form>
-                </div>
-                <br><button class="btn btn-danger btn-close clear" >Tutup</button>
-            </div>
-        </div>
-
-        <!-- REJECT PO FORM -->
-        <div class="app-form modal" id="modal-reject-do-form">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Konfirmasi</h3>
-                </div>
-                <div class="modal-main-content">
-                    <form action="/form/do/approve" method="post">
-                        <input type="hidden" name="do-form" value=<?= $_GET['do']; ?>>
-                        <input type="hidden" name="approval" value="2">
-                        <button type="submit" name="reject" class="btn btn-danger btn-sm form-control"><span class="glyphicon glyphicon-remove"></span> Ditolak</button>
-                    </form>
-                </div>
-                <br><button class="btn btn-danger btn-close clear" >Tutup</button>
-            </div>
-        </div>
-
-        <!-- REMOVE RECEIPT ITEM -->
-        <div class="app-form modal" id="modal-remove-receipt-item">
+        <!-- REMOVE RECEIPT FORM -->
+        <div class="app-form modal" id="modal-remove-receipt-form">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Konfirmasi</h3>
                 </div>
                 <div class="modal-main-content">
                     <form action="/form/receipt/remove" method="post">
-                        <input type="hidden" name="receipt-item" value="">
+                        <input type="hidden" name="receipt_form" value=<?= $_GET['r']; ?>>
                         <button type="submit" class="btn btn-danger btn-sm form-control"><span class="glyphicon glyphicon-remove"></span> Hapus data</button>
                     </form>
                 </div>
@@ -154,7 +161,6 @@ $printBtn = false;
                 <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
-        <!-- NOT USED -->
 
         <!-- UPDATE RECEIPT ITEM -->
         <div class="app-form modal" id="modal-update-receipt-item">
@@ -162,8 +168,8 @@ $printBtn = false;
                 <div class="modal-header">
                     <h3>Memperbarui data</h3>
                 </div>
-                <form action="/stock/update" method="POST">
-                    <input type="hidden" name="id" value=''>
+                <form action="/form/receipt/update-item" method="POST">
+                    <input type="hidden" name="receipt_item" value=''>
                     <?php /* rcp in: 1, rcp out:2,  */ ?>
                         <input type="hidden" name="receipt_type" value=<?= $receiptData[0]->receipt_type; ?> >
                     <div class="form-group">
@@ -189,8 +195,87 @@ $printBtn = false;
                     </div>
                     <div class="form-group">
                         <label>Discount</label>
-                        <input type="number" class="form-control" name="discount" min=1 step=1 required>
+                        <input type="number" class="form-control" name="discount" min=0 step=1 required>
                     </div>
+                    <button type="button" class="btn btn-danger btn-close">Tutup</button>
+                    <button type="submit" class="btn btn-primary" style="float:right;">Kirim <span class="glyphicon glyphicon-send"></span></button>
+                
+                </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+            </div>
+        </div>
+
+        <!-- REMOVE RECEIPT ITEM -->
+        <div class="app-form modal" id="modal-remove-receipt-item">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Konfirmasi</h3>
+                </div>
+                <div class="modal-main-content">
+                    <form action="/form/receipt/remove-item" method="post">
+                        <input type="hidden" name="receipt_item" value="">
+                        <button type="submit" class="btn btn-danger btn-sm form-control"><span class="glyphicon glyphicon-remove"></span> Hapus item</button>
+                    </form>
+                </div>
+                <br><button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+            </div>
+        </div>
+
+        <!-- ADD NEW ITEM -->
+        <div class="app-form modal" id="modal-add-stock-item">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Menambahkan Receipt Item</h3>
+                </div>
+                <form action="/form/receipt/new-item" method="POST">
+                    <?php /* rcp in: 1, rcp out:2,  */ ?>
+                    <input type="hidden" name="receipt_type" value=<?= $receiptData[0]->receipt_type; ?> >
+                    <input type="hidden" name="receipt_form" value=<?= $_GET['r']; ?>>
+                    <div class="modal-wizard show">
+                        <div class="description">
+                            <p>Pilih produk sesuai barang yang diserahterimakan. Apabila barang tidak terdaftar maka daftarkan terlebih dahulu atau pilih
+                            produk 'lain-lain'. <br>Kemudian tuliskan serial number, apabila tidak terdapat keterangan serial number maka beri tanda '-' dan kemudian tuliskan keterangan tambahan yang diperlukan.</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Tanggal</label>
+                            <input type="date" class="form-control" name="receive_send_date" required>
+                        </div>
+                        <div class="row inline-input">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Produk</label>
+                                    <select name="product[]" class="form-control" required>
+                                        <option value=''>PRODUK</option>
+                                        <?php foreach($products as $product): ?>
+                                            <option title="Available: <?= $product->quantity; ?>" value=<?= $product->id ?>><?= makeItShort(ucfirst($product->name), 50); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Jumlah</label>
+                                    <input type="number" min=0 name="quantity[]" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Harga satuan</label>
+                                    <input type="number" min=0 name="price[]" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Disc (%)</label>
+                                    <input type="number" min=0 name="discount[]" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="btn btn-default btn-add-input-form">Tambah</button>
+                    </div>
+                    <br>
                     <button type="button" class="btn btn-danger btn-close">Tutup</button>
                     <button type="submit" class="btn btn-primary" style="float:right;">Kirim <span class="glyphicon glyphicon-send"></span></button>
                 
@@ -215,17 +300,17 @@ $printBtn = false;
                 <div class="col-md-8">
                     <?php foreach($receiptData as $data): ?>
                         <div>
-                            <h3><span style="background-color:#F6D155;">Receipt Number: <?= $data->receipt_number; ?></span></h3>
-                            <h4>Receipt Date: <?= $data->receipt_date; ?></h4>
+                            <h3><span style="background-color:#F6D155;">Receipt Number: <span data-item='receipt_number'><?= $data->receipt_number; ?></span></span></h3>
+                            <h4>Receipt Date: <span data-item='receipt_date' data-item-val="<?= $data->rd; ?>"><?= $data->receipt_date; ?></span></h4>
                         </div>
                         <div class="row">
                             <div class="col-md-6">
-                                <h3>From: <?= makeFirstLetterUpper($data->supplier); ?></h3>
+                                <h3 data-item="supplier" data-item-val=<?= $data->sid; ?>>From: <?= makeFirstLetterUpper($data->supplier); ?></h3>
                                 <h4><?= makeFirstLetterUpper($data->saddress); ?></h4>
                                 <h4>Telp: <?= $data->sphone; ?></h4>
                             </div>
                             <div class="col-md-6 text-left">
-                                <h3>Ship to: <?= makeFirstLetterUpper($data->buyer); ?></h3>
+                                <h3 data-item="buyer" data-item-val=<?= $data->bid; ?>>Ship to: <?= makeFirstLetterUpper($data->buyer); ?></h3>
                                 <h4><?= makeFirstLetterUpper($data->baddress); ?></h4>
                                 <h4>Telp: <?= $data->bphone; ?></h4>
                             </div>     
@@ -235,7 +320,7 @@ $printBtn = false;
                     <div>
                         <h3>Item list</h3>
                         <?php if(count($receiptItems)==0): ?>
-                            <p style="color:red">Belum terdapat data item do.</p>
+                            <p style="color:red">Belum terdapat data receipt item.</p>
                         <?php else: $printBtn=true; ?>
                             <table class="table table-striped">
                                 <thead>
@@ -270,17 +355,22 @@ $printBtn = false;
                                 </tbody>
                             </table>
                         <?php endif; ?>
+                        <button class="btn btn-md btn-primary btn-modal" id="add-stock-item">Tambahkan item</button>
                     </div>
 
                     <?php foreach($receiptData as $data): ?>
                         <div style="margin-bottom:20px;">
-                            <p>Keterangan: <?= ($data->remark==null||empty($data->remark))?"-":makeFirstLetterUpper($data->remark); ?></p>
+                            <p>Mata uang: <span data-item="currency" data-item-val="<?= $data->cid; ?>"><?= $data->currency; ?></span></p>
+                            <p>PPN: <span data-item="ppn"><?= $data->ppn; ?></span> %</p>
+                            <p>Keterangan: <span data-item="remark"><?= ($data->remark==null||empty($data->remark))?"-":makeFirstLetterUpper($data->remark); ?></span></p>
                         </div>
                     <?php endforeach; ?>
                     
                     <?php if($printBtn): ?>
                         <a target="_blank" href="/print/receipt?r=<?= $_GET['r']; ?>"><button type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-print"></span> Cetak</button></a>
                     <?php endif; ?>
+                    <button class="btn btn-sm btn-primary btn-modal" id="update-receipt-form"><span class="glyphicon glyphicon-edit"></span> Update</button>
+                    <button class="btn btn-sm btn-danger btn-modal" id="remove-receipt-form"><span class="glyphicon glyphicon-edit"></span> Remove</button>
 
                 </div>
 
@@ -324,21 +414,7 @@ $printBtn = false;
 
 $(document).ready(function(){
 
-    /* UPDATE DO ITEM */
-    /* $(".btn-action").on("click", function(){
-        var dataId= $(this).attr("data-id");
-
-        var poItem = $(this).parent().closest("tr").attr("data-item");
-
-        if(dataId=='update-receipt-form'){        
-            var receivedBy = $(this).parent().closest("tr").find("[data-item~='received_by']").html();
-            var deliveredBy = $(this).parent().closest("tr").find("[data-item~='delivered_by']").html();
-
-            $("#modal-update-receipt-form").find("input[name~='received_by']").val(receivedBy);
-            $("#modal-update-receipt-form").find("input[name~='delivered_by']").val(deliveredBy); 
-
-        }
-    }); */
+    $('#remark').trumbowyg();
 
     /* SHOW ATTACHMENT */
     $("select[name~='attachment']").on("change", function(){
@@ -415,7 +491,7 @@ $(document).ready(function(){
 
     });
 
-    /* UPDATE QUO ITEM */
+    /* UPDATE ITEM */
     $(".btn-action").on("click", function(){
         var dataId= $(this).attr("data-id");
 
@@ -428,7 +504,7 @@ $(document).ready(function(){
             var price = $(this).parent().closest("tr").find("[data-item~='price']").html();
             var discount = $(this).parent().closest("tr").find("[data-item~='discount']").html();
 
-            $("#modal-update-receipt-item").find("input[name~='id']").val(receiptItem);
+            $("#modal-update-receipt-item").find("input[name~='receipt_item']").val(receiptItem);
             //$("#modal-update-receipt-item").find("select[name~='product']").find("option").attr("selected", false);
             $("#modal-update-receipt-item").find("select[name~='product']").find("option[value~='"+product+"']").attr("selected", true);
             $("#modal-update-receipt-item").find("input[name~='quantity']").val(quantity); 
@@ -436,8 +512,43 @@ $(document).ready(function(){
             $("#modal-update-receipt-item").find("input[name~='discount']").val(discount);
             
         }else{
-            $("#modal-remove-receipt-item, #modal-approve-receipt-item, #modal-reject-receipt-item, #modal-revision-receipt-item").find("input[name~='receipt-item']").val(receiptItem);
+            $("#modal-remove-receipt-item, #modal-approve-receipt-item, #modal-reject-receipt-item, #modal-revision-receipt-item").find("input[name~='receipt_item']").val(receiptItem);
         } 
+    });
+
+    /* UPDATE FORM */
+    $("#update-receipt-form").on("click", function(){
+        var data=$(".main-data");
+
+        var placeholderForm=["receipt_number", "receipt_date", "ppn"];
+        var dataItem='';
+
+        for(var i=0;i<placeholderForm.length;i++){
+            dataItem=data.find("[data-item~='"+placeholderForm[i]+"']");
+            if(dataItem.attr('data-item-val')!=null){
+                var value = dataItem.attr('data-item-val');
+            }else{
+                var value = dataItem.html();
+            }
+
+            $("#modal-update-receipt-form").find("form").find("[name~='"+placeholderForm[i]+"']").val(value);
+        
+        }
+
+        var remark = data.find("[data-item~='remark']").html();
+        $("#modal-update-receipt-form").find("#remark").trumbowyg('html', remark);
+		$("#modal-update-receipt-form").find("#remark").trumbowyg('html');
+
+        var placeholderForm2=["supplier", "buyer", "currency"];
+        for(var i=0;i<placeholderForm2.length;i++){
+            dataItem=data.find("[data-item~='"+placeholderForm2[i]+"']");
+            if(dataItem.attr('data-item-val')!=null){
+                var value = dataItem.attr('data-item-val');
+            }
+           // $("#modal-update-po-form").find("select[name~='"+placeholderForm2[i]+"']").find("option").attr("selected", false);
+            $("#modal-update-receipt-form").find("form").find("select[name~='"+placeholderForm2[i]+"']").find("option[value~='"+value+"']").attr("selected", true);
+        
+        }
     });
 
 });

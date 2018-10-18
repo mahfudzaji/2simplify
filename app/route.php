@@ -104,9 +104,10 @@ $router->post('form/reimburse/remove', 'FormController@reimburseFormItemRemove')
 $router->get('form/receipt', 'FormController@receiptFormIndex');
 $router->get('form/receipt/detail', 'FormController@receiptFormDetail');
 $router->post('form/receipt/create', 'FormController@receiptFormCreate');
+$router->post('form/receipt/update', 'FormController@receiptFormUpdate');
 $router->post('form/receipt/update-item', 'FormController@receiptFormItemUpdate');
-$router->post('form/receipt/remove-item', 'FormController@receiptFormItemRemove');
-$router->post('form/receipt/remove', 'FormController@receiptFormItemRemove');
+$router->post('form/receipt/remove-item', 'FormController@receiptItemRemove');
+$router->post('form/receipt/remove', 'FormController@receiptFormRemove');
 $router->post('form/receipt/new-item', 'FormController@receiptFormCreateNewItem');
 $router->post('form/receipt/approve', 'FormController@receiptFormApproval');
 $router->post('form/receipt/create-from-quo', 'FormController@receiptFormCreateFromQuo');
@@ -172,7 +173,6 @@ $router->get('stock/detail', 'StockController@stockDetail');
 
 //tested
 $router->post('stock/in', 'StockController@stockIn');
-//$router->post('stock/out', 'StockController@stockOut');
 $router->post('stock/update', 'StockController@stockUpdate');
 
 //SETTINGS

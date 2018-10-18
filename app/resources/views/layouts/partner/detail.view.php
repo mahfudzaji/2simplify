@@ -53,11 +53,11 @@
                         <tbody>
                             <tr>
                                 <td>Hubungan</td>
-                                <td data-item="rel" data-val=<?= $partner[0]->rid; ?>><?= ucfirst($partner[0]->relationship); ?></td>
+                                <td data-item="relationship" data-val=<?= $partner[0]->rid; ?>><?= ucfirst($partner[0]->relationship); ?></td>
                             </tr>
                             <tr>
                                 <td>Badan usaha</td>
-                                <td data-item="entity" data-val=<?= $partner[0]->beid; ?>><?= ucfirst($partner[0]->bussiness_entity); ?></td>
+                                <td data-item="bussiness_entity" data-val=<?= $partner[0]->beid; ?>><?= ucfirst($partner[0]->bussiness_entity); ?></td>
                             </tr>
                             <tr>
                                 <td>Nama</td>
@@ -65,7 +65,7 @@
                             </tr>
                             <tr>
                                 <td>Kode pendokumentasian</td>
-                                <td data-item="name" ><?= ucfirst($partner[0]->code); ?></td>
+                                <td data-item="code" ><?= ucfirst($partner[0]->code); ?></td>
                             </tr>
                             <tr>
                                 <td>Alamat</td>
@@ -263,15 +263,19 @@
                     <h3>Perbaharui data Partner</h3>
                 </div>
 
-                <form action="/partner/update" method="POST">
+                <form action="/partner/update" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="p" value=<?= $partner[0]->id; ?> >
                     <div class="form-group">
                         <label>Nama</label>
                         <input type="text" name="name" class="form-control" placeholder="Nama" autofocus required>
                     </div>
                     <div class="form-group">
+                        <label>Kode untuk dokumen</label>
+                        <input type="text" name="code" class="form-control" placeholder="Kode untuk dokumen" required>
+                    </div>
+                    <div class="form-group">
                         <label>Badan usaha</label>
-                        <select name="entity" class="form-control" required>
+                        <select name="bussiness_entity" class="form-control" required>
                             <option value=''>BADAN USAHA</option>
                             <?php foreach($entities as $entity): ?>
                                 <option value=<?= $entity->id; ?> ><?= $entity->bussiness_entity ?> </option>
@@ -301,18 +305,20 @@
                     </div>  
                     <div class="form-group">
                         <label>Hubungan</label><br>
-                        <input type="radio" data-rel="1" name="rel" value=1>Own <br>
-                        <input type="radio" data-rel="2" name="rel" value=2 checked>Partner <br>
-                        <input type="radio" data-rel="3" name="rel" value=3>Customer
+                        <input type="radio" data-rel="1" name="relationship" value=1>Own <br>
+                        <input type="radio" data-rel="2" name="relationship" value=2 checked>Partner <br>
+                        <input type="radio" data-rel="3" name="relationship" value=3>Customer
                     </div>
                     <div class="form-group">
                         <label>Keterangan tambahan</label>
                         <textarea name="remark" class="form-control" placeholder="Keterangan tambahan"></textarea>
                     </div>
+                    <input type="file" name="logo"><br>
                     <button type="submit" name="submit" class="btn btn-primary" style="float:right;"><span class="glyphicon glyphicon-send"></span> Kirim</button>
                                                                                      
                     <button type="button" class="btn btn-danger btn-close">Tutup</button>
                 </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>  
         </div>
 
@@ -337,7 +343,7 @@ $(document).ready(function(){
         //traversing... get the data and fill it in the form
         var data=$(".main-data").find("table").find("tbody");
 
-        var placeholderPartner=['name', 'entity', 'province', 'address', 'phone','email', 'remark'];
+        var placeholderPartner=['name', 'code','bussiness_entity', 'province', 'address', 'phone','email', 'remark'];
         var dataItem='';
 
         for(var i=0;i<placeholderPartner.length;i++){
@@ -350,8 +356,8 @@ $(document).ready(function(){
             $(".modal").find("form").find("[name~='"+placeholderPartner[i]+"']").val(value);
         }
 
-        dataRel=data.find("td[data-item~='rel']").attr("data-val");
-        var rel= $(".modal").find("form").find("input[data-rel~="+dataRel+"]").attr('checked', true);
+        dataRel=data.find("td[data-item~='relationship']").attr("data-val");
+        var rel= $(".modal").find("form").find("input[data-relationship~="+dataRel+"]").attr('checked', true);
 
         $(".modal").css("display","block");
     });

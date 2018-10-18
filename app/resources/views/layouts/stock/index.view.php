@@ -196,7 +196,7 @@ require base.'base/header.view.php';
                 for(let i=0; i<responds.length; i++){
 
                     stockList += "<tr>";
-                    stockList += "<td>"+responds[i].created_at+"</td>";
+                    stockList += "<td>"+responds[i].receive_or_send_date+"</td>";
                     stockList += "<td><a href='"+responds[i].link+"' target='_blank'>"+responds[i].form_number+"</a></td>";
                     stockList += "<td>"+responds[i].quantity+"</td>";
                     stockList += "<td>"+responds[i].status+"</td>";

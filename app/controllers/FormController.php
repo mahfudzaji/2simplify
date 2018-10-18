@@ -1720,7 +1720,7 @@ class FormController{
         a.buyer as bid,
         d.name as supplier,
         e.name as buyer,
-        GROUP_CONCAT(c.name ORDER by c.id asc SEPARATOR '<br>') as product,
+        GROUP_CONCAT(distinct(c.name) ORDER by c.id asc SEPARATOR '<br>') as product,
         GROUP_CONCAT(b.quantity ORDER by c.id asc SEPARATOR '<br>') as quantity,
         GROUP_CONCAT(b.price ORDER by c.id asc SEPARATOR '<br>') as price,
         GROUP_CONCAT(b.discount ORDER by c.id asc SEPARATOR '<br>') as discount,
@@ -1801,8 +1801,8 @@ class FormController{
 
         //if not the passing requirements
         if(!$passingRequirement){
-            //redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
-            redirect(getLastVisitedPage());
+            redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
+            //redirect(getLastVisitedPage());
         }
 
         $data[0]['created_by'] = substr($_SESSION['sim-id'], 3, -3);
@@ -1947,7 +1947,12 @@ class FormController{
 
         $builder = App::get('builder');
 
-        $vendors = $builder->getAllData("vendors", "Product");
+        $products = $builder->custom("SELECT b.id, b.name, IFNULL(sum(quantity), 0) as quantity
+        FROM `stocks` as a 
+        RIGHT JOIN products as b on a.product=b.id 
+        GROUP BY b.id", 'Product');
+
+        $partners = $builder->getAllData('companies', 'Partner');
 
         $parameterData=[];
         $parameters = $builder->getAllData('default_parameter', 'Internal');
@@ -1969,7 +1974,8 @@ class FormController{
 
 
         $receiptData = $builder->custom("SELECT a.id, a.receipt_number,
-        date_format(a.receipt_date, '%d %M %Y') as receipt_date, 
+        date_format(a.receipt_date, '%d %M %Y') as receipt_date,
+        a.receipt_date as rd, 
         a.supplier as sid,
         a.buyer as bid,
         d.name as supplier,
@@ -1984,6 +1990,9 @@ class FormController{
         GROUP_CONCAT(b.discount ORDER by c.id asc SEPARATOR '<br>') as discount,
         a.remark,
         f.id as ddata,
+        a.ppn,
+        g.name as currency,
+        a.currency as cid,
         case a.supplier when $parameterData[company] then '2' else '1' end  as receipt_type
         FROM `form_receipt` as a 
         INNER JOIN receipt_product as b on a.id=b.receipt
@@ -1991,26 +2000,313 @@ class FormController{
         INNER JOIN companies as d on a.supplier=d.id
         INNER JOIN companies as e on a.buyer=e.id
         INNER JOIN document_data as f on f.document_number=a.id
+        INNER JOIN currency as g on a.currency=g.id
         WHERE a.id=$id and f.document=11
         GROUP BY a.id
         ORDER BY a.id DESC","Document");
+        
+        if(count($receiptData)<1){
+            redirectWithMessage([['Data tidak tersedia atau telah dihapus',0]], '/form/receipt');
+        }
 
         $receiptItems = $builder->custom("SELECT b.id, b.product as pid, c.name as product, b.quantity, b.price, b.discount
         FROM form_receipt as a 
         INNER JOIN receipt_product as b on b.receipt=a.id
         INNER JOIN products as c on b.product=c.id 
-        WHERE a.id=$id
-        GROUP BY c.id", "Document");
+        WHERE a.id=$id", "Document");
 
-        view('form/receipt_form_detail', compact('receiptData', 'receiptItems', 'receivedItems', 'attachments', 'uploadFiles'));
+        view('form/receipt_form_detail', compact('receiptData', 'receiptItems', 'receivedItems', 'attachments', 'uploadFiles', 'partners', 'products'));
+    }
+
+    public function receiptFormUpdate(){
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+        }
+
+        $id = filterUserInput($_POST['receipt_form']);
+
+        //checking form requirement
+        $data=[];
+        
+        //check the requirement
+        //if passing the requirement, put the data into $data array
+        //otherwise redirect back to the page
+
+        $passingRequirement=true;
+        $_SESSION['sim-messages']=[];
+
+        foreach($this->placeholderReceiptForm[0] as $k => $v){
+            if(checkRequirement($v, $k, $_POST[$k])){
+                $data[$k]=filterUserInput($_POST[$k]);
+            }else{
+                $passingRequirement=false;
+            }  
+        }
+
+        $data['receipt_number'] = filterUserInput($_POST['receipt_number']);
+        $data['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
+        
+
+        //if not the passing requirements
+        if(!$passingRequirement){
+            redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
+            //redirect(getLastVisitedPage());
+        }
+
+        //dd($data);
+
+        $builder = App::get('builder');
+
+        $updateReceiptForm = $builder->update("form_receipt", $data, ['id' => $id], '', 'Document');
+
+        if(!$updateReceiptForm){
+            recordLog('Receipt form', returnMessage()['receiptForm']['updateFail'] );
+            redirectWithMessage([['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.', 0]],getLastVisitedPage());
+        }
+
+        recordLog('Receipt form', returnMessage()['receiptForm']['updateSuccess'] );
+
+        $builder->save();
+
+        //redirect to form page with message
+        redirectWithMessage([[ returnMessage()['receiptForm']['updateSuccess'] ,1]],getLastVisitedPage());
     }
 
     public function receiptFormItemUpdate(){
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+        }
+
+        $item = filterUserInput($_POST['receipt_item']);
+
+        //checking form requirement
+        $data=[];
+        
+        //check the requirement
+        //if passing the requirement, put the data into $data array
+        //otherwise redirect back to the page
+
+        $passingRequirement=true;
+        $_SESSION['sim-messages']=[];
+
+        foreach($this->placeholderReceiptForm[1] as $k => $v){
+            if(checkRequirement($v, $k, $_POST[$k])){
+                $data[$k]=filterUserInput($_POST[$k]);
+            }else{
+                $passingRequirement=false;
+            }  
+        }
+        
+
+        //if not the passing requirements
+        if(!$passingRequirement){
+            redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
+            //redirect(getLastVisitedPage());
+        }
+
+        $data['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
+
+        $builder = App::get('builder');
+
+        $updateReceiptItem = $builder->update("receipt_product", $data, ['id' => $item], '', 'Document');
+
+        $stockRelation = $builder->getSpecificData("stock_relation", ['*'], ['document' => 11, 'spec_doc' => $item], '&&', 'Stock')[0]->id;
+
+        $updateStock = $builder->update("stocks", ['product' => $data['product'], 'quantity' => $data['quantity']], ['stock_relation' => $stockRelation], '', 'Document');
+
+        if(!$updateStock || !$updateReceiptItem){
+            recordLog('Receipt form', "Memperbaharui receipt item gagal" );
+            redirectWithMessage([["Memperbaharui receipt item gagal", 0]],getLastVisitedPage());
+        }
+
+        recordLog('Receipt form', "Memperbaharui receipt item berhasil" );
+
+        $builder->save();
+
+        //redirect to form page with message
+        redirectWithMessage([[ "Memperbaharui receipt item berhasil",1]],getLastVisitedPage());
+
+    }
+
+    public function receiptFormRemove(){
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+        }
+
+        $receipt = filterUserInput($_POST['receipt_form']);
+
+        $builder = App::get('builder');
+
+        $getStockRelation = $builder->custom("SELECT a.id FROM stock_relation as a 
+        INNER JOIN receipt_product as b on a.spec_doc=b.id
+        INNER JOIN form_receipt as c on b.receipt=c.id
+        WHERE a.document=11 and b.receipt=$receipt", "Document");
+
+        for($i=0; $i<count($getStockRelation); $i++){
+            $sr = $getStockRelation[$i]->id;
+
+            $deleteStockRelation = $builder->delete("stock_relation", ['id' => $sr], '', 'Stock');
+            if(!$deleteStockRelation){
+                redirectWithMessage([["Maaf, gagal menghapus data", 0]], getLastVisitedPage());
+            }
+        }
+
+        /* $deleteStockRelation = $builder->custom("DELETE a FROM stock_relation as a 
+        INNER JOIN receipt_product as b on a.spec_doc=b.id
+        INNER JOIN form_receipt as c on b.receipt=c.id
+        WHERE a.document=11 and b.receipt=$receipt", "Stock");
+
+        if(!$deleteStockRelation){
+            redirectWithMessage([["Maaf, gagal menghapus data", 0]], getLastVisitedPage());
+        } */
+
+        $deleteReceiptForm = $builder->delete("form_receipt", ['id' => $receipt], '', 'Document');
+
+        if(!$deleteReceiptForm){
+            redirectWithMessage([["Maaf, gagal menghapus data", 0]], getLastVisitedPage());
+        }
+
+        recordLog('Receipt form', returnMessage()['receiptForm']['deleteSuccess'] );
+
+        $builder->save();
+
+        redirectWithMessage([[returnMessage()['receiptForm']['deleteSuccess'], 1]], '/form/receipt');
 
     }
     
-    public function receiptFormItemRemove(){
+    public function receiptItemRemove(){
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+        }
 
+        $item = filterUserInput($_POST['receipt_item']);
+
+        $builder = App::get('builder');
+        
+        $deleteStock = $builder->delete("stock_relation", ['document' => 11, 'spec_doc' => $item], '&&', 'Stock');
+
+        $deleteReceiptItem = $builder->delete("receipt_product", ['id' => $item], '', 'Document');
+
+
+        if(!$deleteStock || !$deleteReceiptItem){
+            redirectWithMessage([["Maaf, gagal menghapus data", 0]], getLastVisitedPage());
+        }
+
+        recordLog('Receipt item', returnMessage()['receiptForm']['deleteSuccess'] );
+
+        $builder->save();
+
+        redirectWithMessage([[returnMessage()['receiptForm']['deleteSuccess'], 1]], getLastVisitedPage());
+    }
+
+    public function receiptFormCreateNewItem(){
+
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+        }
+
+        //checking form requirement
+        $data=[];
+        
+        //check the requirement
+        //if passing the requirement, put the data into $data array
+        //otherwise redirect back to the page
+
+        $passingRequirement=true;
+        $_SESSION['sim-messages']=[];
+
+        foreach($this->placeholderReceiptForm[1] as $k => $v){
+            if(checkRequirement($v, $k, $_POST[$k])){
+                $data[$k]=filterUserInput($_POST[$k]);
+            }else{
+                $passingRequirement=false;
+            }  
+        }
+
+        //if not the passing requirements
+        if(!$passingRequirement){
+            redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
+            //redirect(getLastVisitedPage());
+        }
+
+        //check whether the value between keys is equal
+        $dataKeys= array_keys($data);
+
+        $value=0;
+        $isSame=true;
+        for($i=0;$i<count($dataKeys);$i++){
+            $countValue = count($data[$dataKeys[$i]]);
+            if($i==0){
+                $value = $countValue;
+            }
+            if($countValue!=$value){
+                $isSame=false;
+            }
+        }
+
+        if(!$isSame){
+            redirectWithMessage([["Mohon isi data product dengan lengkap", 0]], getLastVisitedPage());
+        }
+
+        //dd($data);
+
+        $idReceiptForm = filterUserInput($_POST['receipt_form']);
+        $receiptType = filterUserInput($_POST['receipt_type']);
+        $receiveSendDate = filterUserInput($_POST['receive_send_date']);
+
+        $newDataRecap=[];
+        for($i=0; $i<$value; $i++){
+            $newData=[];
+            foreach($dataKeys as $key){
+                $newData[$key]=$data[$key][$i];
+            }
+            $newData['receipt'] = $idReceiptForm;
+            $newData['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
+            array_push($newDataRecap, $newData);
+        }
+        
+        if($receiptType==1){
+            $date = "received_at";
+        }else{
+            $date = "send_at";
+        }
+
+        $builder = App::get('builder');
+
+        //dd($newDataRecap);
+
+        $flag = true;
+        for($i=0; $i<count($newDataRecap); $i++){
+
+            //insert into receipt_product
+            $insertToStockProduct = $builder->insert("receipt_product", $newDataRecap[$i]);
+            
+
+            $idReceiptStock = $builder->getPdo()->lastInsertId();
+
+            $insertToStockRelation = $builder->insert("stock_relation", ['document' => 11, 'spec_doc' => $idReceiptStock]);
+
+            $stockRelation = $builder->getPdo()->lastInsertId();
+           
+            $insertToStock = $builder->insert("stocks", [$date => $receiveSendDate, 'product'=>$newDataRecap[$i]['product'], 'quantity'=>$newDataRecap[$i]['quantity'], 'stock_relation' => $stockRelation, 'status' => $receiptType]);
+
+            if(!$insertToStockProduct || !$insertToStock || !$insertToStockRelation){
+                $flag = false;
+            }
+
+        }
+
+        if(!$flag){
+            recordLog('Receipt form', returnMessage()['receiptForm']['createFail'] );
+            redirectWithMessage([['Maaf, Gagal menambahkan receipt item', 0]],getLastVisitedPage());
+        }
+
+        recordLog('Receipt form', returnMessage()['receiptForm']['createSuccess'] );
+        
+        $builder->save();
+
+        //redirect to form page with message
+        redirectWithMessage([[ "Menambahkan receipt item berhasil" ,1]],getLastVisitedPage());
     }
 
 //=====================================================================================================//   
