@@ -172,7 +172,7 @@ class PartnerController{
                 $data['logo']=$lastUploadedId;
             }else{
                 //$_SESSION['sim-messages']=[['Maaf, gagal upload logo', 0]];
-                redirectWithMessage([["Maaf, gagal upload logo", 0]], getLastVisitedPage());
+                redirectWithMessage($_SESSION['sim-messages'], getLastVisitedPage());
             }
             unset($processingUpload);
   

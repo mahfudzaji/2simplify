@@ -22,7 +22,8 @@ class UploadController{
         $user=Auth::user();
         $userId=Auth::user()[0]->id;
         $this->role = App::get('role');
-        $this->role -> getRole($userId);
+		$this->role -> getRole($userId);	
+		$_SESSION['sim-messages'] =[];
     }
 
 	//index page of upload menu
@@ -122,9 +123,11 @@ class UploadController{
 					$file_type=4;
 					//$uploadOk = 1;
 				}else{
+
+					
 					
 					$msg= ["File bukan merupakan gambar, video atau audio", 0];
-					array_push($this->messages,$msg);
+					array_push($_SESSION['sim-messages'] ,$msg);
 					
 					$uploadOk = 0;
 				}
@@ -133,7 +136,7 @@ class UploadController{
 			// Check if file already exists
 			if (file_exists($target_file)) {
 				$msg= ["Maaf, file tersebut sudah ada",0];
-				array_push($this->messages,$msg);
+				array_push($_SESSION['sim-messages'] ,$msg);
 				$uploadOk = 0;
 			}
 				
@@ -142,7 +145,7 @@ class UploadController{
 			// 1 MB=1024KB=10485760 B
 			if ($upload_file["size"] > 10485760) {
 				$msg= ['Maaf, ukuran file tersebut melebihi batas. Maksimal 10 MB',0];
-				array_push($this->messages,$msg);
+				array_push($_SESSION['sim-messages'] ,$msg);
 				$uploadOk = 0;
 			}
 
@@ -150,9 +153,9 @@ class UploadController{
 
 			if($allowFileType!=null){
 				if($allowFileType!=$file_type){
-					$e=implode(',', $fileTypeCategory[$allowFileType]);
+					$e=implode(', ', $fileTypeCategory[$allowFileType]);
 					$msg= ["Maaf, hanya file $e yang diijinkan", 0];
-					array_push($this->messages,$msg);
+					array_push($_SESSION['sim-messages'] ,$msg);
 
 					return false;
 				}
@@ -170,14 +173,14 @@ class UploadController{
 				if($uploadOk==0){
 					$e=implode(',', $fileTypeCategory[$file_type]);
 					$msg= ["Maaf, hanya file $e yang diijinkan", 0];
-					array_push($this->messages,$msg);
+					array_push($_SESSION['sim-messages'] ,$msg);
 				}
 			}
 			
 			// Check if $uploadOk is set to 0 by an error
 			if ($uploadOk == 0) {
 				$msg= ["Maaf, File tersebut tidak dapat diunggah. Terdapat error.", 0];
-				array_push($this->messages,$msg);
+				array_push($_SESSION['sim-messages'] ,$msg);
 
 			} else {
 				
@@ -196,19 +199,19 @@ class UploadController{
 
 				if($insertToUploadFile){
 					$msg=["File berhasil disimpan", 1];
-					array_push($this->messages,$msg);
+					array_push($_SESSION['sim-messages'] ,$msg);
 
 					if (move_uploaded_file($upload_file["tmp_name"],$target_dir.$target_file)) {
 					 
 						$msg= ["Sukses upload data",1];
-						array_push($this->messages,$msg);
+						array_push($_SESSION['sim-messages'] ,$msg);
 
 						$uploadSuccess=true;
 
 					} else {
 						$msg= ["Maaf, terjadi kesalahan ketika mengunggah, mohon ulangi lagi",0];
 						
-						array_push($this->messages,$msg);
+						array_push($_SESSION['sim-messages'] ,$msg);
 
 						$uploadSuccess=false;
 
@@ -223,7 +226,7 @@ class UploadController{
 				}else{
 					$msg= ["Maaf, terjadi kesalahan ketika mengunggah, mohon ulangi lagi",0];
 					
-					array_push($this->messages,$msg);
+					array_push($_SESSION['sim-messages'] ,$msg);
 
 					$uploadSuccess=false;
 
