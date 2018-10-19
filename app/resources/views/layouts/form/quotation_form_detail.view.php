@@ -86,7 +86,6 @@ $priceTotal=0;
             </div>
         </div>
 
-        
         <!-- UPDATE QUO FORM -->
         <div class="app-form modal" id="modal-update-quo">
             <div class="modal-content" style="width:50%;">
@@ -429,7 +428,7 @@ $priceTotal=0;
                         </div>
                         
                     <?php endforeach; ?>
-
+   
                     <table class="table table-striped">
                         <thead>
                             <tr>

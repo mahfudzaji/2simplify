@@ -2383,8 +2383,8 @@ class FormController{
         inner join form_quo as g on g.quo=a.id
         inner join companies as c on a.supplier=c.id
         inner join companies as d on a.buyer=d.id
-        inner join quo_product as e on g.id=e.quo
-        inner join products as f on e.product=f.id
+        left join quo_product as e on g.id=e.quo
+        left join products as f on e.product=f.id
         where $whereClause && po_or_quo=0 && revision is null
         group by a.id
         order by a.id DESC","Document");
@@ -2735,7 +2735,7 @@ class FormController{
         //dd($quoDetailData);
         /* End of Quo revision */
 
-        if(count($quoDetailData)<1){
+        if(count($quoData)<1){
             redirectWithMessage([['Data tidak tersedia atau telah dihapus',0]], '/form/quo');
         }
 
@@ -3319,10 +3319,10 @@ class FormController{
                 FROM po_quo as a 
                 INNER JOIN form_quo as b on a.quo=b.id 
                 INNER JOIN form_po as d on a.po=d.id 
-                INNER JOIN quo_product as c on a.quo=c.quo
+                LEFT JOIN quo_product as c on a.quo=c.quo
                 INNER JOIN companies as e on d.supplier=e.id 
                 INNER JOIN companies as f on d.buyer=f.id 
-                INNER JOIN products as g on c.product=g.id
+                LEFT JOIN products as g on c.product=g.id
                 WHERE $whereClause && po_or_quo=1
                 GROUP BY d.id
                 ORDER BY d.id DESC", "Document");
@@ -3566,7 +3566,7 @@ class FormController{
         INNER JOIN upload_files as c on b.attachment=c.id
         WHERE a.document=5 and a.document_number=$id","Document");
 
-        $poData = $builder->custom("SELECT a.id as po, j.po_number as po_number, DATE_FORMAT(a.doc_date, '%d %M %Y') as po_date,
+        $poData = $builder->custom("SELECT a.id as po, j.po_number as po_number, DATE_FORMAT(a.doc_date, '%d %M %Y') as po_date, a.doc_date as dd,
 		f.name as buyer, f.address as baddress, f.phone as bphone, IFNULL(f.fax, '-')as bfax,
         a.pic_buyer, 
         g.name as supplier, g.address as saddress, g.phone as sphone, IFNULL(g.fax, '-') as sfax,
@@ -3583,7 +3583,8 @@ class FormController{
         k.quo_number,
         j.quo,
         l.revision_number,
-        k.id
+        k.id,
+        a.currency as cid
         FROM `form_po` as a 
         inner join users as b on a.created_by=b.id 
         inner join users as c on a.updated_by=c.id 
@@ -3651,7 +3652,7 @@ class FormController{
 
         //dd($poDetailData);
 
-        if(count($poDetailData)<1){
+        if(count($poData)<1){
             redirectWithMessage([['Data tidak tersedia atau telah dihapus',0]], getLastVisitedPage());
         }
 
@@ -3665,6 +3666,110 @@ class FormController{
     }
 
     public function poFormUpdate(){
+        if(!$this->role->can("update-data-po")){
+            redirectWithMessage([[ returnMessage()['poForm']['accessRight']['update'] , 0]], getLastVisitedPage());
+        }
+
+        $builder = App::get('builder');
+
+        //checking form requirement
+        $data=[];
+        
+        //check the requirement
+        //if passing the requirement, put the data into $data array
+        //otherwise redirect back to the page
+
+        $passingRequirement=true;
+        $_SESSION['sim-messages']=[];
+
+        $po = filterUserInput($_POST['po']);
+
+        if(isEmpty($po)){
+            redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
+        }
+
+        $placeholderPOFormUpdate = [
+            'doc_date' => 'required',
+            'pic_buyer' => 'required',
+            'pic_supplier' => 'required',
+            'currency' => 'required',
+            'remark' => ''
+        ];
+
+        foreach($placeholderPOFormUpdate as $k => $v){
+            if(checkRequirement($v, $k, $_POST[$k])){
+                $data[$k]=filterUserInput($_POST[$k]);
+            }else{
+                $passingRequirement=false;
+            }  
+        }
+        
+        //if not the passing requirements
+        if(!$passingRequirement){
+            //redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
+            redirect($_SESSION['sim-messages'], getLastVisitedPage());
+        }
+
+        $data['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
+        $poNumber = filterUserInput($_POST['po_number']);
+
+        $builder = App::get('builder');
+
+        $updatePoNumber = $builder->update('po_quo', ['po_number' => $poNumber], ['po'=>$po], '', 'Document');
+
+        $updatePoForm = $builder->update("form_po", $data, ['id'=>$po], "", "Document");
+ 
+        if(!$updatePoForm || !$updatePoNumber){
+            recordLog('PO form', returnMessage()['poForm']['updateFail'] );
+            redirectWithMessage([['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.', 0]],getLastVisitedPage());
+        }
+        
+        recordLog('PO form', returnMessage()['poForm']['updateSuccess'] );
+
+        $builder->save();
+
+        //redirect to form page with message
+        redirectWithMessage([[ returnMessage()['poForm']['updateSuccess'] ,1]],getLastVisitedPage());
+
+    }
+
+    public function poFormRemove(){
+        if(!$this->role->can("update-data-po")){
+            redirectWithMessage([[ returnMessage()['poForm']['accessRight']['delete'] , 0]], getLastVisitedPage());
+        }
+
+        //check whether po already have do
+        //if so, when po removed then do also removed
+        //remove po_quo will remove po_product also
+        //then remove form_po
+
+        $po = filterUserInput($_POST['po']);
+
+        $builder = App::get('builder');
+
+        $getidPoQuo = $builder->getSpecificData("po_quo", ['id'], ['po' => $po], $operator, $forClass)[0]->id;
+
+        $getDoRelatedPo = $builder->getSpecificData("form_do", ['id'], ['po_quo' => $getidPoQuo], $operator, $forClass)[0]->id;
+
+        $deletePOQuo = $builder->delete("po_quo", ['po' => $po], '', 'Document');
+
+        $deletePOForm = $builder->delete("form_po", ['id' => $po], '', 'Document');
+
+        $deleteStockRelated = $builder->delete("stock_relation", ['spec_doc' => $getDoRelatedPo, 'document' => 6], '&&', 'Document');
+
+        if(!$deletePOQuo || !$deletePOForm || !$deleteStockRelated){
+            redirectWithMessage([[ returnMessage()['poForm']['deleteFail'] , 0]], getLastVisitedPage());
+        }
+
+        recordLog('PO form', returnMessage()['poForm']['deleteSuccess'] );
+
+        $builder->save();
+
+        redirectWithMessage([[returnMessage()['poForm']['deleteSuccess'], 1]], '/form/po');
+
+    }
+
+    public function poItemUpdate(){
         if(!$this->role->can("update-data-po")){
             redirectWithMessage([[ returnMessage()['poForm']['accessRight']['update'] , 0]], getLastVisitedPage());
         }
@@ -3715,18 +3820,17 @@ class FormController{
         if(!$updatePoProduct){
             recordLog('PO form', returnMessage()['poForm']['updateFail'] );
             redirectWithMessage([['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.', 0]],getLastVisitedPage());
-        }else{
-            recordLog('PO form', returnMessage()['poForm']['updateSuccess'] );
         }
+        
+        recordLog('PO form', returnMessage()['poForm']['updateSuccess'] );
 
         $builder->save();
 
         //redirect to form page with message
         redirectWithMessage([[ returnMessage()['poForm']['updateSuccess'] ,1]],getLastVisitedPage());
-
     }
 
-    public function poFormItemRemove(){
+    public function poItemRemove(){
         if(!$this->role->can("update-data-po")){
             redirectWithMessage([[ returnMessage()['poForm']['accessRight']['delete'] , 0]], getLastVisitedPage());
         }
@@ -3734,19 +3838,8 @@ class FormController{
         //id of the reimburse data item
         $id = filterUserInput($_POST['po-item']);
         $idOfPoForm = filterUserInput($_POST['po']);
-        
-        //check whether the user that perform deletion action is same with the reimburse data's creator
-        $thisAccount = substr($_SESSION['sim-id'], 3, -3);
 
         $builder = App::get('builder');
-        
-        $accountShouldBeAllow = $builder->custom("SELECT created_by FROM form_po WHERE id=$idOfPoForm", "Document");
-        
-        //dd($accountShouldBeAllow);
-
-        if($accountShouldBeAllow[0]->created_by != $thisAccount){
-            redirectWithMessage([[ returnMessage()['poForm']['accessRight']['delete'] , 0]], getLastVisitedPage());
-        }
 
         //check whether po have quo or not
         //if have, delete the item from table quo_product
@@ -4254,7 +4347,7 @@ class FormController{
         WHERE a.document=6 and a.document_number=$id","Document");
 
         $doData = $builder->custom("SELECT a.id, d.id as poid, c.id as ddata, b.po, b.quo, b.po_number, 
-        date_format(a.do_date, '%d %M %Y') as do_date, a.do_number, a.remark, 
+        date_format(a.do_date, '%d %M %Y') as do_date, a.do_date as dd, a.do_number, a.remark, 
         a.delivered_by, a.received_by, a.approved,
         g.name as created_by, h.name as updated_by, i.name as approved_by, a.approved_at,
         e.name as supplier, e.address as saddress, e.phone as sphone, e.fax as sfax, d.pic_supplier, 
@@ -4313,6 +4406,10 @@ class FormController{
         WHERE a.id=$id
         GROUP BY i.id", "Document");
 
+        if(count($doData)<1){
+            redirectWithMessage([['Data tidak tersedia atau telah dihapus',0]], '/form/quo');
+        }
+
 
         view('form/do_form_detail', compact('doData', 'attachments', 'uploadFiles', 'doItems', 'vendors', 'receivedItems'));
     }
@@ -4361,15 +4458,21 @@ class FormController{
             redirectWithMessage([[ returnMessage()['doForm']['accessRight']['update'] , 0]], getLastVisitedPage());
         }
 
-        $id = filterUserInput($_POST['do-form']);
+        $id = filterUserInput($_POST['do_form']);
 
-        $placeholders = ['delivered_by'=>'required', 'received_by'=>'required'];
+        $placeholderDOFormUpdate = [
+            'do_date' => 'required',
+            'do_number' => 'required',
+            'received_by' => 'required',
+            'delivered_by' => 'required',
+            'remark' => ''
+        ];
         
         $passingRequirement=true;
 
         $data = [];
 
-        foreach($placeholders as $placeholder => $requirement){
+        foreach($placeholderDOFormUpdate as $placeholder => $requirement){
             if(checkRequirement($requirement, $placeholder, $_POST[$placeholder])){
                 $data[$placeholder] = filterUserInput($_POST[$placeholder]);
             }else{
@@ -4381,6 +4484,8 @@ class FormController{
             redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
         }
 
+        $data['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
+        
         //update data 
 
         $builder = App::get('builder');
@@ -4396,6 +4501,34 @@ class FormController{
 
         //redirect to form page with message
         redirectWithMessage([[ returnMessage()['doForm']['updateSuccess'] ,1]],getLastVisitedPage());
+
+    }
+
+    public function doFormRemove(){
+        if(!$this->role->can('update-data-do')){
+            redirectWithMessage([[ returnMessage()['doForm']['accessRight']['update'] , 0]], getLastVisitedPage());
+        }
+
+        //remove stock_relation will remove stock also
+        //then remove form_do
+
+        $do = filterUserInput($_POST['do']);
+
+        $builder = App::get('builder');
+
+        $deleteStockRelated = $builder->delete("stock_relation", ['spec_doc' => $do, 'document' => 6], '&&', 'Document');
+
+        $deletePOForm = $builder->delete("form_do", ['id' => $do], '', 'Document');
+
+        if(!$deletePOForm || !$deleteStockRelated){
+            redirectWithMessage([[ returnMessage()['doForm']['deleteFail'] , 0]], getLastVisitedPage());
+        }
+
+        recordLog('DO form', returnMessage()['doForm']['deleteSuccess'] );
+
+        $builder->save();
+
+        redirectWithMessage([[returnMessage()['doForm']['deleteSuccess'], 1]], '/form/do');
 
     }
 

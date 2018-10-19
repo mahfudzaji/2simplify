@@ -79,10 +79,10 @@ $priceTotal=0;
         </div>
 
         <!-- UPDATE PO FORM -->
-        <div class="app-form modal" id="modal-update-po-form">         
-            <div class="modal-content">
+        <div class="app-form modal" id="modal-update-po">
+            <div class="modal-content" style="width:50%;">
                 <div class="modal-header">
-                    <h3>Perbaharui Data <?= $titlePage; ?></h3>
+                    <h3>Update Data <?= $titlePage; ?></h3>
                 </div>
 
                 <div class="description">
@@ -90,30 +90,41 @@ $priceTotal=0;
                     <p><span style="color:red;">*</span>Catatan: <br> Setelah mengirim form, kemudian upload bukti dan beri notes jika diperlukan</p>
                 </div>
                 <form action="/form/po/update" method="post">
-                    <input type="hidden" name="po-item" value="">
+                    <input type="hidden" name="po" value=<?= $_GET['po']; ?>>
+
                     <div class="form-group">
-                        <label>Product</label>
-                        <select name="product" class="form-control" required>
-                            <option value=''>PRODUK</option>
-                            <?php foreach($products as $product): ?>
-                                <option value=<?= $product->id ?> title=" <?= $product->description ?> " ><?= ucfirst($product->name).'|'.strtoupper($product->part_number); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Quantity</label>
-                        <input type="number" name="quantity" min=0 class="form-control" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Price unit</label>
-                        <input type="number" name="price_unit" min=0 class="form-control" required>
+                        <label>PO number</label>
+                        <input type="text" class="form-control" name="po_number" placeholder="PO number" required>
                     </div>
 
                     <div class="form-group">
-                        <label>Diskon (%)</label>
-                        <input type="number" min=0 name="item_discount" class="form-control" required>
+                        <label>Tanggal PO</label>
+                        <input type="date" name="doc_date" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>PIC buyer</label>
+                        <input type="text" class="form-control" name="pic_buyer" placeholder="PIC pihak pengaju quotation" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>PIC supplier</label>
+                        <input type="text" class="form-control" name="pic_supplier" placeholder="PIC pihak pemberi quotation" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mata uang</label>
+                        <select name="currency" class="form-control">
+                            <option value=''>MATA UANG</option>
+                            <option value='1'>Rupiah</option>
+                            <option value='2'>Dollar</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Keterangan / Term & condition</label>
+                        <!-- <textarea name="remark" class="form-control" placeholder="Keterangan tambahan"></textarea> -->
+                        <div id="remark"></div>
                     </div>
 
                     <button type="button" class="btn btn-danger btn-close" >Tutup</button>
@@ -127,14 +138,13 @@ $priceTotal=0;
         </div>
 
         <!-- REMOVE PO FORM -->
-        <div class="app-form modal" id="modal-remove-po-form">
+        <div class="app-form modal" id="modal-remove-po">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Konfirmasi</h3>
                 </div>
                 <div class="modal-main-content">
                     <form action="/form/po/remove" method="post">
-                        <input type="hidden" name="po-item" value="">
                         <input type="hidden" name="po" value=<?= $_GET['po']; ?>>
                         <button type="submit" class="btn btn-danger btn-sm form-control"><span class="glyphicon glyphicon-remove"></span> Hapus data</button>
                     </form>
@@ -144,6 +154,7 @@ $priceTotal=0;
             </div>
         </div>
 
+        <!-- NOT USED -->
         <!-- APPROVAL PO FORM -->
         <div class="app-form modal" id="modal-approve-po-form">
             <div class="modal-content">
@@ -179,6 +190,7 @@ $priceTotal=0;
                 <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
+        <!-- NOT USER -->
 
         <!-- CREATE NEW ITEM -->
         <div class="app-form modal" id="modal-create-new-item">
@@ -228,6 +240,55 @@ $priceTotal=0;
             </div>
         </div>
 
+        <!-- UPDATE PO ITEM -->
+        <div class="app-form modal" id="modal-update-po-item">         
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Perbaharui Data <?= $titlePage; ?></h3>
+                </div>
+
+                <div class="description">
+                    <p>Form ini digunakan untuk memperbaharui data <?= $titlePage; ?>.</p>
+                    <p><span style="color:red;">*</span>Catatan: <br> Setelah mengirim form, kemudian upload bukti dan beri notes jika diperlukan</p>
+                </div>
+                <form action="/form/po/update-item" method="post">
+                    <input type="hidden" name="po-item" value="">
+                    <input type="hidden" name="po-form" value="<?= $_GET['po']; ?>">
+                    <div class="form-group">
+                        <label>Product</label>
+                        <select name="product" class="form-control" required>
+                            <option value=''>PRODUK</option>
+                            <?php foreach($products as $product): ?>
+                                <option value=<?= $product->id ?> title=" <?= $product->description ?> " ><?= ucfirst($product->name).'|'.strtoupper($product->part_number); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" name="quantity" min=0 class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Price unit</label>
+                        <input type="number" name="price_unit" min=0 class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Diskon (%)</label>
+                        <input type="number" min=0 name="item_discount" class="form-control" required>
+                    </div>
+
+                    <button type="button" class="btn btn-danger btn-close" >Tutup</button>
+
+                    <div class="nav-right">
+                        <button type="submit" name="submit" class="btn btn-primary btn-next">Kirim <span class="glyphicon glyphicon-send"></span></button>
+                    </div>
+                </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+            </div>
+        </div>
+
         <!-- IMAGE SCROLL -->
         <div class="modal image-scroll-modal scroll-modal-horizontal">          
             <span class="btn-close glyphicon glyphicon-remove"></span>
@@ -247,10 +308,10 @@ $priceTotal=0;
                             <h3>Supplier: <?= makeFirstLetterUpper($data2->supplier); ?></h3>
                             <h4><?= makeFirstLetterUpper($data2->saddress); ?></h4>
                             <h4>Telp/Fax: <?= $data2->sphone; ?> / <?= $data2->sfax; ?></h4>
-                            <h4>PIC: <?= makeFirstLetterUpper($data2->pic_supplier); ?></h4>
+                            <h4>PIC: <span data-item="pic_supplier"><?= makeFirstLetterUpper($data2->pic_supplier); ?></span></h4>
                         </div>
                         <div class="col-md-6 text-left" style="padding-right:0">
-                            <h3><span style="background-color:#EDCDC2;"><?= $data2->po_number; ?></span></h3>
+                            <h3><span style="background-color:#EDCDC2;" data-item="po_number"><?= $data2->po_number; ?></span></h3>
 
                             <?php
                                 if($data2->quo_number==null || empty($data2->quo_number)){
@@ -265,10 +326,10 @@ $priceTotal=0;
                             ?>
 
                             <h4>Quo: <?= $quoNumber; ?></h4>
-                            <h4>PO DATE: <?= $data2->po_date; ?></h4>
-                            <h4>PIC: <?= makeFirstLetterUpper($data2->pic_buyer); ?></h4>
+                            <h4>PO DATE: <span data-item="po_date" data-item-val="<?= $data2->dd; ?>"><?= $data2->po_date; ?></span></h4>
+                            <h4>PIC: <span data-item="pic_buyer"><?= makeFirstLetterUpper($data2->pic_buyer); ?></span></h4>
                             <h4>Telp/Fax: <?= $data2->bphone; ?> / <?= $data2->bfax; ?></h4>
-                            <h4>Currency: <?= $data2->currency; ?></h4>
+                            <h4>Currency: <span data-item="currency" data-item-val=<?= $data2->cid; ?>><?= $data2->currency; ?></span></h4>
                         </div>
                         
                     <?php endforeach; ?>
@@ -297,6 +358,7 @@ $priceTotal=0;
                                 <td data-item="total"><?= $item; ?></td>
                                 <td data-item="status"><?= $data1->status; ?></td>
                                 <?php if($data1->status==0): ?>
+                                    <?php if($poData[0]->quo==null || $poData[0]->quo=="" || empty($poData[0])): ?>
                                     <?php if($poData[0]->cbid==substr($_SESSION['sim-id'], 3, -3)): ?>
                                         <!-- Single button by Bootstrap -->
                                         <td class="text-center">
@@ -305,8 +367,8 @@ $priceTotal=0;
                                                     Action <span class="caret"></span>
                                                 </button>
                                                 <ul class="dropdown-menu">
-                                                    <li><a href="#" class="btn-modal btn-action" data-id="update-po-form"><span class="glyphicon glyphicon-pencil"></span> Update</a></li>
-                                                    <li><a href="#" class="btn-modal btn-action" data-id="remove-po-form"><span class="glyphicon glyphicon-remove"></span> Remove</a></li>
+                                                    <li><a href="#" class="btn-modal btn-action" data-id="update-po-item"><span class="glyphicon glyphicon-pencil"></span> Update</a></li>
+                                                    <li><a href="#" class="btn-modal btn-action" data-id="remove-po-item"><span class="glyphicon glyphicon-remove"></span> Remove</a></li>
                                                 </ul>
                                             </div>
                                         </td>
@@ -320,13 +382,16 @@ $priceTotal=0;
                                                     Action <span class="caret"></span>
                                                 </button>
                                                 <ul class="dropdown-menu">
-                                                    <li><a href="#" class="btn-modal btn-action" data-id="approve-po-form"><span class="glyphicon glyphicon-ok"></span> Setuju</a></li>
-                                                    <li><a href="#" class="btn-modal btn-action" data-id="reject-po-form"><span class="glyphicon glyphicon-remove"></span> Ditolak</a></li>
+                                                    <li><a href="#" class="btn-modal btn-action" data-id="approve-po-item"><span class="glyphicon glyphicon-ok"></span> Setuju</a></li>
+                                                    <li><a href="#" class="btn-modal btn-action" data-id="reject-po-item"><span class="glyphicon glyphicon-remove"></span> Ditolak</a></li>
                                                 </ul>
                                             </div>
                                         </td>
                                         <!-- td class="text-center"><button type="button" class="btn btn-success btn-sm btn-modal" id="approve-vacation-form"><span class="glyphicon glyphicon-ok"></span> Setuju</button></td>
                                         <td class="text-center"><button type="button" class="btn btn-danger btn-sm btn-modal" id="reject-vacation-form"><span class="glyphicon glyphicon-remove"></span> Ditolak</button></td> -->
+                                    <?php else: ?>
+                                        <td class="text-center">---</td>
+                                    <?php endif; ?>
                                     <?php else: ?>
                                         <td class="text-center">---</td>
                                     <?php endif; ?>
@@ -341,7 +406,7 @@ $priceTotal=0;
                     <?php foreach($poData as $data2): ?>
                         <div style="margin-bottom:20px;">
                             <h4>Total: <?= $priceTotal; ?></h4>
-                            <p>Keterangan: <?= ($data2->remark==null||empty($data2->remark))?"-":makeFirstLetterUpper($data2->remark); ?></p>
+                            <p>Keterangan: <div data-item='remark'><?= ($data2->remark==null||empty($data2->remark))?"-":makeFirstLetterUpper($data2->remark); ?></div></p>
                             <div class="row">
                                 <div class="col-md-6">
                                     <small class="label label-default">Acknowledged by: <?= $data2->acknowledged_by; ?></small>
@@ -356,7 +421,9 @@ $priceTotal=0;
                     <?php endforeach; ?>
                     
                     <a target="_blank" href="/print/po?po=<?= $_GET['po']; ?>"><button type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-print"></span> Cetak</button></a>
-                    
+                    <button class="btn btn-sm btn-primary btn-modal" id="update-po"><span class="glyphicon glyphicon-edit"></span> Update PO</button>
+                    <button class="btn btn-sm btn-danger btn-modal" id="remove-po"><span class="glyphicon glyphicon-edit"></span> Remove</button>
+
                 </div>
                 
                 <!-- SHOW ATTACHMENT -->
@@ -393,29 +460,50 @@ $priceTotal=0;
 <script>
 $(document).ready(function(){
 
+    $('#remark').trumbowyg();
+
     /* UPDATE PO ITEM */
     $(".btn-action").on("click", function(){
         var dataId= $(this).attr("data-id");
 
         var poItem = $(this).parent().closest("tr").attr("data-item");
 
-        if(dataId=='update-po-form'){        
+        if(dataId=='update-po-item'){        
             var product = $(this).parent().closest("tr").find("[data-item~='product']").attr("data-item-val");
             var quantity = $(this).parent().closest("tr").find("[data-item~='quantity']").html();
             var priceUnit = $(this).parent().closest("tr").find("[data-item~='price_unit']").html();
             var discountItem = $(this).parent().closest("tr").find("[data-item~='item_discount']").html();
 
-            $("#modal-update-po-form").find("input[name~='po-item']").val(poItem);
-            $("#modal-update-po-form").find("select[name~='product']").find("option").attr("selected", false);
-            $("#modal-update-po-form").find("select[name~='product']").find("option[value~='"+product+"']").attr("selected", true);
-            $("#modal-update-po-form").find("input[name~='quantity']").val(quantity); 
-            $("#modal-update-po-form").find("input[name~='price_unit']").val(priceUnit);
-            $("#modal-update-po-form").find("input[name~='item_discount']").val(discountItem);
+            $("#modal-update-po-item").find("input[name~='po-item']").val(poItem);
+            $("#modal-update-po-item").find("select[name~='product']").find("option").attr("selected", false);
+            $("#modal-update-po-item").find("select[name~='product']").find("option[value~='"+product+"']").attr("selected", true);
+            $("#modal-update-po-item").find("input[name~='quantity']").val(quantity); 
+            $("#modal-update-po-item").find("input[name~='price_unit']").val(priceUnit);
+            $("#modal-update-po-item").find("input[name~='item_discount']").val(discountItem);
         }else{
-            $("#modal-remove-po-form, #modal-approve-po-form, #modal-reject-po-form").find("input[name~='po-item']").val(poItem);
+            $("#modal-remove-po-item, #modal-approve-po-item, #modal-reject-po-item").find("input[name~='po-item']").val(poItem);
         }
         
     });
+
+    /* UPDATE PO FORM */
+    $("#update-po").on("click", function(){
+        var buyer = $("[data-item~='pic_buyer']").html();
+        var poDate = $("[data-item~='po_date']").attr("data-item-val");
+        var supplier = $("[data-item~='pic_supplier']").html();
+        var currency = $("[data-item~='currency']").attr("data-item-val");
+        var remark = $("[data-item~='remark']").html();
+        var poNumber = $("[data-item~='po_number']").html();
+
+        $("#modal-update-po").find("input[name~='pic_buyer']").val(buyer);
+        $("#modal-update-po").find("input[name~='pic_supplier']").val(supplier);
+        $("#modal-update-po").find("input[name~='doc_date']").val(poDate);
+        $("#modal-update-po").find("#remark").trumbowyg('html', remark);
+		$("#modal-update-po").find("#remark").trumbowyg('html');
+        //$("#modal-update-quo").find("select[name~='currency']").find("option").attr("selected", false);
+        $("#modal-update-po").find("select[name~='currency']").find("option[value~='"+currency+"']").attr("selected", true);
+        $("#modal-update-po").find("input[name~='po_number']").val(poNumber);
+    })
 
     /* SHOW ATTACHMENT */
     $("select[name~='attachment']").on("change", function(){

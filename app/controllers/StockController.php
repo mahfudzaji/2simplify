@@ -676,8 +676,7 @@ class StockController{
         FROM stocks as a
         INNER JOIN products as b on a.product=b.id
         INNER JOIN stock_relation as c on a.stock_relation=c.id
-        INNER JOIN po_quo as d on c.spec_doc=d.id
-        INNER JOIN form_do as e on d.id=e.po_quo
+        INNER JOIN form_do as e on c.spec_doc=e.id
         WHERE c.document=6 and a.product=$product
         UNION
         SELECT DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,

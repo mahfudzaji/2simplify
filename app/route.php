@@ -131,8 +131,10 @@ $router->get('form/po', 'FormController@poFormIndex');
 $router->get('form/po/detail', 'FormController@poFormDetail');
 $router->post('form/po/create', 'FormController@poFormCreate');
 $router->post('form/po/update', 'FormController@poFormUpdate');
-$router->post('form/po/remove', 'FormController@poFormItemRemove');
+$router->post('form/po/remove', 'FormController@poFormRemove');
 $router->post('form/po/new-item', 'FormController@poFormCreateNewItem');
+$router->post('form/po/update-item', 'FormController@poItemUpdate');
+$router->post('form/po/remove-item', 'FormController@poItemRemove');
 $router->post('form/po/approve', 'FormController@poFormApproval');
 $router->post('form/po/create-from-quo', 'FormController@poFormCreateFromQuo');
 $router->get('form/po/get-number', 'FormController@poFormNumber');
@@ -143,6 +145,7 @@ $router->post('form/do/create', 'FormController@doFormCreate');
 $router->get('form/do/detail', 'FormController@doFormDetail');
 $router->post('form/do/approve', 'FormController@doFormApproval');
 $router->post('form/do/update', 'FormController@doFormUpdate');
+$router->post('form/do/remove', 'FormController@doFormRemove');
 
 //PRODUCTS AND STOCKS
 $router->get('product', 'PAController@index');

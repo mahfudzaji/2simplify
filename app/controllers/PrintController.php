@@ -366,7 +366,7 @@ class PrintController{
 
         /* End of Quo revision */
         
-        if(count($quoDetailData)<1){
+        if(count($quoData)<1){
             redirectWithMessage([['Data tidak tersedia atau telah dihapus',0]], '/form/quo');
         }
 
@@ -511,7 +511,7 @@ class PrintController{
         inner join products as c on a.product=c.id
         WHERE d.po=$id $whereClause", 'Document');
 
-        if(count($poDetailData)<1){
+        if(count($poData)<1){
             redirectWithMessage([['Data tidak tersedia atau telah dihapus',0]], getLastVisitedPage());
         }
         

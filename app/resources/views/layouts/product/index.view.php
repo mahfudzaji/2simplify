@@ -146,7 +146,7 @@ require base.'base/header.view.php';
                             <input type="file" name="picture">
                         </div>         
 
-                        <button class="btn btn-danger btn-close">Tutup</button>
+                        <button type="button" class="btn btn-danger btn-close">Tutup</button>
                         <button type="submit" name="submit" class="btn btn-primary" style="float:right;">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </form>
 

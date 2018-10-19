@@ -86,7 +86,16 @@ $printBtn = false;
                     <p><span style="color:red;">*</span>Catatan: <br> Setelah mengirim form, kemudian upload bukti dan beri notes jika diperlukan</p>
                 </div>
                 <form action="/form/do/update" method="post">
-                    <input type="hidden" name="do-form" value=<?= $_GET['do']; ?>>
+                    <input type="hidden" name="do_form" value=<?= $_GET['do']; ?>>
+                    
+                    <div class="form-group">
+                        <label>DO number</label>
+                        <input type="text" class="form-control" name="do_number" placeholder="DO number" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tanggal DO</label>
+                        <input type="date" name="do_date" class="form-control">
+                    </div>
                     <div class="form-group">
                         <label>Diserahkan oleh</label>
                         <input type="text" name="delivered_by" class="form-control" required>
@@ -95,12 +104,37 @@ $printBtn = false;
                         <label>Diterima oleh</label>
                         <input type="text" name="received_by" class="form-control" required>
                     </div>
+                    <div class="form-group">
+                        <label>Keterangan / Term & condition</label>
+                        <!-- <textarea name="remark" class="form-control" placeholder="Keterangan tambahan"></textarea> -->
+                        <div id="remark"></div>
+                    </div>
+
                     <button type="button" class="btn btn-danger btn-close" >Tutup</button>
 
                     <div class="nav-right">
                         <button type="submit" name="submit" class="btn btn-primary btn-next">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </div>
+
                 </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+            </div>
+        </div>   
+
+        <!-- REMOVE DO FORM -->
+        <div class="app-form modal" id="modal-remove-do">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Konfirmasi</h3>
+                </div>
+                <div class="modal-main-content">
+                    <form action="/form/do/remove" method="post">
+                        <input type="hidden" name="do" value=<?= $_GET['do']; ?>>
+                        <button type="submit" class="btn btn-danger btn-sm form-control"><span class="glyphicon glyphicon-remove"></span> Hapus data</button>
+                    </form>
+                </div>
+                <br><button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -194,8 +228,8 @@ $printBtn = false;
                 <div class="col-md-8">
                     <?php foreach($doData as $data2): ?>
                         <div>
-                            <h3><span style="background-color:#F6D155;">DO Number: <?= $data2->do_number; ?></span></h3>
-                            <h4>DO Date: <?= $data2->do_date; ?></h4>
+                            <h3>DO Number: <span style="background-color:#F6D155;" data-item="do_number"><?= $data2->do_number; ?></span></h3>
+                            <h4>DO Date: <span data-item="do_date" data-item-val="<?= $data2->dd; ?>"><?= $data2->do_date; ?></span></h4>
                             <h4>PO Number: <a href="/form/po/detail?po=<?= $data2->poid ?>" target=_blank><?= $data2->po_number; ?></a></h3>
                         </div>
                         <div class="col-md-6" style="padding-left:0">
@@ -276,7 +310,7 @@ $printBtn = false;
 
                     <?php foreach($doData as $data2): ?>
                         <div style="margin-bottom:20px;">
-                            <p>Keterangan: <?= ($data2->remark==null||empty($data2->remark))?"-":makeFirstLetterUpper($data2->remark); ?></p>
+                            <p>Keterangan: <div data-item='remark'><?= ($data2->remark==null||empty($data2->remark))?"-":makeFirstLetterUpper($data2->remark); ?></div></p>
                         </div>
                     <?php endforeach; ?>
 
@@ -308,8 +342,10 @@ $printBtn = false;
                     <?php if($printBtn): ?>
                         <div style="margin-top:10px;">
                             <a target="_blank" href="/print/do?do=<?= $_GET['do']; ?>"><button type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-print"></span> Cetak</button></a>
+                            <button class="btn btn-sm btn-danger btn-modal" id="remove-do"><span class="glyphicon glyphicon-edit"></span> Remove</button>
                         </div>
                     <?php endif; ?>
+                    
 
                 </div>
                 <!-- SHOW ATTACHMENT -->
@@ -347,6 +383,8 @@ $printBtn = false;
 
 $(document).ready(function(){
 
+    $('#remark').trumbowyg();
+
     /* UPDATE DO ITEM */
     $(".btn-action").on("click", function(){
         var dataId= $(this).attr("data-id");
@@ -356,9 +394,19 @@ $(document).ready(function(){
         if(dataId=='update-do-form'){        
             var receivedBy = $(this).parent().closest("tr").find("[data-item~='received_by']").html();
             var deliveredBy = $(this).parent().closest("tr").find("[data-item~='delivered_by']").html();
+            var doDate = $("[data-item~='do_date']").attr("data-item-val");
+            var remark = $("[data-item~='remark']").html();
+            var doNumber = $("[data-item~='do_number']").html();
+
+            console.log(doDate);
 
             $("#modal-update-do-form").find("input[name~='received_by']").val(receivedBy);
             $("#modal-update-do-form").find("input[name~='delivered_by']").val(deliveredBy); 
+
+            $("#modal-update-do-form").find("input[name~='do_date']").val(doDate);
+            $("#modal-update-do-form").find("#remark").trumbowyg('html', remark);
+            $("#modal-update-do-form").find("#remark").trumbowyg('html');
+            $("#modal-update-do-form").find("input[name~='do_number']").val(doNumber);
 
         }
     });
@@ -376,11 +424,6 @@ $(document).ready(function(){
             $("#modal-create-attachment").find(".image-appear").empty();
             $("#modal-create-attachment").find(".image-appear").append("<img src="+image+" alt='Attachment' class='img-responsive'><p class='text-center'>"+description+"</p>");
         });
-    });
-
-    $("#btn-add-sn").on("click", function(){
-        var clone = $(this).parent().find("select[name~='serial_number[]']:first").clone().val("");
-        $(this).before(clone);
     });
 
     //show the detail of the product

@@ -187,7 +187,7 @@ class UserController{
         $processingRegister = $this->processingRegister($builder);
 
         if(!$processingRegister){
-            redirectWithMessage([['Pendaftaran user gagal', 0]], getLastVisitedPage());
+            redirectWithMessage([[$_SESSION['sim-messages'], 0]], getLastVisitedPage());
         }
 
         $userId=$builder->getPdo()->lastInsertId();
