@@ -1,0 +1,203 @@
+<?php
+
+$titlePage="Purchase order";
+
+define("base", $_SERVER['DOCUMENT_ROOT']."/app/resources/views/layouts/");
+
+require base.'base/only-header.view.php';
+
+$priceTotal=0;
+$approveSign=false;
+
+foreach($poData as $data):
+
+?>
+<style>
+.print-area .form{
+    width:790px;
+}
+
+tr{
+    height:25px;
+}
+
+table.x{
+    padding:20px;
+    border-width:1px 1px 0 1px;
+    border-style: solid; 
+    border-color: black
+}
+
+</style>
+
+<body class="print-area">
+    <div class="form">
+        <table class="form-header x" width='790' cellpadding='0' cellspacing='0' >
+            <tr>
+                <td class="text-center"><img src="/public/upload/<?= $ownCompany[0]->logo; ?>" alt="logo" width=100 height=100 style="float:left;padding:5px;"><h2 style="color:blue"><?= $ownCompany[0]->name; ?></h2><?= $ownCompany[0]->address."<br>Telp:". $ownCompany[0]->phone."<br>".$ownCompany[0]->email; ?></td>
+            </tr>
+        </table>
+        
+        <div class="form-body">
+            <table width='790' cellpadding='0' cellspacing='0' class="x" >
+                <tbody>
+                    <tr>
+                        <td style="padding: 0 20px 0 10px;"><h3 style="background-color: greenyellow;color:#fff;"><strong>PURCHASE ORDER</strong></h3></td>
+                        <td style="padding: 0 20px 0 10px;">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>PO. num</td>
+                                        <td>: <?= $data->po_number; ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td>PO. date</td>
+                                        <td>: <?= $data->po_number; ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Reff. Quot</td>
+                                        <td>: <?= ($data->quo_number==null || empty($data->quo_number))?"-":$data->quo_number; ?></td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table width='790' cellpadding='0' cellspacing='0' class="x">
+                <tbody>
+                    <tr>
+                        <td width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" >
+                            <table cellpadding='0' cellspacing='0' >
+                                <tbody>
+                                    <tr><td colspan=2>To:</td></tr>
+                                    <tr><td colspan=2><strong><?= makeFirstLetterUpper($data->supplier); ?></strong></td></tr>
+                                    <tr><td>Attention</td><td>: <?= makeFirstLetterUpper($data->pic_supplier); ?></td></tr>
+                                    <tr><td>Address</td><td>: <?= makeFirstLetterUpper($data->saddress); ?></td></tr>
+                                    <tr><td>Telp/Fax</td><td>: <?= $data->sphone; ?> / <?= $data->sfax; ?></td></tr>
+                                                                      
+                                </tbody>
+                            </table>
+                        </td>
+                        <td width=50% style="border-right:1px solid;">
+                            <table cellpadding='0' cellspacing='0' width=100% >
+                                <tbody>
+                                    <tr style="border-bottom: 1px solid;">
+                                        <td>
+                                            <table cellpadding='0' cellspacing='0' >
+                                                <tr><td style="padding: 0 20px 0 10px;">Invoice, Faktur $ Material Ship To:</td></tr>
+                                                <tr>
+                                                    <td style="padding: 0 20px 0 10px;"><?= $ownCompany[0]->name; ?><br><?= $ownCompany[0]->address; ?></td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="background-color: yellow" >
+                                            <table cellpadding='0' cellspacing='0'>
+                                                <tr><td style="padding: 0 20px 0 10px;">Note:</td></tr>
+                                                <tr><td style="padding: 0 20px 0 10px;"><?= ($data->remark==null||empty($data->remark))?"-":makeFirstLetterUpper($data->remark); ?></td></tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <!-- PO: <?= $data->po_number; ?>
+                                    <tr><td>Quo: <?= ($data->quo_number==null || empty($data->quo_number))?"-":$data->quo_number; ?></td></tr>
+                                    <tr><td>PO DATE: <?= $data->po_number; ?></td></tr>
+                                    <tr><td>PIC: <?= makeFirstLetterUpper($data->pic_buyer); ?></td></tr>
+                                    <tr><td>Telp/Fax: <?= $data->bphone; ?> / <?= $data->bfax; ?></td></tr>
+                                    <tr><td>Currency: <?= $data->currency; ?></td></tr> -->
+                                </tbody>
+                            </table>    
+                        </td>                        
+                    </tr>
+                </tbody>
+            </table>
+            <table width='790' cellpadding='0' cellspacing='0' class="x" style="padding-bottom:20px;">
+                <tbody>
+                    <tr>
+                        <td style="padding: 0 20px 0 10px;"><h4><strong>PERINCIAN DAFTAR PO</strong></h4></td>
+                    </tr>
+                </tbody>
+            </table>
+            <table width='790' cellpadding='0' cellspacing='0' class="x" style="padding:20px; margin-bottom:10px;" >
+                <thead>
+                    <tr style="background-color: aqua">
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Part number</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Description</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >QTY</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Price unit</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Discount</th>
+                        <th style="border:1px solid; padding: 0 20px 0 10px;" >Total price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($poDetailData as $data2):  $item=(100-$data2->item_discount)*$data2->total*0.01; $priceTotal+=$item; ?>
+                        <?php
+                            if($data2->status==1){
+                                $approveSign=true;
+                            }
+                        ?>
+                        <tr>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->part_number; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->product; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->quantity; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->price_unit; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;"><?= $data2->item_discount; ?></td>
+                            <td style="border:1px solid; padding: 0 20px 0 10px;" class="text-right"><?= $item; ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                        <tr><td style="border:none !important; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">Total</td><td style="border:1px solid; padding: 0 20px 0 10px;" class="text-right" ><?= $priceTotal; ?></td></tr>
+                        <tr><td style="border:none !important; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">PPN 10%</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><?= $ppn=$priceTotal*0.1; ?></td></tr>
+                        <tr><td style="border:none !important; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">Grand Total</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><strong><?= $priceTotal+$ppn; ?></strong></td></tr>
+                </tbody>            
+            </table>
+            
+            <table width='790' cellpadding='0' cellspacing='0' style="padding:20px; margin-bottom:10px;border:1px solid" >
+                <thead>
+                    <tr>
+                        <th width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" >Additional Notes:</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" ><?= ($data->remark==null||empty($data->remark))?"-":makeFirstLetterUpper($data->remark); ?></td>    
+                    </tr>
+                </tbody>
+            </table>
+            
+            <table width='790' cellpadding='0' cellspacing='0' style="padding-bottom:20px">
+                <tbody>
+                    <tr>
+                        <td>
+                            <table width='790' cellpadding='0' cellspacing='0' style="padding-bottom:20px">
+                                <thead>
+                                    <tr>
+                                        <th width=50% style="padding-left:10px;">Your Faithfully,</th>
+                                        <th width=50% class="text-right" style="padding-left:10px;">Acknowledged By,</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="vertical-align:top;height:80px;">
+                                        <td width=50% style="padding-left:10px;"></td>
+                                        <td width=50% class="text-right" style="padding-left:10px;"></td>
+                                    </tr>
+                                    <tr style="vertical-align:top;">
+                                        <td width=50% style="padding-left:10px;"><?= strtoupper($data->acknowledged_by); ?></td>
+                                        <td width=50% class="text-right" style="padding-left:10px;">.....................................<br><i>Name, stamp, signature</i></td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <hr>
+    <button type="button" onclick="window.print()">Print</button>
+
+</body>
+<?php endforeach; ?>
+</html>

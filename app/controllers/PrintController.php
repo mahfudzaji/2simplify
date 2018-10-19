@@ -433,48 +433,6 @@ class PrintController{
         left join upload_files as n on e.signature=n.id
         WHERE h.document=5 and a.id=$id", 'Document');
 
-        /* $poDetailData = $builder->custom("SELECT a.id, IFNULL(c.part_number, '-') as part_number, c.name as product, 
-        a.product as pid,
-        a.quantity, 
-        a.price_unit,
-        a.item_discount,
-        a.quantity*a.price_unit as total,
-        case a.status when 0 then '-' when 1 then 'Disetujui' when 2 then 'Ditolak' when 3 then 'Perlu revisi' end as status  
-        FROM `po_product` as a 
-        inner join po_quo as d on d.id=a.doc
-        inner join form_po as b on b.id=d.po 
-        inner join products as c on a.product=c.id 
-        WHERE b.id=$id
-        ORDER BY a.id", 'Document'); */
-
-        /* $poDetailData = $builder->custom("SELECT a.id, IFNULL(c.part_number, '-') as part_number, c.name as product, 
-        a.product as pid,
-        a.quantity, 
-        a.price_unit,
-        a.item_discount,
-        a.quantity*a.price_unit as total,
-        case a.status when 0 then '-' when 1 then 'Disetujui' when 2 then 'Ditolak' when 3 then 'Perlu revisi' end as status,
-        a.status  
-        FROM `po_product` as a 
-        inner join po_quo as d on d.id=a.doc
-        inner join form_po as b on b.id=d.po 
-        inner join products as c on a.product=c.id 
-        WHERE b.id=$id
-        UNION
-        SELECT a.id, IFNULL(c.part_number, '-') as part_number, c.name as product, 
-        a.product as pid,
-        a.quantity, 
-        a.price_unit,
-        a.item_discount,
-        a.quantity*a.price_unit as total,
-        case a.status when 0 then '-' when 1 then 'Disetujui' when 2 then 'Ditolak' when 3 then 'Perlu revisi' end as status,
-        a.status  
-        FROM `quo_product` as a 
-        inner join form_quo as e on a.quo=e.id
-        inner join po_quo as d on d.quo=e.id
-        inner join products as c on a.product=c.id 
-        WHERE d.po=$id", 'Document'); */
-
         $poQuoData = $builder->getSpecificData("po_quo", ['*'], ['po'=>$id], '', 'Document');
         $revisionQuo = $poQuoData[0]->quo_revision;
         if($revisionQuo==null || $revisionQuo==''){
@@ -520,7 +478,7 @@ class PrintController{
             echo json_encode(["poData"=>$poData, "poDetailData"=>$poDetailData]);
             exit();
         }else{
-            printData('po_form',compact('poData', 'poDetailData', 'uploadFiles', 'products', 'ownCompany'));
+            printData('po_form-rev',compact('poData', 'poDetailData', 'uploadFiles', 'products', 'ownCompany'));
         }   
     }
 
