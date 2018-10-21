@@ -161,7 +161,7 @@ table.x{
                 </thead>
                 <tbody>
                     <tr>
-                        <td width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" ><?= ($data->remark==null||empty($data->remark))?"-":makeFirstLetterUpper($data->remark); ?></td>    
+                        <td width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" ><?= ($_GET['apr']==null||empty($_GET['apr']))?"-":makeFirstLetterUpper($_GET['apr']); ?></td>    
                     </tr>
                 </tbody>
             </table>

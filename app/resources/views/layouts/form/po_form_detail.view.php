@@ -190,7 +190,7 @@ $priceTotal=0;
                 <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
-        <!-- NOT USER -->
+        <!-- NOT USED -->
 
         <!-- CREATE NEW ITEM -->
         <div class="app-form modal" id="modal-create-new-item">
@@ -278,6 +278,30 @@ $priceTotal=0;
                         <label>Diskon (%)</label>
                         <input type="number" min=0 name="item_discount" class="form-control" required>
                     </div>
+
+                    <button type="button" class="btn btn-danger btn-close" >Tutup</button>
+
+                    <div class="nav-right">
+                        <button type="submit" name="submit" class="btn btn-primary btn-next">Kirim <span class="glyphicon glyphicon-send"></span></button>
+                    </div>
+                </form>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+            </div>
+        </div>
+
+        <!-- PRINT PO -->
+        <div class="app-form modal" id="modal-print-po">         
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Cetak Data <?= $titlePage; ?></h3>
+                </div>
+
+                <div class="description">
+                    <p><span style="color:red;">*</span>Catatan: <br> Keterangan tambahan yang akan ditambahkan pada form PO</p>
+                </div>
+                <form action="/print/po" method="GET">
+                    <input type="hidden" name="po" value="<?= $_GET['po']; ?>">
+                    <div id="apr"></div>
 
                     <button type="button" class="btn btn-danger btn-close" >Tutup</button>
 
@@ -420,7 +444,8 @@ $priceTotal=0;
                         </div>
                     <?php endforeach; ?>
                     
-                    <a target="_blank" href="/print/po?po=<?= $_GET['po']; ?>"><button type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-print"></span> Cetak</button></a>
+                    <button type="button" class="btn btn-primary btn-sm btn-modal" id="print-po"><span class="glyphicon glyphicon-print"></span> Cetak</button>
+                    <!-- <a target="_blank" href="/print/po?po=<?= $_GET['po']; ?>"><button type="button" class="btn btn-primary btn-modal" id="print-po"><span class="glyphicon glyphicon-print"></span> Cetak</button></a> -->
                     <button class="btn btn-sm btn-primary btn-modal" id="update-po"><span class="glyphicon glyphicon-edit"></span> Update PO</button>
                     <button class="btn btn-sm btn-danger btn-modal" id="remove-po"><span class="glyphicon glyphicon-edit"></span> Remove</button>
 
@@ -461,6 +486,7 @@ $priceTotal=0;
 $(document).ready(function(){
 
     $('#remark').trumbowyg();
+    $('#apr').trumbowyg();
 
     /* UPDATE PO ITEM */
     $(".btn-action").on("click", function(){
