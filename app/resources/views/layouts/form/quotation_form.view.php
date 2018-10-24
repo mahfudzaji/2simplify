@@ -134,8 +134,8 @@ require base.'base/header.view.php';
                         <p>Form ini digunakan untuk menambahkan data Quotation in dan out.</p>
                         <dl>
                         <dt>Catatan</dt>
-                            <dd>Quo In: SNC meminta harga penawaran dari pihak lain, sehingga SNC sebagai buyer/pembeli</dd>
-                            <dd>Quo Out: SNC memberi harga penawaran ke pihak lain, sehingga SNC sebagai supplier/penjual</dd>
+                            <dd>Quo In: Meminta harga penawaran dari pihak lain (Calon pembeli)</dd>
+                            <dd>Quo Out: Memberi harga penawaran ke pihak lain (Calon penjual)</dd>
                         </dl>
                     </div>
                     <div class="row">

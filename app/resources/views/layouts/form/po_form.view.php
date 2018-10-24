@@ -185,12 +185,6 @@ require base.'base/header.view.php';
                 <form action="/form/po/create" method="POST" class="form-modal" id="modal-toggle-no-quo-form" style="display:none;">
                     <div class="modal-wizard show">
                         <div class="description">
-                            <p>Form ini digunakan untuk menambahkan data tanda terima. Form ini digunakan untuk menambahkan data tanda terima.</p>
-                            <dl>
-                            <dt>Catatan</dt>
-                                <dd>Pinjam: pihak asal(<em>dari</em>) meminjamkan barang kepada yang sebagai tujuan(<em>untuk</em>)</dd>
-                                <dd>Serah terima: pihak asal(<em>dari</em>) melakukan serah terima barang ke pihak tujuan(<em>untuk</em>) 
-                            </dl>
                         </div>
                         <div class="row">
                             <div class="col-md-6 text-center">

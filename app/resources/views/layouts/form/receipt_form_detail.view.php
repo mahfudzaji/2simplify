@@ -235,7 +235,7 @@ $printBtn = false;
                     <div class="modal-wizard show">
                         <div class="description">
                             <p>Pilih produk sesuai barang yang diserahterimakan. Apabila barang tidak terdaftar maka daftarkan terlebih dahulu atau pilih
-                            produk 'lain-lain'. <br>Kemudian tuliskan serial number, apabila tidak terdapat keterangan serial number maka beri tanda '-' dan kemudian tuliskan keterangan tambahan yang diperlukan.</p>
+                            produk 'lain-lain'.</p>
                         </div>
                         <div class="form-group">
                             <label>Tanggal</label>

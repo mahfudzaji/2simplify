@@ -133,7 +133,7 @@ require base.'base/header.view.php';
                         <div class="row">
                             <div class="col-md-6 text-center">
                                 <!-- <button class="btn btn-md btn-success btn-modal-toggle" id="po-in-form">PO IN</button> -->
-                                <input type="radio" name="do_type" value="1"><strong>DO IN</strong> 
+                                <input type="radio" name="do_type" value="1" checked><strong>DO IN</strong> 
                             </div>
                             <div class="col-md-6 text-center">
                                 <!-- <button class="btn btn-md btn-default btn-modal-toggle" id="po-out-form">PO OUT</button> -->
@@ -153,6 +153,10 @@ require base.'base/header.view.php';
                             <label>Nomor PO</label>
                             <select name="po_quo" class="form-control" required>
                             </select>
+                        </div>
+                        <div class='form-group'>
+                            <label>DO Number</label>
+                            <input type='text' name='do_number' class='form-control' required>
                         </div>
                         <div class="form-group">
                             <label>Tanggal DO</label>
