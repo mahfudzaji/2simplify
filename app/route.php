@@ -119,6 +119,7 @@ $router->get('form/quo', 'FormController@quoFormIndex');
 $router->get('form/quo/detail', 'FormController@quoFormDetail');
 $router->post('form/quo/create', 'FormController@quoFormCreate');
 $router->post('form/quo/update', 'FormController@quoFormUpdate');
+$router->post('form/quo/remove', 'FormController@quoFormRemove');
 $router->post('form/quo/update-item', 'FormController@quoFormItemUpdate');
 $router->post('form/quo/remove-item', 'FormController@quoFormItemRemove');
 $router->post('form/quo/new-item', 'FormController@quoFormCreateNewItem');
@@ -155,6 +156,7 @@ $router->get('product/asset/detail', 'PAController@detailAsset');
 $router->post('product/create-product', 'PAController@createProduct');
 $router->post('product/update-product', 'PAController@updateProduct');
 $router->post('product/create-category', 'PAController@createCategory');
+$router->post('product/update-category', 'PAController@updateCategory');
 /*$router->post('product/vendor/create', 'PAController@createVendor');
 $router->post('product/asset/create', 'PAController@createAsset');
 $router->post('product/asset/remove', 'PAController@removeAsset');*/
@@ -187,9 +189,14 @@ $router->post('settings/user/update', 'SettingController@userUpdate');
 $router->get('project', 'ProjectController@index');
 $router->post('project/create', 'ProjectController@projectCreate');
 $router->get('project/detail', 'ProjectController@projectDetail');
+$router->post('project/update', 'ProjectController@projectUpdate');
+$router->post('project/remove', 'ProjectController@projectRemove');
 $router->post('project/new-request', 'ProjectController@projectNewRequest');
 $router->post('project/update-item', 'ProjectController@projectUpdateItem');
 $router->post('project/remove-item', 'ProjectController@projectRemoveItem');
+$router->post('project/update-status', 'ProjectController@projectUpdateStatus');
+$router->get('project/get-project-item', 'ProjectController@projectItem');
+
 
 ////ENGINEERING
 $router->get('engineering', '');

@@ -45,7 +45,8 @@ class ProjectController{
         $builder = App::get('builder');
 
         $users = $builder->getAllData('users', 'User');
-        $companies = $builder->getAllData('companies', 'Partner');
+        //$companies = $builder->getAllData('companies', 'Partner');
+        $companies = $builder->custom("SELECT * from companies WHERE relationship!=1" ,'Partner');
 
 
         //Searching for specific category
@@ -218,8 +219,24 @@ class ProjectController{
 
         $id = filterUserInput($_GET['pr']);
 
+        $companies = $builder->custom("SELECT * from companies WHERE relationship!=1" ,'Partner');
+
         $uploadFiles = $builder->getSpecificData('upload_files', ['*'], ['public'=>1], '', 'Document');
-        $products = $builder->getAllData('products', 'Product');
+
+        $products = $builder->custom("SELECT b.id, b.name, 
+        IFNULL((SELECT SUM(quantity) as qty 
+        FROM stocks 
+        WHERE status=1 and product=b.id), 0) as quantity_in,
+        
+        IFNULL((SELECT SUM(quantity) as qty 
+        FROM stocks
+        WHERE status=2 and product=b.id), 0) as quantity_out
+                
+        FROM `stocks` as a 
+        RIGHT JOIN products as b on a.product=b.id 
+        GROUP BY b.id", 'Product');
+
+
         $users = $builder->getAllData('users', 'User');
 
         $projectDetailData = $builder->custom("SELECT a.id, a.name, a.description, 
@@ -252,68 +269,11 @@ class ProjectController{
             redirectWithMessage([['Data tidak tersedia atau telah dihapus',0]], getLastVisitedPage());
         }
 
-        /* $receivedItems = $builder->custom("SELECT b.name as product, a.quantity,
-        DATE_FORMAT(a.send_at, '%d %M %Y') as requested_at, DATE_FORMAT(a.received_at, '%d %M %Y') as returned_at, 
-        a.remark, case a.status when 0 then 'out' when 1 then 'in' end as item_status, a.status as sid,
-        FROM receipt_stock as a 
-        INNER JOIN products as b on a.product=b.id 
-        INNER JOIN stock_relation as c on a.stock_relation=c.id
-        INNER JOIN users as d on 
-        WHERE c.do_or_receipt_in=2 and c.doc_in=$id or c.do_or_receipt_out=2 and c.doc_out=$id
-        GROUP BY a.product","Document"); */
-
-        /* $projectItemRequested = $builder->custom("SELECT DATE_FORMAT(a.request_date, '%d %M %Y') as request_date,
-        a.request_number, a.remark,  
-        GROUP_CONCAT(DISTINCT(c.name) SEPARATOR '<br>') as product,
-        GROUP_CONCAT(DISTINCT(case when c.part_number IS NULL then '-' else c.part_number end) SEPARATOR '<br>') as part_number,
-        d.name as requested_by,
-        GROUP_CONCAT(case b.status when 1 then 'IN' else 'OUT' end SEPARATOR '<br>') as status,
-        
-        (SELECT GROUP_CONCAT(b.quantity SEPARATOR '<br>') as qty 
-        FROM project_item_request as a 
-        INNER JOIN project_item as b on a.id=b.item_request
-        INNER JOIN products as c on b.product=c.id
-        INNER JOIN users as d on a.requested_by=d.id
-        WHERE a.project=$id and b.status=1 GROUP BY a.id) as quantity_in,
-        
-        (SELECT GROUP_CONCAT(b.quantity SEPARATOR '<br>') as qty 
-        FROM project_item_request as a 
-        INNER JOIN project_item as b on a.id=b.item_request
-        INNER JOIN products as c on b.product=c.id
-        INNER JOIN users as d on a.requested_by=d.id
-        WHERE a.project=$id and b.status=2 GROUP BY a.id) as quantity_out
-
-		FROM project_item_request as a
-        INNER JOIN project_item as b on a.id=b.item_request
-        INNER JOIN products as c on b.product=c.id
-        INNER JOIN users as d on a.requested_by=d.id
-        WHERE a.project=$id
-        GROUP BY a.id", "Project"); */
-
-        //dd($projectItemRequested);
-
-        $projectItemRequested = $builder->custom("SELECT DATE_FORMAT(a.request_date, '%d %M %Y') as request_date,
-        a.request_number, a.remark,  
-        GROUP_CONCAT(DISTINCT(d.name) SEPARATOR '<br>') as product,
-        GROUP_CONCAT(DISTINCT(case when d.part_number IS NULL then '-' else d.part_number end) SEPARATOR '<br>') as part_number,
+        $requests = $builder->custom("SELECT a.id as project_req, DATE_FORMAT(a.request_date, '%d %M %Y') as request_date,
+        a.request_number,
         e.name as requested_by,
-        GROUP_CONCAT(case c.status when 1 then 'IN' else 'OUT' end SEPARATOR '<br>') as status,
-
-        (SELECT GROUP_CONCAT(c.quantity SEPARATOR '<br>') as qty 
-        FROM project_item_request as a 
-        INNER JOIN stock_relation as b on a.id=b.spec_doc
-        INNER JOIN stocks as c on c.stock_relation=b.id
-        INNER JOIN products as d on c.product=d.id
-        WHERE b.document=10 and a.project=$id and c.status=1 GROUP BY a.id) as quantity_in,
-        
-        (SELECT GROUP_CONCAT(c.quantity SEPARATOR '<br>') as qty 
-        FROM project_item_request as a 
-        INNER JOIN stock_relation as b on a.id=b.spec_doc
-        INNER JOIN stocks as c on c.stock_relation=b.id
-        INNER JOIN products as d on c.product=d.id
-        WHERE b.document=10 and a.project=$id and c.status=2 GROUP BY a.id) as quantity_out
-
-		FROM project_item_request as a
+        a.remark 
+        FROM project_item_request as a
         INNER JOIN stock_relation as b on a.id=b.spec_doc
         INNER JOIN stocks as c on b.id=c.stock_relation
         INNER JOIN products as d on c.product=d.id
@@ -321,12 +281,126 @@ class ProjectController{
         WHERE b.document=10 and a.project=$id
         GROUP BY a.id", "Project");
 
+        $itemRequest = $builder->custom("SELECT a.id as req, c.product as cid, d.name as product, d.part_number, c.stock_relation,
+        (SELECT quantity FROM stocks WHERE stock_relation=c.stock_relation and status=1) as quantity_in,
+        (SELECT quantity FROM stocks WHERE stock_relation=c.stock_relation and status=2) as quantity_out
+        FROM project_item_request as a
+        INNER JOIN stock_relation as b on a.id=b.spec_doc
+        INNER JOIN stocks as c on b.id=c.stock_relation
+        INNER JOIN products as d on c.product=d.id
+        WHERE b.document=10 and a.project=$id
+        GROUP BY a.id, c.product", "Project");
+
+        foreach($requests as $req){
+            $pushItem = [];
+            foreach($itemRequest as $item){
+                if($item->req == $req->project_req){
+                    array_push($pushItem, $item);
+                }
+            } 
+            $req->item = $pushItem;
+        }
+
+        //dd($requests);
+
         if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
             echo json_encode(["projectDetailData"=>$projectDetailData]);
             exit();
         }else{
-            view('/project/detail', compact('projectDetailData', 'uploadFiles', 'products', 'users', 'projectItemRequested'));
+            view('/project/detail', compact('projectDetailData', 'uploadFiles', 'products', 'users', 'requests', 'companies'));
         }
+    }
+
+    public function projectUpdate(){
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+        }
+
+        $id = filterUserInput($_POST['project']);
+
+        $builder = App::get('builder');
+
+        //checking form requirement
+        $data=[];
+
+        //check the requirement
+        //if passing the requirement, put the data into $data array
+        //otherwise redirect back to the page
+
+        $passingRequirement=true;
+        $_SESSION['sim-messages']=[];
+
+        
+        foreach($this->placeholderProjectForm as $k => $v){
+            if(checkRequirement($v, $k, $_POST[$k])){
+                $data[$k]=filterUserInput($_POST[$k]);
+            }else{
+                $passingRequirement=false;
+            }  
+        }
+        
+        $data['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
+
+        //if not the passing requirements
+        if(!$passingRequirement){
+            redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
+        }
+
+        $updateProjects = $builder->update("form_project", $data, ['id' => $id], '', 'Project');
+
+        if(!$updateProjects){
+            recordLog('Project', returnMessage()['project']['updateFail'] );
+            redirectWithMessage([['Maaf, terjadi kesalahan, mohon ulangi lagi atau hubungi administrator.', 0]],getLastVisitedPage());
+        }
+
+        recordLog('Project', returnMessage()['project']['updateSuccess'] );
+
+        $builder->save();
+
+        //redirect to form page with message
+        redirectWithMessage([[ returnMessage()['project']['updateSuccess'] ,1]], getLastVisitedPage());
+
+    }
+
+    public function projectRemove(){
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+        }
+
+        $project  = filterUserInput($_POST['project']);
+
+        $builder = App::get('builder');
+
+        $getProject = $builder->custom("SELECT * FROM form_project 
+        WHERE id=$project", "Document");
+
+        if(count($getProject)<1){
+            redirectWithMessage([["Maaf, data yang anda cari tidak ditemukan", 0]], getLastVisitedPage());
+        }
+
+        $getStockRelation = $builder->custom("SELECT a.id FROM stock_relation as a 
+        INNER JOIN project_item_request as b on a.spec_doc=b.id
+        INNER JOIN form_project as c on b.project=c.id
+        WHERE a.document=10 and b.project=$project", "Document");
+
+        for($i=0; $i<count($getStockRelation); $i++){
+            $sr = $getStockRelation[$i]->id;
+
+            $deleteStockRelation = $builder->delete("stock_relation", ['id' => $sr], '', 'Stock');
+            if(!$deleteStockRelation){
+                redirectWithMessage([["Maaf, gagal menghapus data", 0]], getLastVisitedPage());
+            }
+        }
+
+        $deleteProject = $builder->delete("form_project", ['id' => $project], '', 'Document');
+
+        if(!$deleteProject){
+            redirectWithMessage([["Maaf, gagal menghapus data", 0]], getLastVisitedPage());
+        }
+
+        $builder->save();
+
+        redirectWithMessage([["Berhasil menghapus project", 1]], '/project');
     }
 
     public function projectNewRequest(){
@@ -471,7 +545,152 @@ class ProjectController{
         if(!array_key_exists('superadmin', $this->roleOfUser)){
             redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
         }
+
+        //cek apakah $returned isset 
+        //apabila iya tambahkan di stock dengan status in
+        //apabila tidak, maka update stock saja
+
+        $requestItem = filterUserInput($_POST['item_request']);
+        
+        $placeholderItemRequest=[
+            "product" => 'required',
+            "quantity" => 'required',
+            "returned" => 'required'
+        ];
+
+        //checking form requirement
+        $data=[];
+
+        //check the requirement
+        //if passing the requirement, put the data into $data array
+        //otherwise redirect back to the page
+
+        $passingRequirement=true;
+        $_SESSION['sim-messages']=[];
+
+        
+        foreach($placeholderItemRequest as $k => $v){
+            if(checkRequirement($v, $k, $_POST[$k])){
+                $data[$k]=filterUserInput($_POST[$k]);
+            }else{
+                $passingRequirement=false;
+            }  
+        }
+
+        $data['updated_by'] = substr($_SESSION['sim-id'], 3, -3);
+
+        //if not the passing requirements
+        if(!$passingRequirement){
+            redirectWithMessage([[ returnMessage()['formNotPassingRequirements'], 0]],getLastVisitedPage());
+        }
+
+
+
     }
+
+    public function projectRemoveItem(){
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            redirectWithMessage([["Anda tidak memiliki hak untuk memasuki menu ini", 0]], getLastVisitedPage());
+        }
+
+        $requestItem  = filterUserInput($_POST['request_item']);
+
+        $builder = App::get('builder');
+
+        $getStockRelation = $builder->custom("SELECT * FROM stock_relation 
+        WHERE id=$requestItem", "Document");
+
+        if(count($getStockRelation)<1){
+            redirectWithMessage([["Maaf, data yang anda cari tidak ditemukan", 0]], getLastVisitedPage());
+        }
+
+        $deleteRequestItem = $builder->delete("stock_relation", ['id' => $requestItem], '', 'Document');
+
+        if(!$deleteRequestItem){
+            redirectWithMessage([["Maaf, gagal menghapus data", 0]], getLastVisitedPage());
+        }
+
+        $builder->save();
+
+        redirectWithMessage([["Berhasil menghapus request item", 1]], getLastVisitedPage());
+    }
+
+    public function projectUpdateStatus(){
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+                echo '{"access":false, "messages":"Anda tidak memiliki hak akses untuk melakukan action ini"}';
+                exit();
+            }else{
+                redirectWithMessage([["Anda tidak memiliki hak akses untuk melakukan action ini", 0]], getLastVisitedPage());
+            }
+        }
+
+        $status = filterUserInput($_POST['status']);
+        $project = filterUserInput($_POST['project']);
+
+        $builder = App::get('builder');
+
+        $updateStatus = $builder->update('form_project', ['project_status' => $status], ['id' => $project], '' ,'Project');
+
+        if(!$updateStatus){
+            echo '{"access":false, "messages":"Mengubah status project gagal"}';
+            exit();
+        }
+
+        $builder->save();
+
+        echo '{"access":true, "messages":"Mengubah status project berhasil"}';
+
+        $_SESSION['sim-messages'] = [["Mengubah status project berhasil", 1]];
+
+        exit();
+
+    }
+
+    public function projectItem(){
+        if(!array_key_exists('superadmin', $this->roleOfUser)){
+            if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+                echo "{'access':false, 'messages':'Anda tidak memiliki akses'}";
+                exit();
+            }
+        }
+
+        $idItemRequest = filterUserInput($_GET['project_request']);
+
+        $builder = App::get('builder');
+
+        $getProjectItem = $builder->custom("SELECT c.product as pid,  d.name as product,
+        IFNULL((SELECT SUM(c.quantity) as qty 
+        FROM project_item_request as a 
+        INNER JOIN stock_relation as b on a.id=b.spec_doc
+        INNER JOIN stocks as c on c.stock_relation=b.id
+        INNER JOIN products as d on c.product=d.id
+        WHERE b.document=10 and c.stock_relation=$idItemRequest and c.status=1 GROUP BY a.id), 0) as quantity_in,
+
+        IFNULL((SELECT SUM(c.quantity) as qty 
+        FROM project_item_request as a 
+        INNER JOIN stock_relation as b on a.id=b.spec_doc
+        INNER JOIN stocks as c on c.stock_relation=b.id
+        INNER JOIN products as d on c.product=d.id
+        WHERE b.document=10 and c.stock_relation=$idItemRequest and c.status=2 GROUP BY a.id), 0) as quantity_out
+
+        FROM project_item_request as a
+        INNER JOIN stock_relation as b on a.id=b.spec_doc
+        INNER JOIN stocks as c on b.id=c.stock_relation
+        INNER JOIN products as d on c.product=d.id
+        WHERE b.document=10 AND c.stock_relation=$idItemRequest
+        GROUP BY c.product", 'Project');
+
+        if(count($getProjectItem)<1){
+            echo "{'access':false, 'messages':'Data tidak tersedia'}";
+            exit();
+        }
+
+        echo json_encode(["getProjectItem"=>$getProjectItem]);
+        exit();
+
+    }
+
 }
 
 ?>

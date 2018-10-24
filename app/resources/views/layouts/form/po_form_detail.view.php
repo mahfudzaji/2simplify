@@ -289,6 +289,23 @@ $priceTotal=0;
             </div>
         </div>
 
+        <!-- REMOVE PO ITEM -->
+        <div class="app-form modal" id="modal-remove-po-item">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Konfirmasi</h3>
+                </div>
+                <div class="modal-main-content">
+                    <form action="/form/po/remove-item" method="post">
+                        <input type="hidden" name="po-item" value="">
+                        <button type="submit" class="btn btn-danger btn-sm form-control"><span class="glyphicon glyphicon-remove"></span> Hapus data</button>
+                    </form>
+                </div>
+                <br><button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+            </div>
+        </div>
+
         <!-- PRINT PO -->
         <div class="app-form modal" id="modal-print-po">         
             <div class="modal-content">
@@ -447,7 +464,9 @@ $priceTotal=0;
                     <button type="button" class="btn btn-primary btn-sm btn-modal" id="print-po"><span class="glyphicon glyphicon-print"></span> Cetak</button>
                     <!-- <a target="_blank" href="/print/po?po=<?= $_GET['po']; ?>"><button type="button" class="btn btn-primary btn-modal" id="print-po"><span class="glyphicon glyphicon-print"></span> Cetak</button></a> -->
                     <button class="btn btn-sm btn-primary btn-modal" id="update-po"><span class="glyphicon glyphicon-edit"></span> Update PO</button>
-                    <button class="btn btn-sm btn-danger btn-modal" id="remove-po"><span class="glyphicon glyphicon-edit"></span> Remove</button>
+                    <?php if($poData[0]->do==null || empty($poData[0]->do) || $poData[0]->do==''): ?>
+                        <button class="btn btn-sm btn-danger btn-modal" id="remove-po"><span class="glyphicon glyphicon-edit"></span> Remove</button>
+                    <?php endif; ?>
 
                 </div>
                 

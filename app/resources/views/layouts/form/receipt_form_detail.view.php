@@ -171,7 +171,7 @@ $printBtn = false;
                 <form action="/form/receipt/update-item" method="POST">
                     <input type="hidden" name="receipt_item" value=''>
                     <?php /* rcp in: 1, rcp out:2,  */ ?>
-                        <input type="hidden" name="receipt_type" value=<?= $receiptData[0]->receipt_type; ?> >
+                    <input type="hidden" name="receipt_type" value=<?= $receiptData[0]->receipt_type; ?> >
                     <div class="form-group">
                         <label>Product</label>
                         <select name="product" class="form-control" required>
@@ -248,7 +248,7 @@ $printBtn = false;
                                     <select name="product[]" class="form-control" required>
                                         <option value=''>PRODUK</option>
                                         <?php foreach($products as $product): ?>
-                                            <option title="Available: <?= $product->quantity; ?>" value=<?= $product->id ?>><?= makeItShort(ucfirst($product->name), 50); ?></option>
+                                            <option title="Available: <?= $product->quantity; ?>" value=<?= $product->id ?> data-qty=<?= $product->quantity; ?>><?= makeItShort(ucfirst($product->name), 50); ?></option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
@@ -432,62 +432,16 @@ $(document).ready(function(){
     });
 
     //show the detail of the product
-    $("#modal-add-stock-item").on("change", "select[name~='product']", function(){
+    $("#modal-add-stock-item").on("change", "select[name~='product[]']", function(){
         var product = $(this).val();
 
-        $.get('/stock/getProductDetail', {product:product}, function(data, status){
+        var receiptType = $(this).closest("form").find("input[name~='receipt_type']").val();
 
-            var productDetail = JSON.parse(data)[0];
-
-            var detail ="<ul>";
-            detail+="<li>Nama : "+productDetail.name+"</li>";
-            detail+="<li>Vendor : "+productDetail.vendor+"</li>";
-            detail+="<li>Part number : "+productDetail.part_number+"</li>";
-            detail+="<li>Deskripsi : "+productDetail.description+"</li>";
-            detail+="<li>Link : "+productDetail.link+"</li>";
-            detail+="</ul>";
-
-            $("select[name~='product']").closest("form").find(".detail-respond").find(".col-md-4").empty().append("<img src='/public/upload/"+productDetail.upload_file+"' class='img-responsive'>");
-            $("select[name~='product']").closest("form").find(".detail-respond").find(".col-md-8").empty().append(detail);
-
-        });
-
-        var quantity = $(this).find("option:selected").attr("data-qty");
+        if(receiptType==2){
+            var quantity = $(this).find("option:selected").attr("data-qty");
         
-        $(this).closest("form").find("input[name~='quantity']").val(0).attr("max", quantity);
-        
-        //if DO in then type the serial number
-        //if DO out then select the serial number
-
-        //do in: 1, do out:2,
-        var doType = $(this).closest("form").find("input[name~='do_type']").val();
-        
-        if(doType == 1){
-
-            $(this).closest("form").find("[name~='serial_number[]']").replaceWith("<input type='text' name='serial_number[]' class='form-control' required>");
-        
-        }else if(doType == 2){
-
-            $(this).closest("form").attr("action", "/stock/out");
-
-            $(this).closest("form").find("input[name~='received_at']").parent().find("label").html("Dikirim pada");
-
-            $(this).closest("form").find("input[name~='received_at']").attr("name", "send_at");
-
-            //change to select input
-            $(this).closest("form").find("[name~='serial_number[]']").replaceWith("<select name='serial_number[]' class='form-control' required>");
-
-            $.get('/stock/get-serial-number', {product:product}, function(data, status){
-                var serialNumber = JSON.parse(data);
-                var snOption = "<option value=''>Serial Number</option>";
-
-                for(var i=0; i<serialNumber.length; i++){
-                    snOption+="<option value="+serialNumber[i].serial_number+">"+serialNumber[i].serial_number+"</option>";
-                }
-
-                $("#modal-add-stock-item").find("select[name~='serial_number[]']").empty().append(snOption);
-            });
-        }
+            $(this).closest(".inline-input").find("input[name~='quantity[]']").val(0).attr("max", quantity);
+        } 
 
     });
 

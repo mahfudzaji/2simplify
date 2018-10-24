@@ -202,7 +202,7 @@ require base.'base/header.view.php';
                                 <select name="product[]" class="form-control" required>
                                     <option value=''>PRODUK</option>
                                     <?php foreach($products as $product): ?>
-                                        <option title="Available: <?= $product->quantity; ?>" value=<?= $product->id ?>><?= makeItShort(ucfirst($product->name), 50); ?></option>
+                                        <option title="Available: <?= $product->quantity; ?>" value=<?= $product->id ?> data-qty=<?= $product->quantity; ?>><?= makeItShort(ucfirst($product->name), 50); ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -350,7 +350,19 @@ require base.'base/footer.view.php'
             });
             //console.log(typeof(parameters));
         });
+        
+        $("#modal-create-receipt-form").on("change", "select[name~='product[]']", function(){
+            var product = $(this).val();
 
+            var receiptType = $(this).closest("form").find("input[name~='receipt_type']:checked").val();
+
+            if(receiptType==2){
+                var quantity = $(this).find("option:selected").attr("data-qty");
+            
+                $(this).closest(".inline-input").find("input[name~='quantity[]']").val(0).attr("max", quantity);
+            } 
+
+        });
             
     })
 </script>

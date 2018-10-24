@@ -42,8 +42,8 @@ table.x{
             <table width='790' cellpadding='0' cellspacing='0' class="x" >
                 <tbody>
                     <tr>
-                        <td style="padding: 0 20px 0 10px;"><h3 style="background-color: greenyellow;color:#fff;"><strong>PURCHASE ORDER</strong></h3></td>
-                        <td style="padding: 0 20px 0 10px;">
+                        <td width=50% style="padding: 0 20px 0 10px;"><h3 style="background-color: greenyellow;color:#fff;"><strong>PURCHASE ORDER</strong></h3></td>
+                        <td width=50% style="padding: 0 20px 0 10px;">
                             <table>
                                 <tbody>
                                     <tr>
@@ -65,10 +65,10 @@ table.x{
                     </tr>
                 </tbody>
             </table>
-            <table width='790' cellpadding='0' cellspacing='0' class="x">
+            <table width='790' cellpadding='0' cellspacing='0'>
                 <tbody>
                     <tr>
-                        <td width=50% style="border-right:1px solid; padding: 0 20px 0 10px;" >
+                        <td width=50% style="border:1px solid; padding: 0 20px 0 10px;">
                             <table cellpadding='0' cellspacing='0' >
                                 <tbody>
                                     <tr><td colspan=2>To:</td></tr>
@@ -80,47 +80,41 @@ table.x{
                                 </tbody>
                             </table>
                         </td>
-                        <td width=50% style="border-right:1px solid;">
+                        <td width=50% style="border:1px solid;">
                             <table cellpadding='0' cellspacing='0' width=100% >
                                 <tbody>
-                                    <tr style="border-bottom: 1px solid;">
-                                        <td>
+                                    <tr>
+                                        <td style="padding: 0 20px 0 10px;border-bottom:1px solid;">
                                             <table cellpadding='0' cellspacing='0' >
-                                                <tr><td style="padding: 0 20px 0 10px;">Invoice, Faktur $ Material Ship To:</td></tr>
+                                                <tr><td>Invoice, Faktur & Material Ship To:</td></tr>
                                                 <tr>
-                                                    <td style="padding: 0 20px 0 10px;"><?= $ownCompany[0]->name; ?><br><?= $ownCompany[0]->address; ?></td>
+                                                    <td><?= $ownCompany[0]->name; ?><br><?= $ownCompany[0]->address; ?></td>
                                                 </tr>
                                             </table>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td style="background-color: yellow" >
+                                        <td style="padding: 0 20px 0 10px; background-color: yellow">
                                             <table cellpadding='0' cellspacing='0'>
-                                                <tr><td style="padding: 0 20px 0 10px;">Note:</td></tr>
-                                                <tr><td style="padding: 0 20px 0 10px;"><?= ($data->remark==null||empty($data->remark))?"-":makeFirstLetterUpper($data->remark); ?></td></tr>
+                                                <tr><td>Note:</td></tr>
+                                                <tr><td><?= ($data->remark==null||empty($data->remark))?"-":makeFirstLetterUpper($data->remark); ?></td></tr>
                                             </table>
                                         </td>
                                     </tr>
-                                    <!-- PO: <?= $data->po_number; ?>
-                                    <tr><td>Quo: <?= ($data->quo_number==null || empty($data->quo_number))?"-":$data->quo_number; ?></td></tr>
-                                    <tr><td>PO DATE: <?= $data->po_number; ?></td></tr>
-                                    <tr><td>PIC: <?= makeFirstLetterUpper($data->pic_buyer); ?></td></tr>
-                                    <tr><td>Telp/Fax: <?= $data->bphone; ?> / <?= $data->bfax; ?></td></tr>
-                                    <tr><td>Currency: <?= $data->currency; ?></td></tr> -->
                                 </tbody>
                             </table>    
                         </td>                        
                     </tr>
                 </tbody>
             </table>
-            <table width='790' cellpadding='0' cellspacing='0' class="x" style="padding-bottom:20px;">
+            <table width='790' cellpadding='0' cellspacing='0' style="padding-bottom:20px;">
                 <tbody>
                     <tr>
-                        <td style="padding: 0 20px 0 10px;"><h4><strong>PERINCIAN DAFTAR PO</strong></h4></td>
+                        <td style="border-width:0 1px; border-style: solid; padding: 0 20px 0 10px;"><h4><strong>PERINCIAN DAFTAR PO</strong></h4></td>
                     </tr>
                 </tbody>
             </table>
-            <table width='790' cellpadding='0' cellspacing='0' class="x" style="padding:20px; margin-bottom:10px;" >
+            <table width='790' cellpadding='0' cellspacing='0' style="padding:20px; margin-bottom:10px;" >
                 <thead>
                     <tr style="background-color: aqua">
                         <th style="border:1px solid; padding: 0 20px 0 10px;" >Part number</th>

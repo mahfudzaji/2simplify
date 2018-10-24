@@ -506,6 +506,59 @@ class PAController{
         }
     }
 
+    public function updateCategory(){
+        //checking access right
+        if(!$this->role->can("update-asset")){
+            redirectWithMessage([["Anda tidak memiliki hak untuk memperbaharui data product", 0]],'/product');
+        }
+
+        //category id
+        $id = filterUserInput($_POST['cid']);
+        $data['updated_by']=substr($_SESSION['sim-id'], 3, -3);
+
+        //checking form requirement
+        $data=[];
+        
+        //check the requirement
+        //if passing the requirement, put the data into $data array
+        //otherwise redirect back to the page
+
+        $passingRequirement=true;
+        $_SESSION['sim-messages']=[];
+
+
+        foreach($this->placeholderCategory as $k => $v){ 
+            if(checkRequirement($v, $k, $_POST[$k])){
+                $data[$k]=filterUserInput($_POST[$k]);
+            }else{
+                $passingRequirement=false;
+            }  
+        }
+
+        if(!$passingRequirement){
+            redirect(getLastVisitedPage());
+            exit();
+        }
+
+        $builder = App::get('builder');
+
+        //dd($id);
+
+        $updateToProduct = $builder->update("product_categories", $data, ['id' => $id], "", "Product");
+
+        if(!$updateToProduct){
+            recordLog('Insert product', 'Memperbaharui category gagal');
+            redirectWithMessage([['Maaf, Memperbaharui category gagal', 0]] , getLastVisitedPage());
+
+        }
+
+        recordLog('Insert product', 'Memperbaharui category berhasil');
+
+        $builder->save();
+
+        redirectWithMessage([['Memperbaharui category berhasil', 1]] , getLastVisitedPage());
+    }
+
     public function updateProduct(){
         //checking access right
         if(!$this->role->can("update-asset")){

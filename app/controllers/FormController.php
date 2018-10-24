@@ -2655,7 +2655,8 @@ class FormController{
             j.created_by as cbid,
             a.approved_by as abid,
             a.remark,
-            j.revision_number
+            j.revision_number,
+            l.id as po
             FROM `form_po` as a 
             inner join form_quo as k on a.id=k.quo
             inner join quo_revision as j on k.id=j.form_quo
@@ -2667,6 +2668,7 @@ class FormController{
             inner join companies as g on a.supplier=g.id
             inner join document_data as h on h.document_number=k.id
             inner join currency as i on a.currency=i.id
+            left join po_quo as l on l.quo=k.id
             WHERE h.document=9 and k.id=$id and j.revision_number=$revisionNumber", 'Document');
 
             $quoDetailData = $builder->custom("SELECT a.id, IFNULL(c.part_number, '-') as part_number, c.name as product, 
@@ -2702,7 +2704,8 @@ class FormController{
             h.id as ddata,
             a.created_by as cbid,
             a.approved_by as abid,
-            a.remark
+            a.remark,
+            l.id as po
             FROM `form_po` as a 
             inner join form_quo as k on a.id=k.quo
             inner join users as b on a.created_by=b.id 
@@ -2713,6 +2716,7 @@ class FormController{
             inner join companies as g on a.supplier=g.id
             inner join document_data as h on h.document_number=k.id
             inner join currency as i on a.currency=i.id
+            left join po_quo as l on l.quo=k.id
             WHERE h.document=9 and k.id=$id", 'Document');
 
 
@@ -2830,6 +2834,35 @@ class FormController{
         //redirect to form page with message
         redirectWithMessage([[ returnMessage()['quoForm']['updateSuccess'] ,1]],getLastVisitedPage());
 
+    }
+
+    public function quoFormRemove(){
+        if(!$this->role->can("update-data-quo")){
+            redirectWithMessage([[ returnMessage()['quoForm']['accessRight']['delete'] , 0]], getLastVisitedPage());
+        }
+
+        //remove quo form
+        //first, search of id of po_form based on id of quo_form
+        //then remove it 
+
+        //id of quo form
+        $quo = filterUserInput($_POST['quo']);
+
+        $builder = App::get('builder');
+
+        $getidQuo = $builder->getSpecificData("form_quo", ['quo'], ['id' => $quo], '', 'Document')[0]->quo;
+
+        $deleteQuoForm = $builder->delete("form_po", ['id' => $getidQuo], '', 'Document');
+
+        if(!$deleteQuoForm){
+            redirectWithMessage([[ returnMessage()['quoForm']['deleteFail'] , 0]], getLastVisitedPage());
+        }
+
+        recordLog('QUO form', returnMessage()['quoForm']['deleteSuccess'] );
+
+        $builder->save();
+
+        redirectWithMessage([[returnMessage()['quoForm']['deleteSuccess'], 1]], '/form/quo');
     }
 
     public function quoFormItemUpdate(){
@@ -3584,7 +3617,8 @@ class FormController{
         j.quo,
         l.revision_number,
         k.id,
-        a.currency as cid
+        a.currency as cid,
+        m.id as do
         FROM `form_po` as a 
         inner join users as b on a.created_by=b.id 
         inner join users as c on a.updated_by=c.id 
@@ -3597,6 +3631,7 @@ class FormController{
         inner join po_quo as j on a.id=j.po
         left join form_quo as k on j.quo=k.id
         left join quo_revision as l on j.quo_revision=l.id
+        left join form_do as m on j.id=m.po_quo
         WHERE h.document=5 and a.id=$id", 'Document');
 
         /* $poDetailData = $builder->custom("SELECT a.id, IFNULL(c.part_number, '-') as part_number, c.name as product, 
@@ -3747,9 +3782,9 @@ class FormController{
 
         $builder = App::get('builder');
 
-        $getidPoQuo = $builder->getSpecificData("po_quo", ['id'], ['po' => $po], $operator, $forClass)[0]->id;
+        $getidPoQuo = $builder->getSpecificData("po_quo", ['id'], ['po' => $po], '', 'Document')[0]->id;
 
-        $getDoRelatedPo = $builder->getSpecificData("form_do", ['id'], ['po_quo' => $getidPoQuo], $operator, $forClass)[0]->id;
+        $getDoRelatedPo = $builder->getSpecificData("form_do", ['id'], ['po_quo' => $getidPoQuo], '', 'Document')[0]->id;
 
         $deletePOQuo = $builder->delete("po_quo", ['po' => $po], '', 'Document');
 
@@ -4551,9 +4586,11 @@ class FormController{
         
         $builder=App::get('builder');
 
-        $attachment=$builder->custom("select b.id, c.upload_file,c.title, c.created_at, b.description
-        from document_data as a right join document_attachments as b on a.id=b.document_data inner join upload_files as c on b.attachment=c.id
-        where a.document=$documentType and a.document_number=$documentNumber","Document");
+        $attachment=$builder->custom("SELECT b.id, c.upload_file, IFNULL(c.title, '') as title, c.created_at, b.description
+        FROM document_data as a 
+        RIGHT JOIN document_attachments as b on a.id=b.document_data 
+        INNER JOIN upload_files as c on b.attachment=c.id
+        WHERE a.document=$documentType and a.document_number=$documentNumber","Document");
 
         echo json_encode($attachment);
     }

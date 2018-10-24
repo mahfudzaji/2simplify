@@ -692,7 +692,7 @@ class StockController{
         UNION
         SELECT DATE_FORMAT(a.created_at, '%d %M %Y') as created_at, b.name as product, a.quantity, case a.status when 1 then 'in' else 'out' end as status,
         d.request_number as form_number,
-        concat('/form/project/detail?pr=',e.id) as link,
+        concat('/project/detail?pr=',e.id) as link,
         DATE_FORMAT(IFNULL(a.received_at , a.send_at), '%d %M %Y') as receive_or_send_date
         FROM stocks as a
         INNER JOIN products as b on a.product=b.id

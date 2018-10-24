@@ -153,8 +153,11 @@ class UserController{
         $firstUserId=$builder->getPdo()->lastInsertId();
 
         $insertAdminRole=$builder->insert('role_user', ['user_id'=>$firstUserId, 'role_id'=>1]);
+
+        //Set admin account active
+        $activateAccount = $builder->update('users', ['active' => 1], ['id' => $firstUserId], '', 'User');
         
-        if(!$insertAdminRole){
+        if(!$insertAdminRole || !$activateAccount){
             redirectWithMessage([["Pendaftaran sebagai admin gagal. Coba lagi", 0]], '/');
         }
 
@@ -423,7 +426,7 @@ class UserController{
         $result=$builder->getSpecificData("users", $parameters, $where, "and", "User");
         
         if(!$result){
-            redirectWithMessage(["Email yang anda masukkan tidak terdaftar atau tidak aktif", 0], '/');
+            redirectWithMessage([["Email yang anda masukkan tidak terdaftar atau tidak aktif", 0]], '/');
         }
 
         $resetPassword=uniqid();
@@ -446,9 +449,9 @@ class UserController{
         //sent email contain new password
         $mail = App::get('mail');
 
-        $mail->setFrom('aji@sentranetcomindo.com', 'Simplify mailer');
+        $mail->setFrom(App::get('config')['username'], 'Simplify mailer');
         $mail->addAddress($email, $result[0]->name);     
-        $mail->addReplyTo('aji@sentranetcomindo.com', 'Information');
+        $mail->addReplyTo(App::get('config')['username'], 'Information');
 
         $mail->isHTML(true);                               
 

@@ -145,8 +145,25 @@ $priceTotal=0;
             </div>
         </div>
 
+        <!-- REMOVE QUO FORM -->
+        <div class="app-form modal" id="modal-remove-quo">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Konfirmasi</h3>
+                </div>
+                <div class="modal-main-content">
+                    <form action="/form/quo/remove" method="post">
+                        <input type="hidden" name="quo" value=<?= $_GET['quo']; ?>>
+                        <button type="submit" class="btn btn-danger btn-sm form-control"><span class="glyphicon glyphicon-remove"></span> Hapus data</button>
+                    </form>
+                </div>
+                <br><button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+            </div>
+        </div>
+
         <!-- UPDATE QUO ITEM -->
-        <div class="app-form modal" id="modal-update-quo-form">         
+        <div class="app-form modal" id="modal-update-quo-item">         
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Perbaharui Data <?= $titlePage; ?></h3>
@@ -194,7 +211,7 @@ $priceTotal=0;
         </div>
 
         <!-- REMOVE QUO ITEM -->
-        <div class="app-form modal" id="modal-remove-quo-form">
+        <div class="app-form modal" id="modal-remove-quo-item">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Konfirmasi</h3>
@@ -463,8 +480,8 @@ $priceTotal=0;
                                                 Action <span class="caret"></span>
                                             </button>
                                             <ul class="dropdown-menu">
-                                                <li><a href="#" class="btn-modal btn-action" data-id="update-quo-form"><span class="glyphicon glyphicon-pencil"></span> Update</a></li>
-                                                <li><a href="#" class="btn-modal btn-action" data-id="remove-quo-form"><span class="glyphicon glyphicon-remove"></span> Remove</a></li>
+                                                <li><a href="#" class="btn-modal btn-action" data-id="update-quo-item"><span class="glyphicon glyphicon-pencil"></span> Update</a></li>
+                                                <li><a href="#" class="btn-modal btn-action" data-id="remove-quo-item"><span class="glyphicon glyphicon-remove"></span> Remove</a></li>
                                             </ul>
                                         </div>
                                     </td>
@@ -520,7 +537,9 @@ $priceTotal=0;
                     <a target="_blank" href=/print/quotation?quo=<?php echo (isset($_GET['revision']) && !empty($_GET['revision']))?$_GET['quo']."&revision=".$_GET['revision']:$_GET['quo'] ?>><button type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-print"></span> Cetak</button></a>
                     <button class="btn btn-sm btn-primary btn-modal" id="update-quo"><span class="glyphicon glyphicon-edit"></span> Update quo</button>
                     <button class="btn btn-sm btn-primary btn-modal" id="create-revision"><span class="glyphicon glyphicon-edit"></span> Buat revisi</button>
-
+                    <?php if($quoData[0]->po==null || empty($quoData[0]->po) || $quoData[0]->po==''): ?>
+                        <button class="btn btn-sm btn-danger btn-modal" id="remove-quo"><span class="glyphicon glyphicon-edit"></span> Remove</button>
+                    <?php endif; ?>
                 </div>
                 
                 <!-- SHOW ATTACHMENT -->
@@ -600,7 +619,7 @@ $(document).ready(function(){
  
             
         }else{
-            $("#modal-remove-quo-form, #modal-approve-quo-form, #modal-reject-quo-form, #modal-revision-quo-form").find("input[name~='quo-item']").val(quoItem);
+            $("#modal-remove-quo-item, #modal-approve-quo-item, #modal-reject-quo-item, #modal-revision-quo-item").find("input[name~='quo-item']").val(quoItem);
         }
         
     });

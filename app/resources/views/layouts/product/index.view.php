@@ -186,6 +186,32 @@ require base.'base/header.view.php';
             </div>  
         </div>
 
+        <!-- UPDATE CATEGORY -->
+        <div class="app-form modal" id="modal-update-category">   
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Tambahkan Kategori</h3>
+                </div>
+
+                <form action="/product/update-category" method="POST">
+                    <input type="hidden" name="cid" value="">
+                    <div class="form-group">
+                        <label>Nama kategori</label>
+                        <input type="text" name="name" class="form-control" placeholder="Nama" autofocus required>
+                    </div>
+                    <div class="form-group">
+                        <label>Deskripsi</label>
+                        <textarea name="description" class="form-control" placeholder="Deskripsi" required></textarea>
+                    </div>                                                                             
+                    <button class="btn btn-danger btn-close">Tutup</button>
+                    <button type="submit" name="submit" class="btn btn-primary" style="float:right;"><span class="glyphicon glyphicon-send"></span> Kirim</button>
+                
+                    <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
+
+                </form>
+            </div>  
+        </div>
+
         <!-- CATEGORY FORM -->
         <?php if(array_key_exists('superadmin' , $roleOfUser)): ?>
             <div class="app-form modal" id="modal-create-category">   
@@ -219,9 +245,10 @@ require base.'base/header.view.php';
                 <?php foreach($paData as $data): ?>
                 <div data-item="product" id="<?= $data->catid; ?>">
                     <div class="cover-grid category fade-toggle-trigger" >
+                        <span class="glyphicon glyphicon-edit btn-modal" data-id="update-category" style="right: 0;position: absolute; z-index:50"></span>
                         <ul>
-                            <li><strong><?= strtoupper($data->category); ?></strong></li>
-                            <li><?= $data->description; ?></li> 
+                            <li data-item="category"><?= strtoupper($data->category); ?></li>
+                            <li data-item="description"><?= $data->description; ?></li> 
                             <li><?= count($data->products); ?> Product</li> 
                         </ul>
                         <span class="glyphicon glyphicon-chevron-down arrow-down"></span>
@@ -280,6 +307,18 @@ require base.'base/header.view.php';
             $("#modal-update-product").find("textarea[name~='description']").val(desc);
             $("#modal-update-product").find("input[name~='link']").val(link);
             $("#modal-update-product").find("input[name~='pid']").val(pid);
+
+        });
+        
+        $("[data-id~='update-category']").on("click", function(){
+
+            let cid = $(this).closest("[data-item~='product']").attr("id");
+            let category = $(this).parent().find("[data-item~='category']").html();
+            let desc = $(this).parent().find("[data-item~='description']").html();
+            
+            $("#modal-update-category").find("input[name~='cid']").val(cid);
+            $("#modal-update-category").find("input[name~='name']").val(category);
+            $("#modal-update-category").find("textarea[name~='description']").val(desc);
 
         });
 
