@@ -585,7 +585,6 @@ class ProjectController{
         }
 
 
-
     }
 
     public function projectRemoveItem(){

@@ -95,12 +95,12 @@ function isEmpty($input){
 
     if(is_array($input)){
         for($i=0;$i<count($input);$i++){
-            if(empty($input[$i]) && $input[$i]=='' && !isset($input)){
+            if(empty($input[$i]) && $input[$i]=='' && !isset($input[$i])){
                 $toReturn = true;
             }
         }
     }else{
-        if(empty($input)){
+        if(empty($input) && $input=='' && !isset($input)){
             $toReturn = true;
         }
     }

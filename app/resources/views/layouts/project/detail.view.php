@@ -448,7 +448,7 @@ $priceTotal=0;
                                                         Action <span class="caret"></span>
                                                     </button>
                                                     <ul class="dropdown-menu">
-                                                        <!-- <li><a href="#" class="btn-modal btn-action" data-id="update-item"><span class="glyphicon glyphicon-pencil"></span> Update</a></li> -->
+                                                        <li><a href="#" class="btn-modal btn-action" data-id="update-item"><span class="glyphicon glyphicon-pencil"></span> Update</a></li>
                                                         <li><a href="#" class="btn-modal btn-action" data-id="remove-item"><span class="glyphicon glyphicon-remove"></span> Remove</a></li>
                                                     </ul>
                                                 </div>
