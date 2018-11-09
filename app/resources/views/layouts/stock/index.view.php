@@ -147,15 +147,15 @@ require base.'base/header.view.php';
                 console.log(responds);
                 
                 let stockList = "<table class='table table-hover'><thead>";
-				stockList += "<tr><th>Product</th><th>Stock in</th><th>Stock out</th><th>Total</th><th>Action</th></tr>";
+				stockList += "<tr><th>Product</th><th>In</th><th>Out</th><th>Available</th><th>Action</th></tr>";
                 stockList += "</thead><tbody>";
                 
 
                 for(let i=0; i<responds.length; i++){
                     
-                    let stockIn = Number(responds[i].stock_in)-Number(responds[i].stock_out)
+                    let available = Number(responds[i].stock_in)-Number(responds[i].stock_out)
                     let stockOut = Number(responds[i].stock_out)
-                    let total = stockIn+stockOut
+                    let stockIn = Number(responds[i].stock_in)
 
                     console.log(stockIn-stockOut)
 
@@ -163,7 +163,7 @@ require base.'base/header.view.php';
                     stockList += "<td data-item='product'>"+responds[i].product+"</td>";
                     stockList += "<td data-item='stock-in' data-item-val="+stockIn+">"+stockIn+"</td>";
                     stockList += "<td data-item='stock-out' data-item-val="+stockOut+">"+stockOut+"</td>";
-                    stockList += "<td data-item='total' data-item-val="+responds[i].ra+">"+total+"</td>";
+                    stockList += "<td data-item='available' data-item-val="+available+">"+available+"</td>";
                     stockList += "<td><button type='button' class='btn btn-link btn-action btn-modal' data-id='stock-detail'>More</button></td>";
                     //stockList += "<td><button type='button' class='btn btn-sm btn-primary btn-modal' data-id='update-stock'>More</button></td>";
                     stockList += "</tr>";
