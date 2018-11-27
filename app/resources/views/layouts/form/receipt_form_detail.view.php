@@ -332,7 +332,7 @@ $printBtn = false;
                                     <th class="text-center">Action</th>
                                 </thead>
                                 <tbody>
-                                    <?php foreach($receiptItems as $item): $priceTotal=0; $price=(100-$item->discount)*$item->price*0.01; $priceTotal+=$price;  ?>
+                                    <?php foreach($receiptItems as $item): $priceTotal=0; $price=(100-$item->discount)*$item->price*0.01; $priceTotal=$price*$item->quantity;  ?>
                                         <tr id=<?= $item->id; ?>>
                                             <td data-item="product" data-item-val=<?= $item->pid; ?>><?= $item->product; ?></td>
                                             <td data-item="quantity"><?= $item->quantity; ?></td>

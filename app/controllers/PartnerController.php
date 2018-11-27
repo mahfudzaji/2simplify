@@ -245,7 +245,7 @@ class PartnerController{
             if($uploadResult){
                 $lastUploadedId=$processingUpload->getLastUploadedId();
 
-                $toUpdate['logo']=$lastUploadedId;
+                $data['logo']=$lastUploadedId;
             }else{
                 //$_SESSION['sim-messages']=[['Maaf, gagal upload logo', 0]];
                 redirectWithMessage($_SESSION['sim-messages'], getLastVisitedPage());

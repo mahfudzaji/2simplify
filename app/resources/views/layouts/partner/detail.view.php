@@ -356,8 +356,8 @@ $(document).ready(function(){
             $(".modal").find("form").find("[name~='"+placeholderPartner[i]+"']").val(value);
         }
 
-        dataRel=data.find("td[data-item~='relationship']").attr("data-val");
-        var rel= $(".modal").find("form").find("input[data-relationship~="+dataRel+"]").attr('checked', true);
+        dataRel = data.find("td[data-item~='relationship']").attr("data-val");
+        var rel= $(".modal").find("form").find("input[data-rel~="+dataRel+"]").attr('checked', true);
 
         $(".modal").css("display","block");
     });

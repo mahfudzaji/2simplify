@@ -267,29 +267,33 @@ function toDownload($formData, $dataColumn){
 
 function recordLog($context, $activity){
       
-        $id=substr($_SESSION['sim-id'],3,-3);
-        $user=$_SESSION['sim-name'];
+    $id=substr($_SESSION['sim-id'],3,-3);
+    $user=$_SESSION['sim-name'];
 
-        //record log to database
-      
-        $builder= App::get('builder');
+    //record log to database
+    
+    $builder= App::get('builder');
 
-        $insertLog=$builder->insert('activity_history',[
-            'user'=>$id,
-            'context'=>$context,
-            'activity'=>$activity
-            ]
-        ); 
-        
-        //record log to file
+    $insertLog=$builder->insert('activity_history',[
+        'user'=>$id,
+        'context'=>$context,
+        'activity'=>$activity
+        ]
+    ); 
+    
+    //record log to file
 
-        date_default_timezone_set("Asia/Jakarta");
-        $time= date("d-m-Y h:i:sa", time());
-        $file=fopen("log/Activity.log","a");
-        fwrite($file, "$time\t$context\t$user\t$activity\r\n");
-        fclose($file);
-      
-    }
+    date_default_timezone_set("Asia/Jakarta");
+    $time= date("d-m-Y h:i:sa", time());
+    $file=fopen("log/Activity.log","a");
+    fwrite($file, "$time\t$context\t$user\t$activity\r\n");
+    fclose($file);
+    
+}
+
+function formatRupiah($value){
+    return strrev(wordwrap(strrev($value), 3, '.', true));
+}
 
 /*
 $app=[];

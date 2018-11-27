@@ -580,7 +580,8 @@ class PrintController{
         GROUP_CONCAT(b.price ORDER by c.id asc SEPARATOR '<br>') as price,
         a.remark,
         f.id as ddata,
-        g.name as currency
+        g.name as currency,
+        a.ppn
         FROM `form_receipt` as a 
         INNER JOIN receipt_product as b on a.id=b.receipt
         INNER JOIN products as c on b.product=c.id

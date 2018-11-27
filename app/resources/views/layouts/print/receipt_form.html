@@ -104,7 +104,7 @@ tr{
                         </tr>
                     <?php endforeach; ?>
                         <tr><td style="border:none; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">Total</td><td style="border:1px solid; padding: 0 20px 0 10px;" class="text-right" ><?= $priceTotal; ?></td></tr>
-                        <tr><td style="border:none; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">PPN 10%</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><?= $ppn=$priceTotal*0.1; ?></td></tr>
+                        <tr><td style="border:none; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">PPN <?= $data->ppn; ?>%</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><?= $ppn=$priceTotal*($data->ppn/100); ?></td></tr>
                         <tr><td style="border:none; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">Grand Total (<?= $data->currency; ?>)</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><strong><?= $priceTotal+$ppn; ?></strong></td></tr>
                 </tbody>            
             </table>

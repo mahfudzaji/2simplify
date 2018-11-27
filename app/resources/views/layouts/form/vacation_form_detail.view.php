@@ -36,6 +36,7 @@ require base.'base/header.view.php';
                     </form>
                 </div>
                 <button class="btn btn-danger btn-close" style="clear:both;">Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -46,25 +47,20 @@ require base.'base/header.view.php';
                     <h3>Lampiran</h3>
                 </div>
                 <div class="modal-main-content">
-                    <form action="/attachment" method="post">
+                    <form action="/attachment" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="document_data" value=<?= $vacationData[0]->ddata; ?>>
                         <div class="form-group">
                             <label>Lampiran</label>
                             <textarea class="form-control" name="description" placeholder="Tuliskan deskripsi lampiran..." required></textarea>
                         </div>
                         <div class="form-group">
-                            <select name="attachment" class="form-control select-ajax" required>
-                                <option value=''>PILIH LAMPIRAN</option>
-                                <?php foreach($uploadFiles as $uploadFile): ?>
-                                    <option value=<?= $uploadFile->id; ?>><?= $uploadFile->title; ?></option>
-                                <?php endforeach; ?>
-                            </select>
+                            <input type="file" name="attachment" required>
                         </div>
-                        <div class="image-appear"></div>
                         <button type="submit" class="btn btn-primary pull-right">Kirim <span class="glyphicon glyphicon-send"></span></button>
                     </form>
                 </div>
                 <button class="btn btn-danger btn-close clear" >Tutup</button>
+                <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>
             </div>
         </div>
 
@@ -148,7 +144,8 @@ require base.'base/header.view.php';
                             </div>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-danger btn-close" >Tutup</button>                    
+                    <button type="button" class="btn btn-danger btn-close" >Tutup</button>  
+                    <button type="button" class="btn btn-danger btn-close btn-close-top"><span class="glyphicon glyphicon-remove"></span> </button>                  
                     <button type="submit" name="submit" class="btn btn-primary btn-next" style="float:right;">Kirim <span class="glyphicon glyphicon-send"></span></button>
                 </form>
             </div>
