@@ -122,6 +122,11 @@ $priceTotal=0;
                     </div>
 
                     <div class="form-group">
+                        <label>PPN (%)</label>
+                        <input type="number" min=0 max=100 name="ppn" class="form-control">
+                    </div>
+
+                    <div class="form-group">
                         <label>Keterangan / Term & condition</label>
                         <!-- <textarea name="remark" class="form-control" placeholder="Keterangan tambahan"></textarea> -->
                         <div id="remark"></div>
@@ -394,9 +399,9 @@ $priceTotal=0;
                                 <td data-item="part_number" data-item-val=<?= $data1->part_number; ?>><?= $data1->part_number; ?></td>
                                 <td data-item="product" data-item-val=<?= $data1->pid; ?>><?= $data1->product; ?></td>
                                 <td data-item="quantity"><?= $data1->quantity; ?></td>
-                                <td data-item="price_unit"><?= $data1->price_unit; ?></td>
+                                <td data-item="price_unit" data-item-val=<?= $data1->price_unit; ?> class="text-right"><?= formatRupiah($data1->price_unit); ?></td>
                                 <td data-item="item_discount"><?= $data1->item_discount; ?></td>
-                                <td data-item="total"><?= $item; ?></td>
+                                <td data-item="total" data-item-val=<?= $item; ?> class="text-right"><?= formatRupiah($item); ?></td>
                                 <td data-item="status"><?= $data1->status; ?></td>
                                 <?php if($data1->status==0): ?>
                                     <?php if($poData[0]->quo==null || $poData[0]->quo=="" || empty($poData[0])): ?>
@@ -446,7 +451,8 @@ $priceTotal=0;
 
                     <?php foreach($poData as $data2): ?>
                         <div style="margin-bottom:20px;">
-                            <h4>Total: <?= $priceTotal; ?></h4>
+                            <h4>Total: <?= formatRupiah($priceTotal); ?></h4>
+                            <p>PPN: <span data-item="ppn" data-item-val=<?= $data2->ppn; ?> ><?= $data2->ppn; ?></span> %</p>
                             <p>Keterangan: <div data-item='remark'><?= ($data2->remark==null||empty($data2->remark))?"-":makeFirstLetterUpper($data2->remark); ?></div></p>
                             <div class="row">
                                 <div class="col-md-6">
@@ -516,7 +522,7 @@ $(document).ready(function(){
         if(dataId=='update-po-item'){        
             var product = $(this).parent().closest("tr").find("[data-item~='product']").attr("data-item-val");
             var quantity = $(this).parent().closest("tr").find("[data-item~='quantity']").html();
-            var priceUnit = $(this).parent().closest("tr").find("[data-item~='price_unit']").html();
+            var priceUnit = $(this).parent().closest("tr").find("[data-item~='price_unit']").attr("data-item-val");
             var discountItem = $(this).parent().closest("tr").find("[data-item~='item_discount']").html();
 
             $("#modal-update-po-item").find("input[name~='po-item']").val(poItem);
@@ -539,6 +545,7 @@ $(document).ready(function(){
         var currency = $("[data-item~='currency']").attr("data-item-val");
         var remark = $("[data-item~='remark']").html();
         var poNumber = $("[data-item~='po_number']").html();
+        var ppn = $("[data-item~='ppn']").attr("data-item-val");
 
         $("#modal-update-po").find("input[name~='pic_buyer']").val(buyer);
         $("#modal-update-po").find("input[name~='pic_supplier']").val(supplier);
@@ -548,6 +555,7 @@ $(document).ready(function(){
         //$("#modal-update-quo").find("select[name~='currency']").find("option").attr("selected", false);
         $("#modal-update-po").find("select[name~='currency']").find("option[value~='"+currency+"']").attr("selected", true);
         $("#modal-update-po").find("input[name~='po_number']").val(poNumber);
+        $("#modal-update-po").find("input[name~='ppn']").val(ppn);
     })
 
     /* SHOW ATTACHMENT */

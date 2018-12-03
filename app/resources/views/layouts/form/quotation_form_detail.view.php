@@ -130,6 +130,11 @@ $priceTotal=0;
                     </div>
 
                     <div class="form-group">
+                        <label>PPN (%)</label>
+                        <input type="number" min=0 max=100 name="ppn" class="form-control">
+                    </div>
+
+                    <div class="form-group">
                         <label>Keterangan / Term & condition</label>
                         <!-- <textarea name="remark" class="form-control" placeholder="Keterangan tambahan"></textarea> -->
                         <div id="remark"></div>
@@ -465,9 +470,9 @@ $priceTotal=0;
                                 <td data-item="part_number" data-item-val=<?= $data1->part_number; ?>><?= $data1->part_number; ?></td>
                                 <td data-item="product" data-item-val=<?= $data1->pid; ?>><?= $data1->product; ?></td>
                                 <td data-item="quantity"><?= $data1->quantity; ?></td>
-                                <td data-item="price_unit"><?= $data1->price_unit; ?></td>
+                                <td data-item="price_unit" data-item-val=<?= $data1->price_unit; ?> class="text-right"><?= formatRupiah($data1->price_unit); ?></td>
                                 <td data-item="item_discount"><?= $data1->item_discount; ?></td>
-                                <td data-item="total"><?= $item; ?></td>
+                                <td data-item="total" data-item-val=<?= $item; ?> class="text-right"><?= formatRupiah($item); ?></td>
                                 <td data-item="status"><?= $data1->status; ?></td>
                                 
                                 <!-- Creator -->
@@ -516,7 +521,8 @@ $priceTotal=0;
 
                     <?php foreach($quoData as $data2): ?>
                         <div style="margin-bottom:20px;">
-                            <h4>Total: <?= $priceTotal; ?></h4>
+                            <h4>Total: <?= formatRupiah($priceTotal); ?></h4>
+                            <p>PPN: <span data-item="ppn" data-item-val=<?= $data2->ppn; ?> ><?= $data2->ppn; ?></span> %</p>
                             <p><strong>Keterangan:</strong> <div data-item="remark"><?= ($data2->remark==null||empty($data2->remark))?"-":makeFirstLetterUpper($data2->remark); ?></div></p>
                             <div class="row">
                                 <div class="col-md-6">
@@ -603,19 +609,19 @@ $(document).ready(function(){
         var priceUnit='';
         var itemDiscount='';
 
-        if(dataId=='update-quo-form'){        
+        if(dataId=='update-quo-item'){     
+             
             product = $(this).parent().closest("tr").find("[data-item~='product']").attr("data-item-val");
             quantity = $(this).parent().closest("tr").find("[data-item~='quantity']").html();
-            priceUnit = $(this).parent().closest("tr").find("[data-item~='price_unit']").html();
+            priceUnit = $(this).parent().closest("tr").find("[data-item~='price_unit']").attr("data-item-val");
             itemDiscount = $(this).parent().closest("tr").find("[data-item~='item_discount']").html();
 
-
-            $("#modal-update-quo-form").find("input[name~='quo-item']").val(quoItem);
-            $("#modal-update-quo-form").find("select[name~='product']").find("option").attr("selected", false);
-            $("#modal-update-quo-form").find("select[name~='product']").find("option[value~='"+product+"']").attr("selected", true);
-            $("#modal-update-quo-form").find("input[name~='quantity']").val(quantity); 
-            $("#modal-update-quo-form").find("input[name~='price_unit']").val(priceUnit);
-            $("#modal-update-quo-form").find("input[name~='item_discount']").val(itemDiscount);
+            $("#modal-update-quo-item").find("input[name~='quo-item']").val(quoItem);
+            $("#modal-update-quo-item").find("select[name~='product']").find("option").attr("selected", false);
+            $("#modal-update-quo-item").find("select[name~='product']").find("option[value~='"+product+"']").attr("selected", true);
+            $("#modal-update-quo-item").find("input[name~='quantity']").val(quantity); 
+            $("#modal-update-quo-item").find("input[name~='price_unit']").val(priceUnit);
+            $("#modal-update-quo-item").find("input[name~='item_discount']").val(itemDiscount);
  
             
         }else{
@@ -630,6 +636,7 @@ $(document).ready(function(){
         var quoDate = $("[data-item~='quo_date']").attr("data-item-val");
         var supplier = $("[data-item~='pic_supplier']").html();
         var currency = $("[data-item~='currency']").attr("data-item-val");
+        var ppn = $("[data-item~='ppn']").attr("data-item-val");
         var remark = $("[data-item~='remark']").html();
         var quoNumber = $("[data-item~='quo_number']").html();
 
@@ -641,6 +648,7 @@ $(document).ready(function(){
         //$("#modal-update-quo").find("select[name~='currency']").find("option").attr("selected", false);
         $("#modal-update-quo").find("select[name~='currency']").find("option[value~='"+currency+"']").attr("selected", true);
         $("#modal-update-quo").find("input[name~='quo_number']").val(quoNumber);
+        $("#modal-update-quo").find("input[name~='ppn']").val(ppn);
 
     });
 
@@ -654,7 +662,7 @@ $(document).ready(function(){
             var quoItem = thisQuoItem.attr("data-item");
             var product = thisQuoItem.find("[data-item~='product']").attr("data-item-val");
             var quantity = thisQuoItem.find("[data-item~='quantity']").html();
-            var priceUnit = thisQuoItem.find("[data-item~='price_unit']").html();
+            var priceUnit = thisQuoItem.find("[data-item~='price_unit']").attr("data-item-val");
             var itemDiscount = thisQuoItem.find("[data-item~='item_discount']").html();
 
             if(i==1){

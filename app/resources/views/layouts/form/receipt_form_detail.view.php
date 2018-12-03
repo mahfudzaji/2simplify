@@ -336,9 +336,9 @@ $printBtn = false;
                                         <tr id=<?= $item->id; ?>>
                                             <td data-item="product" data-item-val=<?= $item->pid; ?>><?= $item->product; ?></td>
                                             <td data-item="quantity"><?= $item->quantity; ?></td>
-                                            <td data-item="price"><?= $item->price; ?></td>
+                                            <td data-item="price" data-item-val=<?= $item->price; ?> class="text-right"><?= formatRupiah($item->price); ?></td>
                                             <td data-item="discount"><?= $item->discount; ?></td>
-                                            <td data-item="total"><?= $priceTotal; ?></td>
+                                            <td data-item="total" data-item-val=<?= $item->price; ?> class="text-right"><?= formatRupiah($priceTotal); ?></td>
                                             <td class="text-center">
                                                 <div class="btn-group">
                                                     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -455,7 +455,7 @@ $(document).ready(function(){
             
             var product = $(this).parent().closest("tr").find("[data-item~='product']").attr("data-item-val");
             var quantity = $(this).parent().closest("tr").find("[data-item~='quantity']").html();
-            var price = $(this).parent().closest("tr").find("[data-item~='price']").html();
+            var price = $(this).parent().closest("tr").find("[data-item~='price']").attr("data-item-val");
             var discount = $(this).parent().closest("tr").find("[data-item~='discount']").html();
 
             $("#modal-update-receipt-item").find("input[name~='receipt_item']").val(receiptItem);

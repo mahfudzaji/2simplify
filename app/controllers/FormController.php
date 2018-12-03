@@ -2656,7 +2656,8 @@ class FormController{
             a.approved_by as abid,
             a.remark,
             j.revision_number,
-            l.id as po
+            l.id as po,
+            a.ppn
             FROM `form_po` as a 
             inner join form_quo as k on a.id=k.quo
             inner join quo_revision as j on k.id=j.form_quo
@@ -2705,7 +2706,8 @@ class FormController{
             a.created_by as cbid,
             a.approved_by as abid,
             a.remark,
-            l.id as po
+            l.id as po,
+            a.ppn
             FROM `form_po` as a 
             inner join form_quo as k on a.id=k.quo
             inner join users as b on a.created_by=b.id 
@@ -2779,6 +2781,7 @@ class FormController{
             'pic_buyer' => 'required',
             'pic_supplier' => 'required',
             'currency' => 'required',
+            'ppn' => 'required',
             'remark' => ''
         ];
 
@@ -3728,6 +3731,7 @@ class FormController{
             'pic_buyer' => 'required',
             'pic_supplier' => 'required',
             'currency' => 'required',
+            'ppn' => 'required',
             'remark' => ''
         ];
 

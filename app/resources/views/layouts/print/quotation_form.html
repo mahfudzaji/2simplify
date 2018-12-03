@@ -70,14 +70,14 @@ tr{
                         <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="part_number" data-item-val=<?= $data1->part_number; ?>><?= $data1->part_number; ?></td>
                         <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="product" data-item-val=<?= $data1->pid; ?>><?= $data1->product; ?></td>
                         <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="quantity"><?= $data1->quantity; ?></td>
-                        <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="price_unit"><?= $data1->price_unit; ?></td>
+                        <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="price_unit"><?= formatRupiah($data1->price_unit); ?></td>
                         <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="item_discount"><?= $data1->item_discount; ?></td>
-                        <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="total" class="text-right"><?= $item; ?></td>
+                        <td style="border:1px solid; padding: 0 20px 0 10px;"  data-item="total" class="text-right"><?= formatRupiah($item); ?></td>
                     </tr>
                 <?php endforeach; ?>
-                    <tr><td style="border:none; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">Total</td><td style="border:1px solid; padding: 0 20px 0 10px;" class="text-right" ><?= $priceTotal; ?></td></tr>
-                    <tr><td style="border:none; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">PPN 10%</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><?= $ppn=$priceTotal*0.1; ?></td></tr>
-                    <tr><td style="border:none; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">Grand Total</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><strong><?= $priceTotal+$ppn; ?></strong></td></tr>
+                    <tr><td style="border:none; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">Total</td><td style="border:1px solid; padding: 0 20px 0 10px;" class="text-right" ><?= formatRupiah($priceTotal); ?></td></tr>
+                    <tr><td style="border:none; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">PPN <?= $data->ppn; ?>%</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><?= $ppn=formatRupiah($priceTotal*($data->ppn/100)); ?></td></tr>
+                    <tr><td style="border:none; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">Grand Total</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><strong><?= formatRupiah($priceTotal+$ppn); ?></strong></td></tr>
             </table>
             <br>
             <table width='790' cellpadding='0' cellspacing='0' style="padding:20px;border:none" >
