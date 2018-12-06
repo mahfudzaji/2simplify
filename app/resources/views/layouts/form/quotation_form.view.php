@@ -270,7 +270,7 @@ require base.'base/header.view.php';
                     </div>
                     <div class="form-group">
                         <label>Diketahui oleh</label>
-                        <select name="acknowledged_by" class="form-control">
+                        <select name="acknowledged_by" class="form-control" required>
                             <option value=''>-</option>
                             <?php foreach($approvalPerson as $person): ?>
                                 <option value=<?= $person->user_id ?>><?= ucfirst($person->name); ?></option>
@@ -279,7 +279,7 @@ require base.'base/header.view.php';
                     </div>
                     <div class="form-group">
                         <label>Disetujui oleh</label>
-                        <select name="approved_by" class="form-control">
+                        <select name="approved_by" class="form-control" required>
                             <option value=''>-</option>
                             <?php foreach($approvalPerson as $person): ?>
                                 <option value=<?= $person->user_id ?>><?= ucfirst($person->name); ?></option>
