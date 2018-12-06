@@ -34,7 +34,7 @@ table.x{
     <div class="form">
         <table class="form-header x" width='790' cellpadding='0' cellspacing='0' >
             <tr>
-                <td class="text-center"><img src="/public/upload/<?= $ownCompany[0]->logo; ?>" alt="logo" width=100 height=100 style="float:left;padding:5px;"><h2 style="color:blue"><?= $ownCompany[0]->name; ?></h2><?= $ownCompany[0]->address."<br>Telp:". $ownCompany[0]->phone."<br>".$ownCompany[0]->email; ?></td>
+                <td class="text-center"><img src="/public/upload/<?= $ownCompany[0]->logo; ?>" alt="logo" height=100 style="float:left;padding:5px;"><h2 style="color:blue"><?= $ownCompany[0]->name; ?></h2><?= $ownCompany[0]->address."<br>Telp:". $ownCompany[0]->phone."<br>".$ownCompany[0]->email; ?></td>
             </tr>
         </table>
         
@@ -142,7 +142,7 @@ table.x{
                         </tr>
                     <?php endforeach; ?>
                         <tr><td style="border:none !important; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">Total</td><td style="border:1px solid; padding: 0 20px 0 10px;" class="text-right" ><?= formatRupiah($priceTotal); ?></td></tr>
-                        <tr><td style="border:none !important; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">PPN <?= $data->ppn; ?>%</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><?= $ppn=formatRupiah($priceTotal*($data->ppn/100)); ?></td></tr>
+                        <tr><td style="border:none !important; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">PPN <?= $data->ppn; ?>%</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><?php $ppn=$priceTotal*($data->ppn/100); echo formatRupiah($ppn); ?></td></tr>
                         <tr><td style="border:none !important; padding: 0 20px 0 10px;" colspan=4></td><td style="border:1px solid; padding: 0 20px 0 10px;">Grand Total</td><td style="border:1px solid; padding: 0 20px 0 10px;"  class="text-right"><strong><?= formatRupiah($priceTotal+$ppn); ?></strong></td></tr>
                 </tbody>            
             </table>
